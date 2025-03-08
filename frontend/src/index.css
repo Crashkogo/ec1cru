@@ -29,8 +29,8 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  place-items: center;
-  min-width: 320px;
+  flex-direction: column;
+  min-width: 100vw; /* Растянуть на всю ширину */
   min-height: 100vh;
 }
 

@@ -13,6 +13,14 @@ module.exports = {
         whiteText: '#ffffff',
         grayText: '#555555',
       },
+      spacing: {
+        '4-header': '0.5rem', // Добавляем кастомный отступ
+      },
+    },
+    container: {
+      center: true, // Центрировать контейнер
+      padding: '2rem', // Отступы по бокам
+      screens: false, // Отключить медиа-запросы
     },
   },
   plugins: [],
