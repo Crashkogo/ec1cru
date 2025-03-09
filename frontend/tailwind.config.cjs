@@ -12,6 +12,7 @@ module.exports = {
         greenAccent: '#28a745',
         whiteText: '#ffffff',
         grayText: '#555555',
+        lightGray: '#ccc',
       },
       spacing: {
         '4-header': '0.5rem', // Добавляем кастомный отступ
