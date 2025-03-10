@@ -7,6 +7,7 @@ const Header = forwardRef<HTMLElement, object>((props, ref) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const menuItems = [
+    
     {
       title: 'Компания',
       items: [

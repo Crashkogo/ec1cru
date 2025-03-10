@@ -3,15 +3,26 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Home from './pages/Home';
 import PageWrapper from './components/PageWrapper';
+import Login from './pages/admin/Login';
+import Dashboard from './pages/admin/Dashboard';
 
 const App: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     if (headerRef.current) {
       setHeaderHeight(headerRef.current.offsetHeight);
     }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+        setShowLogin(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return (
@@ -28,8 +39,16 @@ const App: React.FC = () => {
                 </PageWrapper>
               }
             />
-
+            <Route
+              path="/admin/*"
+              element={
+                <PageWrapper headerHeight={headerHeight}>
+                  <Dashboard />
+                </PageWrapper>
+              }
+            />
           </Routes>
+          {showLogin && <Login onClose={() => setShowLogin(false)} />}
         </Suspense>
       </div>
     </Router>

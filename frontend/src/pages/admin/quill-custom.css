@@ -1,0 +1,17 @@
+/* quill-custom.css */
+.ql-editor {
+    min-height: 400px; /* Увеличиваем высоту редактора */
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .ql-container {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .ql-toolbar {
+    border: 1px solid #ccc;
+    border-radius: 4px 4px 0 0;
+  }
