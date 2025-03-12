@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import PageWrapper from './components/PageWrapper';
 import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
+import NewsDetail from './components/NewsDetail';
 
 const App: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);
@@ -44,6 +45,14 @@ const App: React.FC = () => {
               element={
                 <PageWrapper headerHeight={headerHeight}>
                   <Dashboard />
+                </PageWrapper>
+              }
+            />
+            <Route
+              path="/news/:slug"
+              element={
+                <PageWrapper headerHeight={headerHeight}>
+                <NewsDetail />
                 </PageWrapper>
               }
             />

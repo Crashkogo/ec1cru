@@ -24,7 +24,7 @@ const News: React.FC = () => {
     }
 
     axios
-      .get('http://localhost:5000/api/posts/news', {
+      .get('http://localhost:5000/api/posts/admin/news', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {

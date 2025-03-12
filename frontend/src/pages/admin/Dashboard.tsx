@@ -5,9 +5,10 @@ import AdminMenu from '../../components/AdminMenu';
 import Users from './Users';
 import News from './News';
 import NewsCreate from './NewsCreate';
+import NewsEdit from './NewsEdit'; // Новый импорт
 import EventsCreate from './EventsCreate';
 import PromotionsCreate from './PromotionsCreate';
-import Events from './Events'; // Исправь, если Events.tsx уже есть
+import Events from './Events';
 import Promotions from './Promotions';
 
 const Dashboard: React.FC = () => {
@@ -51,6 +52,7 @@ const Dashboard: React.FC = () => {
             <Route path="/" element={<h1 className="text-3xl text-darkBg">Главная панель</h1>} />
             <Route path="/news" element={<News />} />
             <Route path="/news/create" element={<NewsCreate />} />
+            <Route path="/news/edit/:slug" element={<NewsEdit />} /> {/* Новый маршрут */}
             <Route path="/events" element={<Events />} />
             <Route path="/events/create" element={<EventsCreate />} />
             <Route path="/promotions" element={<Promotions />} />

@@ -1,16 +1,69 @@
-// src/pages/Home.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
+interface News {
+  id: number;
+  title: string;
+  slug: string;
+  createdAt: string;
+}
 
 const Home: React.FC = () => {
+  const [latestNews, setLatestNews] = useState<News[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:5000/api/posts/news', {
+        params: { take: 3 },
+      })
+      .then((response) => {
+        setLatestNews(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching latest news:', error);
+        setLoading(false);
+      });
+  }, []);
+
   return (
-      <div className="container px-4 py-8">
-        <div className="w-full md:w-2/3 mx-auto bg-lightGray rounded-lg shadow-md p-6">
-          <h1 className="text-3xl font-bold text-darkBg">Главная страница</h1>
-          <p className="mt-4 text-darkBg">Добро пожаловать!</p>
-          <p className="mt-6 text-darkBg">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam magni architecto dolore, at excepturi facere cumque eaque, nemo mollitia vero provident sit voluptatum labore delectus quisquam laboriosam asperiores hic temporibus voluptates libero quaerat accusantium! Placeat ipsam sunt nihil fugit amet aliquam magnam veniam nisi, minima in iusto? Eligendi totam tenetur aperiam itaque harum aspernatur. Dignissimos perferendis ipsam, commodi enim eveniet dolorum quaerat cupiditate illo aut? Dolore dolores odit corporis officia, quae culpa molestias quod veritatis provident magnam itaque? Explicabo quibusdam quos, aliquid quas corrupti, odit minima natus, odio quisquam vel itaque! Voluptatem excepturi cumque iusto, aliquid vero, corporis, consequuntur eveniet molestias nihil iste reprehenderit beatae. Velit eum doloribus veritatis nemo, corrupti magnam molestiae quibusdam vel illo, quisquam eligendi dolorem optio ut placeat aliquam id facilis pariatur! Consectetur impedit tenetur fugit voluptas rerum labore minus vitae explicabo officia nemo, obcaecati repellat unde necessitatibus voluptate exercitationem! Eaque est vero ab cum quia debitis qui. Fuga voluptate quia quas explicabo quod! Sapiente iure vel eaque temporibus eius earum, omnis excepturi asperiores. Illum ducimus rerum aspernatur fugiat commodi ea, porro delectus assumenda voluptate nesciunt a veniam facere sunt atque quos molestias iure deleniti dolor sapiente est natus maxime! Harum, provident dolorum vel facere possimus culpa inventore labore assumenda omnis hic, voluptatum officia est libero sint natus temporibus quasi error laborum modi nesciunt! Maxime voluptatibus vero a quae aut magnam ducimus at harum ipsam eum delectus consequuntur voluptates aliquid, vitae sequi impedit veritatis iusto! Eos aperiam, voluptates illo iure culpa est quos enim pariatur velit, sequi odit quae, minima ab unde! Doloribus eius possimus facere cumque rem repudiandae ipsam, suscipit libero ad voluptatum eaque, unde excepturi necessitatibus debitis commodi quo inventore. Provident sunt placeat odit illo eos iusto natus, ipsum reiciendis impedit fugit repellat repellendus officiis soluta corporis deleniti nobis voluptatibus possimus! Officia, delectus accusamus nam, consectetur natus numquam unde quasi distinctio qui error enim nobis adipisci quam. At, iste. Possimus dicta soluta sed odio esse dignissimos at cum aliquam, tempore illum necessitatibus amet recusandae minus neque quisquam corrupti nemo ratione veniam vel harum sequi, adipisci totam. Fuga itaque sapiente modi rem enim nesciunt, consectetur facere cum placeat eaque ullam at sequi molestiae, eveniet ratione maiores! Facere aperiam asperiores in? Cupiditate distinctio maiores obcaecati pariatur culpa, debitis dignissimos maxime voluptatem commodi quasi hic inventore aut eveniet ducimus ratione rerum vitae nulla expedita. Pariatur asperiores voluptatibus recusandae quia nam voluptates doloremque minima officia officiis voluptatem, ipsa dicta quod quasi et eaque rem ad natus magnam facere autem distinctio? Pariatur ad mollitia, tempore reprehenderit quidem facere praesentium quibusdam repudiandae quo possimus nulla optio, commodi sint delectus quod quam distinctio, tempora necessitatibus eos saepe ducimus adipisci hic. Ipsum, aperiam esse corrupti temporibus quas, itaque iusto ab accusantium labore amet autem eligendi nesciunt animi, facere optio ex. Harum saepe earum corrupti dolore mollitia asperiores quos voluptate officia placeat, fuga possimus sunt repellat impedit sit hic magni. Praesentium suscipit facere aliquid sed nam deleniti nulla! Vero eius non aliquam incidunt perspiciatis inventore repellendus. Optio eveniet sit in asperiores, fuga eaque quaerat repellat alias minus quos at architecto nemo consectetur libero earum quasi excepturi necessitatibus qui obcaecati eum quis tenetur mollitia laboriosam. Eum perspiciatis ipsa repudiandae commodi, deleniti iusto quaerat laboriosam ratione animi ea nesciunt adipisci eius neque corrupti veritatis provident atque alias placeat cupiditate temporibus exercitationem harum voluptas libero? Reiciendis ad neque quos velit rerum animi ab earum perspiciatis consequatur, incidunt explicabo non odit beatae provident quo, nisi quisquam nemo adipisci harum ut inventore ex minus. Dolore sint exercitationem temporibus atque excepturi repellat fugiat suscipit, eum minus eius repellendus illum quibusdam. Dolore modi minus, quidem accusamus dolor ut inventore, nemo magni dignissimos rerum quas sed? Nisi laborum repudiandae corrupti aliquam iusto quis maxime ipsam exercitationem laudantium architecto ipsum, ratione fugiat tempora id ab quaerat labore autem a voluptatem explicabo consequatur amet illum, placeat voluptates. Hic, quis iure! Amet quae consequuntur aperiam. Labore sit consectetur voluptas molestiae aut harum repellendus incidunt rerum aliquid reprehenderit assumenda tempore, recusandae debitis quas pariatur, hic, obcaecati alias itaque voluptate officia dolor odio. Aliquam, inventore sit a deleniti excepturi, ab illum magnam pariatur molestiae tenetur aliquid. Necessitatibus magni velit, deleniti fugiat ipsum sed voluptatem aliquam, quos accusamus quibusdam quia illo voluptas provident eveniet vel repellat. Harum alias deleniti voluptatibus maxime sapiente ut, nam, aperiam praesentium fuga aliquam, blanditiis aliquid deserunt totam pariatur provident dignissimos atque officia porro. Ad cumque veritatis amet similique neque itaque eaque expedita dolore adipisci, numquam dolorum iure cum ut quia sequi consequuntur sint atque dignissimos commodi porro provident voluptas! Odio nam autem, quis, non dolor sint veniam, nemo ab nulla veritatis ex explicabo deleniti tempore. Autem quae sit aliquam dolorem. Alias magnam odio distinctio delectus ducimus dolorem harum provident exercitationem laboriosam, minus amet tempore libero repellendus, quam praesentium impedit. Ratione consequuntur unde obcaecati molestias quidem, eius a nulla nemo cupiditate deleniti dolores vitae quos expedita illo, temporibus error facere consequatur quae tempore optio. Accusamus in illum quas sunt illo itaque debitis obcaecati distinctio modi! Recusandae cumque assumenda aliquam accusamus possimus veritatis maiores voluptatum maxime nostrum aperiam? Molestias, autem numquam ipsam, quis quaerat tenetur culpa eum iste consequuntur, exercitationem neque optio earum qui maxime illo. Doloremque voluptatibus obcaecati ut harum labore iste beatae voluptates! Architecto labore quae necessitatibus! Eveniet laudantium recusandae impedit laborum. Omnis quos quo eius a repudiandae cum aperiam blanditiis expedita repellat veniam voluptates, exercitationem quisquam itaque aliquid nobis facilis, tempora nam placeat molestiae inventore possimus. Recusandae quod rerum sint ipsam esse quidem libero deserunt impedit molestiae dolorem omnis autem aperiam quis quaerat, architecto maxime vel mollitia incidunt quas non in tenetur placeat. Officiis similique est corporis ducimus. Hic repellendus reprehenderit necessitatibus natus praesentium nesciunt at! Nam dicta tempora commodi iusto quaerat praesentium, illo, provident a ab eveniet, eos eaque? Ullam consequuntur culpa mollitia velit soluta quia quidem repellat tenetur possimus rem obcaecati dicta alias assumenda consectetur corrupti, cumque voluptatibus dolore voluptate officia placeat repudiandae aliquam qui. Praesentium quis nisi exercitationem excepturi adipisci odio consequatur labore dolorum vel reiciendis? Tempore ex libero, fuga quae voluptatem obcaecati aperiam autem facilis cumque possimus.</p>
+    <div className="container px-4 py-8">
+      <div className="w-full md:w-2/3 mx-auto bg-lightGray rounded-lg shadow-md p-6">
+        {/* Блок новостей */}
+        <div className="w-1/2 mx-auto">
+          <div className="border-2 border-darkBg rounded-lg p-4">
+            <h2 className="text-xl font-semibold text-darkBg mb-4">Последние новости</h2>
+            {loading ? (
+              <p className="text-darkBg text-center">Загрузка...</p>
+            ) : latestNews.length === 0 ? (
+              <p className="text-darkBg text-center">Новостей пока нет</p>
+            ) : (
+              <ul className="space-y-3">
+                {latestNews.map((news, index) => (
+                  <li
+                    key={news.id}
+                    className="animate-slideDown opacity-0"
+                    style={{ animationDelay: `${index * 0.2}s` }}
+                  >
+                    <Link
+                      to={`/news/${news.slug}`}
+                      className="text-blue-500 hover:underline text-base font-medium"
+                    >
+                      {news.title}
+                    </Link>
+                    <span className="block text-gray-500 text-sm">
+                      {new Date(news.createdAt).toLocaleDateString('ru-RU')}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
+    </div>
   );
 };
 

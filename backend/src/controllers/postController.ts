@@ -10,11 +10,14 @@ const __dirname = path.dirname(__filename);
 
 const prisma = new PrismaClient();
 
-// Существующие функции для новостей
+// Получение новостей
 export const getNews: RequestHandler = async (req, res) => {
   try {
+    const take = parseInt(req.query.take as string) || undefined; // Получаем параметр take
     const news = await prisma.news.findMany({
       orderBy: { createdAt: 'desc' },
+      take, // Ограничиваем количество записей
+      where: { isPublished: true }, // Показываем только опубликованные новости
     });
     res.status(200).json(news);
   } catch (error) {
@@ -22,7 +25,20 @@ export const getNews: RequestHandler = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+// Новый роут для админки (все новости)
+export const getAllNews: RequestHandler = async (req, res) => {
+  try {
+    const news = await prisma.news.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    res.status(200).json(news);
+  } catch (error) {
+    console.error('Error fetching all news:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
+// Создание новости
 export const createNews: RequestHandler = async (req, res) => {
   const { title, shortDescription, content, isPublished, slug, metaTitle, metaDescription } = req.body;
 
@@ -52,11 +68,11 @@ export const createNews: RequestHandler = async (req, res) => {
   }
 };
 
-// Существующие функции для акций (Promotions)
+// Получение акций
 export const getPromotions: RequestHandler = async (req, res) => {
   try {
     const promotions = await prisma.promotions.findMany({
-      orderBy: { startDate: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
     res.status(200).json(promotions);
   } catch (error) {
@@ -65,8 +81,9 @@ export const getPromotions: RequestHandler = async (req, res) => {
   }
 };
 
+// Создание акции
 export const createPromotion: RequestHandler = async (req, res) => {
-  const { title, description, startDate, endDate, isPublished, slug, metaTitle, metaDescription, status } = req.body;
+  const { title, shortDescription, content, startDate, endDate, isPublished, slug, metaTitle, metaDescription, status } = req.body;
 
   try {
     const existingPromotion = await prisma.promotions.findUnique({ where: { slug } });
@@ -78,7 +95,8 @@ export const createPromotion: RequestHandler = async (req, res) => {
     const newPromotion = await prisma.promotions.create({
       data: {
         title,
-        description,
+        shortDescription, // Исправлено с "shordDescription" на "shortDescription"
+        content, // Добавлено обязательное поле
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         isPublished: isPublished === 'true' || isPublished === true,
@@ -96,11 +114,11 @@ export const createPromotion: RequestHandler = async (req, res) => {
   }
 };
 
-// Новые функции для мероприятий (Events)
+// Получение событий
 export const getEvents: RequestHandler = async (req, res) => {
   try {
     const events = await prisma.events.findMany({
-      orderBy: { startDate: 'desc' }, // Сортировка по дате начала
+      orderBy: { createdAt: 'desc' },
     });
     res.status(200).json(events);
   } catch (error) {
@@ -109,8 +127,9 @@ export const getEvents: RequestHandler = async (req, res) => {
   }
 };
 
+// Создание события
 export const createEvent: RequestHandler = async (req, res) => {
-  const { title, shortDescription, description, startDate, isPublished, status, ours, slug, metaTitle, metaDescription } = req.body;
+  const { title, shortDescription, content, startDate, isPublished, status, ours, slug, metaTitle, metaDescription } = req.body;
 
   try {
     const existingEvent = await prisma.events.findUnique({ where: { slug } });
@@ -123,7 +142,7 @@ export const createEvent: RequestHandler = async (req, res) => {
       data: {
         title,
         shortDescription,
-        description,
+        content, // Добавлено обязательное поле
         startDate: new Date(startDate),
         isPublished: isPublished === 'true' || isPublished === true,
         status: status === 'true' || status === true,
@@ -141,7 +160,7 @@ export const createEvent: RequestHandler = async (req, res) => {
   }
 };
 
-// Существующая функция загрузки изображений (будет использоваться для всех типов)
+// Загрузка изображений
 export const uploadImage: RequestHandler = async (req, res) => {
   if (!req.files || !req.files.file) {
     res.status(400).json({ message: 'No file uploaded' });
@@ -150,7 +169,7 @@ export const uploadImage: RequestHandler = async (req, res) => {
 
   const file = req.files.file as UploadedFile;
   const slug = req.body.slug || 'temp';
-  const entity = req.body.entity || 'news'; // По умолчанию news, если не указано
+  const entity = req.body.entity || 'news';
   const uploadDir = path.join(__dirname, '../../frontend/public/uploads', entity, slug);
 
   if (!fs.existsSync(uploadDir)) {
@@ -167,5 +186,58 @@ export const uploadImage: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error('Error uploading image:', error);
     res.status(500).json({ message: 'Error uploading image' });
+  }
+};
+
+// Получение новости по slug
+export const getNewsBySlug: RequestHandler = async (req, res) => {
+  const { slug } = req.params;
+
+  try {
+    const news = await prisma.news.findUnique({
+      where: { slug },
+    });
+
+    if (!news) {
+      res.status(404).json({ message: 'News not found' });
+      return; // Просто прерываем выполнение, не возвращаем Response
+    }
+
+    res.status(200).json(news);
+  } catch (error) {
+    console.error('Error fetching news by slug:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Обновление новости
+export const updateNews: RequestHandler = async (req, res) => {
+  const { slug } = req.params;
+  const { title, shortDescription, content, isPublished, metaTitle, metaDescription } = req.body;
+
+  try {
+    const existingNews = await prisma.news.findUnique({ where: { slug } });
+    if (!existingNews) {
+      res.status(404).json({ message: 'News not found' });
+      return; // Просто прерываем выполнение, не возвращаем Response
+    }
+
+    const updatedNews = await prisma.news.update({
+      where: { slug },
+      data: {
+        title,
+        shortDescription,
+        content,
+        isPublished: isPublished === 'true' || isPublished === true,
+        slug, // Оставляем тот же slug, чтобы не менять уникальный идентификатор
+        metaTitle: metaTitle || null,
+        metaDescription: metaDescription || null,
+      },
+    });
+
+    res.status(200).json(updatedNews);
+  } catch (error) {
+    console.error('Error updating news:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
