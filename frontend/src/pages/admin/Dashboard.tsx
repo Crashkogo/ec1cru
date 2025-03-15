@@ -5,9 +5,9 @@ import AdminMenu from '../../components/AdminMenu';
 import Users from './Users';
 import News from './News';
 import NewsCreate from './NewsCreate';
-import NewsEdit from './NewsEdit'; // Новый импорт
-import EventsCreate from './EventsCreate';
-import PromotionsCreate from './PromotionsCreate';
+ import NewsEdit from './NewsEdit'; // Новый импорт
+/*import EventsCreate from './EventsCreate';
+import PromotionsCreate from './PromotionsCreate'; */
 import Events from './Events';
 import Promotions from './Promotions';
 
@@ -54,9 +54,9 @@ const Dashboard: React.FC = () => {
             <Route path="/news/create" element={<NewsCreate />} />
             <Route path="/news/edit/:slug" element={<NewsEdit />} /> {/* Новый маршрут */}
             <Route path="/events" element={<Events />} />
-            <Route path="/events/create" element={<EventsCreate />} />
+            {/* <Route path="/events/create" element={<EventsCreate />} /> */}
             <Route path="/promotions" element={<Promotions />} />
-            <Route path="/promotions/create" element={<PromotionsCreate />} />
+           {/*  <Route path="/promotions/create" element={<PromotionsCreate />} /> */}
             <Route path="/users" element={<Users />} />
           </Routes>
         </div>

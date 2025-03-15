@@ -67,7 +67,37 @@ export const createNews: RequestHandler = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+// Обновление новости
+export const updateNews: RequestHandler = async (req, res) => {
+  const { slug } = req.params;
+  const { title, shortDescription, content, isPublished, metaTitle, metaDescription } = req.body;
 
+  try {
+    const existingNews = await prisma.news.findUnique({ where: { slug } });
+    if (!existingNews) {
+      res.status(404).json({ message: 'News not found' });
+      return; // Просто прерываем выполнение, не возвращаем Response
+    }
+
+    const updatedNews = await prisma.news.update({
+      where: { slug },
+      data: {
+        title,
+        shortDescription,
+        content,
+        isPublished: isPublished === 'true' || isPublished === true,
+        slug, // Оставляем тот же slug, чтобы не менять уникальный идентификатор
+        metaTitle: metaTitle || null,
+        metaDescription: metaDescription || null,
+      },
+    });
+
+    res.status(200).json(updatedNews);
+  } catch (error) {
+    console.error('Error updating news:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 // Получение акций
 export const getPromotions: RequestHandler = async (req, res) => {
   try {
@@ -210,34 +240,3 @@ export const getNewsBySlug: RequestHandler = async (req, res) => {
   }
 };
 
-// Обновление новости
-export const updateNews: RequestHandler = async (req, res) => {
-  const { slug } = req.params;
-  const { title, shortDescription, content, isPublished, metaTitle, metaDescription } = req.body;
-
-  try {
-    const existingNews = await prisma.news.findUnique({ where: { slug } });
-    if (!existingNews) {
-      res.status(404).json({ message: 'News not found' });
-      return; // Просто прерываем выполнение, не возвращаем Response
-    }
-
-    const updatedNews = await prisma.news.update({
-      where: { slug },
-      data: {
-        title,
-        shortDescription,
-        content,
-        isPublished: isPublished === 'true' || isPublished === true,
-        slug, // Оставляем тот же slug, чтобы не менять уникальный идентификатор
-        metaTitle: metaTitle || null,
-        metaDescription: metaDescription || null,
-      },
-    });
-
-    res.status(200).json(updatedNews);
-  } catch (error) {
-    console.error('Error updating news:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-};

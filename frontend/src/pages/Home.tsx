@@ -29,7 +29,7 @@ const Home: React.FC = () => {
   }, []);
 
   return (
-    <div className="container px-4 py-8">
+    <div className="container h-full px-4 py-8">
       <div className="w-full md:w-2/3 mx-auto bg-lightGray rounded-lg shadow-md p-6">
         {/* Блок новостей */}
         <div className="w-1/2 mx-auto">

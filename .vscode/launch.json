@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      // Конфигурация для отладки React (frontend)
+      {
+        "name": "Debug React (Chrome)",
+        "type": "chrome",
+        "request": "launch",
+        "url": "http://localhost:5173", // Порт вашего React-приложения
+        "webRoot": "${workspaceFolder}/frontend/src",
+        "sourceMapPathOverrides": {
+          "webpack:///src/*": "${webRoot}/*"
+        }
+      },
+      // Конфигурация для отладки Node.js (backend)
+      {
+        "name": "Debug Node.js Server",
+        "type": "node",
+        "request": "launch",
+        "runtimeArgs": ["-r", "ts-node/register"], // Для TypeScript
+        "args": ["${workspaceFolder}/backend/src/server.ts"], // Путь к вашему серверу
+        "cwd": "${workspaceFolder}/backend",
+        "console": "integratedTerminal",
+        "internalConsoleOptions": "neverOpen",
+        "sourceMaps": true
+      }
+    ],
+    // Опционально: Конфигурация для одновременной отладки frontend и backend
+    "compounds": [
+      {
+        "name": "Full Stack Debug",
+        "configurations": ["Debug React (Chrome)", "Debug Node.js Server"]
+      }
+    ]
+  }

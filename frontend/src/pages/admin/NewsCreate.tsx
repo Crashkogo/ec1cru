@@ -1,17 +1,13 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import Quill from 'quill';
-import ImageResize from 'quill-image-resize-module-react';
-import 'react-quill/dist/quill.snow.css';
+import { useQuill } from 'react-quilljs';
+import Quill from '../../quill-config'; // Предполагается, что файл в src
+import 'quill/dist/quill.snow.css';
 import './quill-custom.css';
-
-// Регистрируем модуль ImageResize в Quill
-Quill.register('modules/imageResize', ImageResize);
 
 // Схема валидации
 const newsSchema = z.object({
@@ -46,7 +42,7 @@ const transliterate = (text: string): string => {
 
 const NewsCreate: React.FC = () => {
   const navigate = useNavigate();
-  const quillRef = useRef<ReactQuill>(null);
+  const [tempImages, setTempImages] = useState<string[]>([]); // Храним временные URL
 
   const {
     register,
@@ -62,6 +58,117 @@ const NewsCreate: React.FC = () => {
   const title = watch('title');
   const content = watch('content');
 
+  // Настройка Quill
+  const { quill, quillRef } = useQuill({
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['link', 'image'],
+        ['blockquote', 'code-block'],
+        [{ align: ['', 'center', 'right', 'justify'] }],
+        [{ float: ['', 'left', 'right'] }],
+        ['clean'],
+      ],
+      imageResize: {
+        parchment: Quill.import('parchment'),
+        modules: ['Resize', 'DisplaySize', 'Toolbar'],
+      },
+    },
+    formats: [
+      'header', 'bold', 'italic', 'underline', 'strike', 'list',
+      'link', 'image', 'blockquote', 'code-block', 'align', 'float', 'margin', 'display'
+    ],
+  });
+
+  // Обработчик загрузки изображения
+  const insertImageToEditor = (url: string) => {
+    if (quill) {
+      const fullUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+      const range = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
+      quill.insertEmbed(range.index, 'image', fullUrl);
+      console.log('Image inserted:', fullUrl);
+      if (fullUrl.includes('/uploads/news/temp/')) {
+        setTempImages((prev) => [...prev, fullUrl]); // Сохраняем временные URL
+      }
+    }
+  };
+
+  const uploadImageToServer = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('slug', watch('slug') || 'temp');
+    formData.append('entity', 'news');
+
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No token found');
+
+    const response = await axios.post<{ location: string }>(
+      'http://localhost:5000/api/posts/upload-image',
+      formData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log('Server response:', response.data);
+    if (!response.data.location) {
+      throw new Error('No location in server response');
+    }
+    return response.data.location;
+  };
+
+  const selectLocalImage = () => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      console.log('File selected');
+      const file = input.files?.[0];
+      if (!file) {
+        console.log('No file selected');
+        return;
+      }
+
+      try {
+        console.log('Uploading image...');
+        const imageUrl = await uploadImageToServer(file);
+        insertImageToEditor(imageUrl);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('Ошибка при загрузке изображения: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
+      }
+    };
+  };
+
+  // Привязка обработчиков через useEffect
+  useEffect(() => {
+    if (quill) {
+      console.log('Quill initialized');
+      quill.getModule('toolbar').addHandler('image', selectLocalImage);
+      quill.getModule('toolbar').addHandler('float', (value: string) => {
+        const range = quill.getSelection();
+        if (range) {
+          const [leaf] = quill.getLeaf(range.index);
+          if (leaf && (leaf.domNode as HTMLElement).tagName === 'IMG') {
+            (leaf.domNode as HTMLElement).style.float = value || '';
+            (leaf.domNode as HTMLElement).style.margin = value ? '0 1em 1em 0' : '0';
+            (leaf.domNode as HTMLElement).style.display = 'inline';
+            setValue('content', quill.root.innerHTML, { shouldValidate: true });
+          }
+        }
+      });
+      quill.on('text-change', () => {
+        setValue('content', quill.root.innerHTML, { shouldValidate: true });
+      });
+      if (content && quill.root.innerHTML !== content) {
+        quill.root.innerHTML = content;
+      }
+    }
+  }, [quill, setValue, content, selectLocalImage]);
+
+  // Синхронизация slug
   useEffect(() => {
     if (title) {
       const slug = transliterate(title);
@@ -69,38 +176,30 @@ const NewsCreate: React.FC = () => {
     }
   }, [title, setValue]);
 
-  useEffect(() => {
-    setValue('content', content);
-  }, [content, setValue]);
-
-  const quillModules = {
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      ['link', 'image'],
-      ['blockquote', 'code-block'],
-      [{ align: [] }],
-      ['clean'],
-    ],
-    imageResize: {
-      parchment: Quill.import('parchment'),
-      modules: ['Resize', 'DisplaySize', 'Toolbar'],
-    },
-  };
-
   const onSubmit: SubmitHandler<NewsFormInputs> = async (data) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.post(
-        'http://localhost:5000/api/posts/news',
-        data,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      let updatedContent = data.content;
+      if (tempImages.length > 0) {
+        tempImages.forEach((tempUrl) => {
+          const newUrl = tempUrl.replace('/uploads/news/temp/', `/uploads/news/${data.slug}/`);
+          updatedContent = updatedContent.replace(tempUrl, newUrl);
+        });
+        data.content = updatedContent;
+        await axios.post('http://localhost:5000/api/posts/move-images', {
+          oldSlug: 'temp',
+          newSlug: data.slug,
+        }, { headers: { Authorization: `Bearer ${token}` } });
+        setTempImages([]);
+      }
+
+      await axios.post('http://localhost:5000/api/posts/news', data, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       navigate('/admin/news');
     } catch (error) {
       console.error('Error creating news:', error);
-      alert('Ошибка при создании новости: ' + error.message);
+      alert('Ошибка при создании новости: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
     }
   };
 
@@ -122,13 +221,7 @@ const NewsCreate: React.FC = () => {
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Основное содержание</label>
-          <ReactQuill
-            ref={quillRef}
-            value={content}
-            onChange={(newValue) => setValue('content', newValue, { shouldValidate: true })}
-            modules={quillModules}
-            className="mb-4 bg-white"
-          />
+          <div ref={quillRef} className="mb-4 bg-white" />
           {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content.message}</p>}
         </div>
 

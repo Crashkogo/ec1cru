@@ -55,8 +55,8 @@ const NewsDetail: React.FC = () => {
   }
 
   return (
-    <div className="container px-4 py-8">
-      <div className="w-full md:w-2/3 mx-auto bg-lightGray rounded-lg shadow-md p-6">
+    <div className="container px-4 py-8 h-4/5">
+      <div className="w-full h-full md:w-2/3 mx-auto bg-lightGray rounded-lg shadow-md p-6">
         <h1 className="text-3xl font-bold text-darkBg mb-4">{news.title}</h1>
         <p className="text-gray-500 mb-4">
           Опубликовано: {new Date(news.createdAt).toLocaleDateString('ru-RU')}

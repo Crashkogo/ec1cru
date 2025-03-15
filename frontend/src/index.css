@@ -45,7 +45,7 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-  min-width: 100vw; /* Растянуть на всю ширину */
+  min-width: 100%; /* Растянуть на всю ширину */
   min-height: 100vh;
 }
 
