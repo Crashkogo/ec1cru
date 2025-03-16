@@ -12,8 +12,8 @@ const promotionSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   shortDescription: z.string().min(1, 'Short description is required'),
   content: z.string().min(1, 'Content is required'),
-  startDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid start date' }),
-  endDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid end date' }),
+  startDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Valid start date is required' }),
+  endDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Valid end date is required' }),
   isPublished: z.boolean(),
   slug: z.string().min(1, 'Slug is required'),
   metaTitle: z.string().optional(),
@@ -41,7 +41,7 @@ const transliterate = (text: string): string => {
     .replace(/(^-|-$)/g, '');
 };
 
-const PromotionsCreate: React.FC = () => {
+const PromotionCreate: React.FC = () => {
   const navigate = useNavigate();
   const [tempImages, setTempImages] = useState<string[]>([]);
 
@@ -58,8 +58,6 @@ const PromotionsCreate: React.FC = () => {
 
   const title = watch('title');
   const content = watch('content');
-  const startDate = watch('startDate');
-  const endDate = watch('endDate');
 
   // Парсинг HTML для извлечения URL-ов изображений
   const extractTempImages = (htmlContent: string): string[] => {
@@ -70,7 +68,7 @@ const PromotionsCreate: React.FC = () => {
 
     images.forEach((img) => {
       const src = img.getAttribute('src');
-      if (src && src.includes('/uploads/news/temp/') && !tempImageUrls.includes(src)) {
+      if (src && src.includes('/uploads/promotions/temp/') && !tempImageUrls.includes(src)) {
         tempImageUrls.push(src);
       }
     });
@@ -98,15 +96,6 @@ const PromotionsCreate: React.FC = () => {
     }
   }, [title, setValue]);
 
-  useEffect(() => {
-    if (startDate && endDate) {
-      const now = new Date();
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      setValue('status', now >= start && now <= end);
-    }
-  }, [startDate, endDate, setValue]);
-
   const onSubmit: SubmitHandler<PromotionFormInputs> = async (data) => {
     const token = localStorage.getItem('token');
     try {
@@ -114,7 +103,7 @@ const PromotionsCreate: React.FC = () => {
 
       if (tempImages.length > 0) {
         tempImages.forEach((tempUrl) => {
-          const newUrl = tempUrl.replace('/uploads/news/temp/', `/uploads/news/${data.slug}/`);
+          const newUrl = tempUrl.replace('/uploads/promotions/temp/', `/uploads/promotions/${data.slug}/`);
           updatedContent = updatedContent.replace(tempUrl, newUrl);
         });
 
@@ -123,9 +112,11 @@ const PromotionsCreate: React.FC = () => {
           {
             oldSlug: 'temp',
             newSlug: data.slug,
+            entity: 'promotions',
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
+
         setTempImages([]);
         data.content = updatedContent;
       }
@@ -133,6 +124,7 @@ const PromotionsCreate: React.FC = () => {
       await axios.post(`${import.meta.env.VITE_API_URL}/api/posts/promotions`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       navigate('/admin/promotions');
     } catch (error) {
       console.error('Error creating promotion:', error);
@@ -160,6 +152,26 @@ const PromotionsCreate: React.FC = () => {
           {errors.shortDescription && (
             <p className="text-red-500 text-sm mt-1">{errors.shortDescription.message}</p>
           )}
+        </div>
+
+        <div className="mb-4">
+          <label className="block mb-2 font-medium">Дата начала</label>
+          <input
+            type="datetime-local"
+            {...register('startDate')}
+            className="w-full p-2 border rounded"
+          />
+          {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
+        </div>
+
+        <div className="mb-4">
+          <label className="block mb-2 font-medium">Дата окончания</label>
+          <input
+            type="datetime-local"
+            {...register('endDate')}
+            className="w-full p-2 border rounded"
+          />
+          {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate.message}</p>}
         </div>
 
         <div className="mb-4">
@@ -198,34 +210,14 @@ const PromotionsCreate: React.FC = () => {
               base_url: '/tinymce',
               suffix: '.min',
               image_uploadtab: true,
-              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image`,
-              images_upload_base_path: import.meta.env.VITE_API_URL,
+              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=promotions`, // Добавляем entity как query-параметр
+              images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
               automatic_uploads: true,
               file_picker_types: 'image',
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
             }}
           />
           {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content.message}</p>}
-        </div>
-
-        <div className="mb-4">
-          <label className="block mb-2 font-medium">Дата начала</label>
-          <input
-            type="datetime-local"
-            {...register('startDate')}
-            className="w-full p-2 border rounded"
-          />
-          {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
-        </div>
-
-        <div className="mb-4">
-          <label className="block mb-2 font-medium">Дата окончания</label>
-          <input
-            type="datetime-local"
-            {...register('endDate')}
-            className="w-full p-2 border rounded"
-          />
-          {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate.message}</p>}
         </div>
 
         <div className="mb-4">
@@ -276,4 +268,4 @@ const PromotionsCreate: React.FC = () => {
   );
 };
 
-export default PromotionsCreate;
+export default PromotionCreate;

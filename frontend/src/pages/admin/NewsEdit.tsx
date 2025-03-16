@@ -177,6 +177,7 @@ const NewsEdit: React.FC = () => {
             {
               oldSlug: originalSlug,
               newSlug: data.slug,
+              entity: 'news', 
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -266,7 +267,7 @@ const NewsEdit: React.FC = () => {
               base_url: '/tinymce',
               suffix: '.min',
               image_uploadtab: true,
-              images_upload_url: '${import.meta.env.VITE_API_URL}/api/posts/upload-image',
+              images_upload_url: '${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=news',
               images_upload_base_path: '${import.meta.env.VITE_API_URL}',
               automatic_uploads: true,
               file_picker_types: 'image',

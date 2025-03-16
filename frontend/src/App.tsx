@@ -6,6 +6,7 @@ import PageWrapper from './components/PageWrapper';
 import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import NewsDetail from './components/NewsDetail';
+import PromotionsDetail from './components/PromotionsDetail';
 
 const App: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);
@@ -53,6 +54,14 @@ const App: React.FC = () => {
               element={
                 <PageWrapper headerHeight={headerHeight}>
                 <NewsDetail />
+                </PageWrapper>
+              }
+            />
+             <Route
+              path="/promotions/:slug"
+              element={
+                <PageWrapper headerHeight={headerHeight}>
+                <PromotionsDetail />
                 </PageWrapper>
               }
             />

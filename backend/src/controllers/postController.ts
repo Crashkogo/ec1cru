@@ -130,16 +130,12 @@ export const uploadImage: RequestHandler = async (req, res) => {
 
   const file = req.files.file as UploadedFile;
   const slug = req.body.slug || 'temp';
-  const entity = req.body.entity; // Убираем дефолтное значение, чтобы требовать его с фронта
-
-  // Валидация entity
-  const allowedEntities = ['news', 'promotions', 'events', 'ourdevelop']; // Пример допустимых значений
-  if (!entity || !allowedEntities.includes(entity)) {
-    res.status(400).json({ message: 'Invalid or missing entity' });
-    return;
-  }
-
-  const uploadDir = path.join(__dirname, '../../frontend/public/uploads', entity, slug);
+  
+  // Извлекаем entity из query-параметров, если он есть, иначе из тела запроса, либо используем 'news' по умолчанию
+  console.log(req.query.entity);
+  const entity = req.query.entity || req.body.entity || 'news';
+  
+  const uploadDir = path.join(__dirname, '../../frontend/public/uploads', entity as string, slug);
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -158,20 +154,8 @@ export const uploadImage: RequestHandler = async (req, res) => {
   }
 };
 export const moveImagesAfterCreate: RequestHandler = async (req, res) => {
-  const { oldSlug = 'temp', newSlug, entity } = req.body;
-
-  // Валидация entity
-  const allowedEntities = ['news', 'promotions', 'events', 'ourdevelop'];
-  if (!entity || !allowedEntities.includes(entity)) {
-    res.status(400).json({ message: 'Invalid or missing entity' });
-    return;
-  }
-
-  if (!newSlug) {
-    res.status(400).json({ message: 'Missing newSlug' });
-    return;
-  }
-
+  const { oldSlug = 'temp', newSlug } = req.body;
+  const entity = req.body.entity;
   const oldDir = path.join(__dirname, '../../frontend/public/uploads', entity, oldSlug);
   const newDir = path.join(__dirname, '../../frontend/public/uploads', entity, newSlug);
 
@@ -186,7 +170,7 @@ export const moveImagesAfterCreate: RequestHandler = async (req, res) => {
         const newPath = path.join(newDir, file);
         fs.renameSync(oldPath, newPath); // Перемещаем файлы
       }
-      fs.rmdirSync(oldDir, { recursive: true }); // Удаляем старую папку (рекурсивно на случай, если остались вложенные файлы/папки)
+      fs.rmdirSync(oldDir); // Удаляем старую папку, если она пуста
     }
     res.json({ message: 'Images moved successfully' });
   } catch (error) {
@@ -220,16 +204,12 @@ export const getPromotionBySlug: RequestHandler = async (req, res) => {
 // Получение опубликованных акций
 export const getPromotions: RequestHandler = async (req, res) => {
   try {
-    const take = parseInt(req.query.take as string) || undefined; // Получаем параметр take
+    const take = parseInt(req.query.take as string) || undefined;
     const promotions = await prisma.promotions.findMany({
       orderBy: { createdAt: 'desc' },
-      take, // Ограничиваем количество записей
-      where: { 
-        isPublished: true, // Показываем только опубликованные акции
-        status: true // Показываем только активные акции
-      },
+      take,
+      where: { isPublished: true },
     });
-
     res.status(200).json(promotions);
   } catch (error) {
     console.error('Error fetching promotions:', error);
@@ -237,7 +217,7 @@ export const getPromotions: RequestHandler = async (req, res) => {
   }
 };
 
-// Новый роут для админки (все акции)
+// Получение всех акций (для админки)
 export const getAllPromotions: RequestHandler = async (req, res) => {
   try {
     const promotions = await prisma.promotions.findMany({
@@ -255,7 +235,6 @@ export const createPromotion: RequestHandler = async (req, res) => {
   const { title, shortDescription, content, startDate, endDate, isPublished, slug, metaTitle, metaDescription, status } = req.body;
 
   try {
-    console.log('Slug:', slug);
     const existingPromotion = await prisma.promotions.findUnique({ where: { slug } });
     if (existingPromotion) {
       res.status(400).json({ message: 'Slug already exists' });
@@ -302,10 +281,10 @@ export const updatePromotion: RequestHandler = async (req, res) => {
         title,
         shortDescription,
         content,
-        startDate: startDate ? new Date(startDate) : existingPromotion.startDate,
-        endDate: endDate ? new Date(endDate) : existingPromotion.endDate,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
         isPublished: isPublished === 'true' || isPublished === true,
-        slug, // Оставляем тот же slug
+        slug,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
         status: status === 'true' || status === true,

@@ -258,7 +258,7 @@ const PromotionsEdit: React.FC = () => {
               base_url: '/tinymce',
               suffix: '.min',
               image_uploadtab: true,
-              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image`,
+              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=promotions`,
               images_upload_base_path: import.meta.env.VITE_API_URL,
               automatic_uploads: true,
               file_picker_types: 'image',
