@@ -28,7 +28,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="w-full h-full">
+      <div className="w-full h-full ">
         <Header ref={headerRef} />
         <Suspense fallback={<div className="text-whiteText">Loading...</div>}>
           <Routes>

@@ -1,27 +1,29 @@
-/* import React, { useRef, useEffect } from 'react';
+/* import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import { useQuill } from 'react-quilljs';
+import Quill from '../../quill-config';
+import 'quill/dist/quill.snow.css';
 import './quill-custom.css';
 
-const promotionSchema = z.object({
+// Схема валидации для акций
+const promotionsSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
+  shortDescription: z.string().min(1, 'Short description is required'),
   content: z.string().min(1, 'Content is required'),
-  startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(1, 'End date is required'),
   isPublished: z.boolean(),
-  status: z.boolean(),
   slug: z.string().min(1, 'Slug is required'),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
+  startDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid start date' }),
+  endDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid end date' }),
+  status: z.boolean(),
 });
 
-type PromotionFormInputs = z.infer<typeof promotionSchema>;
+type PromotionsFormInputs = z.infer<typeof promotionsSchema>;
 
 const transliterate = (text: string): string => {
   const ruToEn: { [key: string]: string } = {
@@ -30,6 +32,7 @@ const transliterate = (text: string): string => {
     у: 'u', ф: 'f', х: 'kh', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y',
     ь: '', э: 'e', ю: 'yu', я: 'ya', ' ': '-', ',': '', '.': '',
   };
+
   return text
     .toLowerCase()
     .split('')
@@ -42,7 +45,8 @@ const transliterate = (text: string): string => {
 
 const PromotionsCreate: React.FC = () => {
   const navigate = useNavigate();
-  const quillRef = useRef<ReactQuill>(null);
+  const [tempImages, setTempImages] = useState<string[]>([]);
+  const toolbarRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
@@ -50,44 +54,194 @@ const PromotionsCreate: React.FC = () => {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<PromotionFormInputs>({
-    resolver: zodResolver(promotionSchema),
-    defaultValues: { isPublished: false, status: true, content: '' },
+  } = useForm<PromotionsFormInputs>({
+    resolver: zodResolver(promotionsSchema),
+    defaultValues: {
+      isPublished: false,
+      content: '',
+      status: true, // По умолчанию акция активна
+      startDate: new Date().toISOString().split('T')[0], // Сегодняшняя дата
+      endDate: new Date().toISOString().split('T')[0], // Сегодняшняя дата
+    },
   });
 
   const title = watch('title');
   const content = watch('content');
+
+  const { quill, quillRef } = useQuill({
+    theme: 'snow',
+    modules: {
+      toolbar: {
+        container: [
+          [{ header: [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['link', 'image'],
+          ['blockquote', 'code-block'],
+          [{ align: ['', 'center', 'right', 'justify'] }],
+          [{ float: ['', 'left', 'right'] }],
+          ['clean'],
+        ],
+      },
+      imageResize: {
+        parchment: Quill.import('parchment'),
+        modules: ['Resize', 'DisplaySize', 'Toolbar'],
+      },
+    },
+    formats: [
+      'header', 'bold', 'italic', 'underline', 'strike', 'list',
+      'link', 'image', 'blockquote', 'code-block', 'align', 'float', 'margin', 'display',
+    ],
+  });
+
+  const insertImageToEditor = useCallback((url: string) => {
+    if (quill) {
+      const fullUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
+      const range = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
+      quill.insertEmbed(range.index, 'image', fullUrl);
+      console.log('Image inserted:', fullUrl);
+      if (fullUrl.includes('/uploads/promotions/temp/')) { // Изменено на promotions
+        setTempImages((prev) => [...prev, fullUrl]);
+      }
+    }
+  }, [quill]);
+
+  const uploadImageToServer = useCallback(async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('slug', watch('slug') || 'temp');
+    formData.append('entity', 'promotions'); // Изменено на promotions
+
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('No token found');
+
+    const response = await axios.post<{ location: string }>(
+      'http://localhost:5000/api/posts/upload-image',
+      formData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    console.log('Server response:', response.data);
+    if (!response.data.location) {
+      throw new Error('No location in server response');
+    }
+    return response.data.location;
+  }, [watch]);
+
+  const selectLocalImage = useCallback(() => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      console.log('File selected');
+      const file = input.files?.[0];
+      if (!file) {
+        console.log('No file selected');
+        return;
+      }
+
+      try {
+        console.log('Uploading image...');
+        const imageUrl = await uploadImageToServer(file);
+        insertImageToEditor(imageUrl);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        alert('Ошибка при загрузке изображения: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
+      }
+    };
+  }, [uploadImageToServer, insertImageToEditor]);
+
+  const handleFloat = useCallback((value: string) => {
+    if (quill) {
+      const range = quill.getSelection();
+      if (range) {
+        const [leaf] = quill.getLeaf(range.index);
+        const domNode = leaf?.domNode;
+        if (domNode instanceof HTMLElement && domNode.tagName === 'IMG') {
+          // Применяем float, margin и display через Quill форматы
+          quill.formatText(range.index, 1, 'float', value || '', 'user');
+          quill.formatText(range.index, 1, 'margin', value ? '0 1em 1em 0' : '0', 'user');
+          quill.formatText(range.index, 1, 'display', 'inline', 'user');
+  
+          // Обновляем содержимое формы
+          const updatedContent = quill.root.innerHTML;
+          console.log('Updated content after float:', updatedContent); // Логируем для отладки
+          setValue('content', updatedContent, { shouldValidate: true });
+        } else {
+          console.warn('Selected element is not an image:', domNode);
+        }
+      } else {
+        console.warn('No selection found in Quill editor');
+      }
+    }
+  }, [quill, setValue]);
+
+  useEffect(() => {
+    if (quill && toolbarRef.current) {
+      console.log('Quill initialized');
+      const imageButton = toolbarRef.current.querySelector('.ql-image');
+      if (imageButton) {
+        imageButton.addEventListener('click', selectLocalImage);
+      }
+
+      const floatButtons = toolbarRef.current.querySelectorAll('.ql-float');
+      floatButtons.forEach((button) => {
+        const value = button.getAttribute('value') || '';
+        button.addEventListener('click', () => handleFloat(value));
+      });
+
+      quill.on('text-change', () => {
+        setValue('content', quill.root.innerHTML, { shouldValidate: true });
+      });
+
+      if (content && quill.root.innerHTML !== content) {
+        quill.root.innerHTML = content;
+      }
+
+      return () => {
+        if (imageButton) {
+          imageButton.removeEventListener('click', selectLocalImage);
+        }
+        floatButtons.forEach((button) => {
+          const value = button.getAttribute('value') || '';
+          button.removeEventListener('click', () => handleFloat(value));
+        });
+      };
+    }
+  }, [quill, content, setValue, selectLocalImage, handleFloat]);
 
   useEffect(() => {
     if (title) {
       const slug = transliterate(title);
       setValue('slug', slug);
     }
-	}, [title, setValue]);
+  }, [title, setValue]);
 
-  const quillModules = {
-    toolbar: {
-      container: [
-        [{ header: [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        ['link', 'image'],
-        ['blockquote', 'code-block'],
-        [{ align: [] }],
-        ['clean'],
-      ],
-     },
-  };
-
-  const onSubmit: SubmitHandler<PromotionFormInputs> = async (data) => {
+  const onSubmit: SubmitHandler<PromotionsFormInputs> = async (data) => {
     const token = localStorage.getItem('token');
     try {
+      let updatedContent = data.content;
+      if (tempImages.length > 0) {
+        tempImages.forEach((tempUrl) => {
+          const newUrl = tempUrl.replace('/uploads/promotions/temp/', `/uploads/promotions/${data.slug}/`);
+          updatedContent = updatedContent.replace(tempUrl, newUrl);
+        });
+        await axios.post('http://localhost:5000/api/posts/move-images', {
+          oldSlug: 'temp',
+          newSlug: data.slug,
+        }, { headers: { Authorization: `Bearer ${token}` } });
+        setTempImages([]);
+        data.content = updatedContent;
+      }
+
       await axios.post('http://localhost:5000/api/posts/promotions', data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       navigate('/admin/promotions');
     } catch (error) {
       console.error('Error creating promotion:', error);
+      alert('Ошибка при создании акции: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
     }
   };
 
@@ -100,67 +254,66 @@ const PromotionsCreate: React.FC = () => {
           <input {...register('title')} className="w-full p-2 border rounded" placeholder="Введите заголовок..." />
           {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
         </div>
+
         <div className="mb-4">
-          <label className="block mb-2 font-medium">Описание</label>
-          <textarea {...register('description')} className="w-full p-2 border rounded" placeholder="Введите описание..." />
-          {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
+          <label className="block mb-2 font-medium">Краткое описание</label>
+          <textarea {...register('shortDescription')} className="w-full p-2 border rounded" placeholder="Введите краткое описание..." />
+          {errors.shortDescription && <p className="text-red-500 text-sm mt-1">{errors.shortDescription.message}</p>}
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Основное содержание</label>
-          <ReactQuill
-            ref={quillRef}
-            value={content}
-            onChange={(newValue) => {
-              setValue('content', newValue, { shouldValidate: true }); // Синхронизация с useForm
-            }}
-            modules={quillModules}
-            className="mb-4 bg-white"
-          />
+          <div ref={quillRef} className="mb-4 bg-white">
+            <div ref={toolbarRef} className="ql-toolbar ql-snow" />
+            <div className="ql-container ql-snow">
+              <div className="ql-editor" />
+            </div>
+          </div>
           {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content.message}</p>}
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Дата начала</label>
-          <input
-            type="datetime-local"
-            {...register('startDate')}
-            className="w-full p-2 border rounded"
-          />
+          <input type="date" {...register('startDate')} className="w-full p-2 border rounded" />
           {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Дата окончания</label>
-          <input
-            type="datetime-local"
-            {...register('endDate')}
-            className="w-full p-2 border rounded"
-          />
+          <input type="date" {...register('endDate')} className="w-full p-2 border rounded" />
           {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate.message}</p>}
         </div>
+
         <div className="mb-4">
           <label className="flex items-center font-medium">
             <input type="checkbox" {...register('isPublished')} className="mr-2" />
             Опубликовано
           </label>
         </div>
+
         <div className="mb-4">
           <label className="flex items-center font-medium">
             <input type="checkbox" {...register('status')} className="mr-2" />
             Активна
           </label>
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Slug</label>
           <input {...register('slug')} className="w-full p-2 border rounded" placeholder="Автоматически генерируется..." readOnly />
           {errors.slug && <p className="text-red-500 text-sm mt-1">{errors.slug.message}</p>}
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Meta Title</label>
           <input {...register('metaTitle')} className="w-full p-2 border rounded" placeholder="Введите meta title..." />
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Meta Description</label>
           <textarea {...register('metaDescription')} className="w-full p-2 border rounded" placeholder="Введите meta description..." rows={3} />
         </div>
+
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
           Сохранить акцию
         </button>

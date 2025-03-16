@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+/* import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaEdit } from 'react-icons/fa';
@@ -6,9 +6,10 @@ import { FaEdit } from 'react-icons/fa';
 interface Promotion {
   id: number;
   title: string;
-  description: string;
+  shortDescription: string; // Исправлено с description на shortDescription
   startDate: string;
   endDate: string;
+  createdAt: string;
   isPublished: boolean;
   status: boolean; // true - активна, false - завершена
   slug: string;
@@ -26,7 +27,7 @@ const Promotions: React.FC = () => {
     }
 
     axios
-      .get('http://localhost:5000/api/posts/promotions', {
+      .get('http://localhost:5000/api/posts/admin/promotions', { // Предполагаю маршрут для админки
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -62,7 +63,7 @@ const Promotions: React.FC = () => {
             <thead>
               <tr className="bg-grayText text-whiteText">
                 <th className="p-3 text-left">Заголовок</th>
-                <th className="p-3 text-left">Описание</th>
+                <th className="p-3 text-left">Краткое описание</th>
                 <th className="p-3 text-left">Дата начала</th>
                 <th className="p-3 text-left">Дата окончания</th>
                 <th className="p-3 text-left">Статус</th>
@@ -74,7 +75,7 @@ const Promotions: React.FC = () => {
               {promotions.map((item) => (
                 <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-100">
                   <td className="p-3">{item.title}</td>
-                  <td className="p-3">{item.description}</td>
+                  <td className="p-3">{item.shortDescription}</td>
                   <td className="p-3">{new Date(item.startDate).toLocaleDateString('ru-RU')}</td>
                   <td className="p-3">{new Date(item.endDate).toLocaleDateString('ru-RU')}</td>
                   <td className="p-3">{item.status ? 'Активна' : 'Завершена'}</td>
@@ -94,4 +95,4 @@ const Promotions: React.FC = () => {
   );
 };
 
-export default Promotions;
+export default Promotions; */

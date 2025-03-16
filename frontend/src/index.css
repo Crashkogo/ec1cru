@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Кастомные стили для news-content */
+@layer components {
+  .news-content {
+    @apply break-words; /* Перенос длинных слов */
+  }
+
+  /* Поддержка inline float */
+  .news-content img[style*="float: left"] {
+    @apply float-left mr-4 mb-4;
+  }
+
+  .news-content img[style*="float: right"] {
+    @apply float-right ml-4 mb-4;
+  }
+
+  /* Убедимся, что изображения не выходят за границы */
+  .news-content img {
+    @apply max-w-full h-auto;
+  }
+}
+
 @keyframes slideDown {
   0% {
     opacity: 0;

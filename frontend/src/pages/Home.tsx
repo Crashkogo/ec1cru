@@ -30,7 +30,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="container h-full px-4 py-8">
-      <div className="w-full md:w-2/3 mx-auto bg-lightGray rounded-lg shadow-md p-6">
+      <div className="w-full md:w-2/3 mx-auto min-h-screen bg-lightGray rounded-lg shadow-md p-6">
         {/* Блок новостей */}
         <div className="w-1/2 mx-auto">
           <div className="border-2 border-darkBg rounded-lg p-4">
