@@ -1,4 +1,4 @@
-/* import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaEdit } from 'react-icons/fa';
@@ -27,7 +27,7 @@ const Promotions: React.FC = () => {
     }
 
     axios
-      .get('http://localhost:5000/api/posts/admin/promotions', { // Предполагаю маршрут для админки
+      .get(`${import.meta.env.VITE_API_URL}/api/posts/admin/promotions`, { // Предполагаю маршрут для админки
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -95,4 +95,4 @@ const Promotions: React.FC = () => {
   );
 };
 
-export default Promotions; */
+export default Promotions;

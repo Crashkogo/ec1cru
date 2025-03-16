@@ -7,10 +7,10 @@ import News from './News';
 import NewsCreate from './NewsCreate';
 import NewsEdit from './NewsEdit';
 /* import EventsCreate from './EventsCreate'; */
-/* import PromotionsCreate from './PromotionsCreate';
-import PromotionsEdit from './PromotionsEdit'; */
+import PromotionsCreate from './PromotionsCreate';
+import PromotionsEdit from './PromotionsEdit';
 /* import Events from './Events'; */
-/* import Promotions from './Promotions'; */
+import Promotions from './Promotions';
 /* import EventsEdit from './EventsEdit'; */
 
 const Dashboard: React.FC = () => {
@@ -58,9 +58,9 @@ const Dashboard: React.FC = () => {
 {/*             <Route path="/events" element={<Events />} />
             <Route path="/events/create" element={<EventsCreate />} /> */}
         {/*     <Route path="/events/edit/:slug" element={<EventsEdit />} /> */}
-{/*             <Route path="/promotions" element={<Promotions />} />
-          <Route path="/promotions/create" element={<PromotionsCreate />} />
-          <Route path="/promotions/edit/:slug" element={<PromotionsEdit />} /> */}
+            <Route path="/promotions" element={<Promotions />} />
+        <Route path="/promotions/create" element={<PromotionsCreate />} />
+          <Route path="/promotions/edit/:slug" element={<PromotionsEdit /> } />
             <Route path="/users" element={<Users />} />
           </Routes>
         </div>
