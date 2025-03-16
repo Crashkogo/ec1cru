@@ -41,7 +41,7 @@ const Users: React.FC = () => {
     if (!token) return;
 
     axios
-      .get('http://localhost:5000/api/users', {
+      .get(`${import.meta.env.VITE_API_URL}/api/users`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -57,7 +57,7 @@ const Users: React.FC = () => {
   const onCreateSubmit: SubmitHandler<UserFormInputs> = async (data) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.post('http://localhost:5000/api/users/register', data, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/users/register`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers([...users, { id: Date.now(), ...data }]);
@@ -72,7 +72,7 @@ const Users: React.FC = () => {
     if (!selectedUser) return;
     const token = localStorage.getItem('token');
     try {
-      await axios.put(`http://localhost:5000/api/users/${selectedUser.id}`, data, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/users/${selectedUser.id}`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(users.map((u) => (u.id === selectedUser.id ? { ...u, ...data } : u)));

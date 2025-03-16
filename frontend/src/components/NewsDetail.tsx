@@ -23,7 +23,7 @@ const NewsDetail: React.FC = () => {
     if (!slug) return;
 
     axios
-      .get(`http://localhost:5000/api/posts/news/${slug}`)
+      .get(`${import.meta.env.VITE_API_URL}/api/posts/news/${slug}`)
       .then((response) => {
         setNews(response.data);
         setLoading(false);

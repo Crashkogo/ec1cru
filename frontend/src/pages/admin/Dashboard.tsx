@@ -25,7 +25,7 @@ const Dashboard: React.FC = () => {
     }
 
     axios
-      .get('http://localhost:5000/api/users/protected', {
+      .get(`${import.meta.env.VITE_API_URL}/api/users/protected`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {

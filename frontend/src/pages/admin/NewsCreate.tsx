@@ -113,7 +113,7 @@ const NewsCreate: React.FC = () => {
         });
 
         const moveResponse = await axios.post(
-          'http://localhost:5000/api/posts/move-images',
+          `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
           {
             oldSlug: 'temp',
             newSlug: data.slug,
@@ -129,7 +129,7 @@ const NewsCreate: React.FC = () => {
       }
 
       console.log('Final content before sending:', data.content);
-      const createResponse = await axios.post('http://localhost:5000/api/posts/news', data, {
+      const createResponse = await axios.post(`${import.meta.env.VITE_API_URL}/api/posts/news`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('Create news response:', createResponse.data);
@@ -199,8 +199,8 @@ const NewsCreate: React.FC = () => {
               base_url: '/tinymce',
               suffix: '.min',
               image_uploadtab: true,
-              images_upload_url: 'http://localhost:5000/api/posts/upload-image',
-              images_upload_base_path: 'http://localhost:5000',
+              images_upload_url: '${import.meta.env.VITE_API_URL}/api/posts/upload-image',
+              images_upload_base_path: '${import.meta.env.VITE_API_URL}',
               automatic_uploads: true,
               file_picker_types: 'image',
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',

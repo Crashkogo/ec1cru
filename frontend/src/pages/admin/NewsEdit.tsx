@@ -88,7 +88,7 @@ const NewsEdit: React.FC = () => {
     }
 
     axios
-      .get<NewsFormInputs>(`http://localhost:5000/api/posts/news/${slug}`, {
+      .get<NewsFormInputs>(`${import.meta.env.VITE_API_URL}/api/posts/news/${slug}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -153,7 +153,7 @@ const NewsEdit: React.FC = () => {
           });
 
           const moveTempResponse = await axios.post(
-            'http://localhost:5000/api/posts/move-images',
+            `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
             {
               oldSlug: 'temp',
               newSlug: data.slug,
@@ -173,7 +173,7 @@ const NewsEdit: React.FC = () => {
           );
 
           const moveSlugResponse = await axios.post(
-            'http://localhost:5000/api/posts/move-images',
+            `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
             {
               oldSlug: originalSlug,
               newSlug: data.slug,
@@ -191,7 +191,7 @@ const NewsEdit: React.FC = () => {
 
       console.log('Final content before sending:', data.content);
       const updateResponse = await axios.patch(
-        `http://localhost:5000/api/posts/news/${slug}`,
+        `${import.meta.env.VITE_API_URL}/api/posts/news/${slug}`,
         data,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -266,8 +266,8 @@ const NewsEdit: React.FC = () => {
               base_url: '/tinymce',
               suffix: '.min',
               image_uploadtab: true,
-              images_upload_url: 'http://localhost:5000/api/posts/upload-image',
-              images_upload_base_path: 'http://localhost:5000',
+              images_upload_url: '${import.meta.env.VITE_API_URL}/api/posts/upload-image',
+              images_upload_base_path: '${import.meta.env.VITE_API_URL}',
               automatic_uploads: true,
               file_picker_types: 'image',
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',

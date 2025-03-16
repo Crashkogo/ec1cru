@@ -12,18 +12,25 @@ interface News {
 const Home: React.FC = () => {
   const [latestNews, setLatestNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     axios
-      .get('http://localhost:5000/api/posts/news', {
+      .get(`${import.meta.env.VITE_API_URL}/api/posts/news`, {
         params: { take: 3 },
       })
       .then((response) => {
-        setLatestNews(response.data);
+        console.log('Response data:', response.data); // Для отладки
+        if (Array.isArray(response.data)) {
+          setLatestNews(response.data);
+        } else {
+          setError('Данные с сервера не являются массивом');
+        }
         setLoading(false);
       })
       .catch((error) => {
         console.error('Error fetching latest news:', error);
+        setError('Ошибка загрузки новостей');
         setLoading(false);
       });
   }, []);
@@ -37,6 +44,8 @@ const Home: React.FC = () => {
             <h2 className="text-xl font-semibold text-darkBg mb-4">Последние новости</h2>
             {loading ? (
               <p className="text-darkBg text-center">Загрузка...</p>
+            ) : error ? (
+              <p className="text-red-500 text-center">{error}</p>
             ) : latestNews.length === 0 ? (
               <p className="text-darkBg text-center">Новостей пока нет</p>
             ) : (
