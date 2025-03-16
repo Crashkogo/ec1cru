@@ -1,29 +1,27 @@
-/* import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuill } from 'react-quilljs';
-import Quill from '../../quill-config';
-import 'quill/dist/quill.snow.css';
-import './quill-custom.css';
+import { Editor } from '@tinymce/tinymce-react';
+import type { Editor as TinyMCEEditor } from 'tinymce';
 
-// Схема валидации для акций
-const promotionsSchema = z.object({
+// Схема валидации
+const promotionSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   shortDescription: z.string().min(1, 'Short description is required'),
   content: z.string().min(1, 'Content is required'),
+  startDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid start date' }),
+  endDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid end date' }),
   isPublished: z.boolean(),
   slug: z.string().min(1, 'Slug is required'),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
-  startDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid start date' }),
-  endDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid end date' }),
   status: z.boolean(),
 });
 
-type PromotionsFormInputs = z.infer<typeof promotionsSchema>;
+type PromotionFormInputs = z.infer<typeof promotionSchema>;
 
 const transliterate = (text: string): string => {
   const ruToEn: { [key: string]: string } = {
@@ -49,7 +47,6 @@ const PromotionsEdit: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [tempImages, setTempImages] = useState<string[]>([]);
   const [originalSlug, setOriginalSlug] = useState<string | null>(null);
-  const toolbarRef = useRef<HTMLDivElement>(null);
 
   const {
     register,
@@ -57,40 +54,34 @@ const PromotionsEdit: React.FC = () => {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<PromotionsFormInputs>({
-    resolver: zodResolver(promotionsSchema),
+  } = useForm<PromotionFormInputs>({
+    resolver: zodResolver(promotionSchema),
     defaultValues: { isPublished: false, content: '', status: true },
   });
 
   const title = watch('title');
   const content = watch('content');
+  const startDate = watch('startDate');
+  const endDate = watch('endDate');
 
-  const { quill, quillRef } = useQuill({
-    theme: 'snow',
-    modules: {
-      toolbar: {
-        container: [
-          [{ header: [1, 2, 3, false] }],
-          ['bold', 'italic', 'underline', 'strike'],
-          [{ list: 'ordered' }, { list: 'bullet' }],
-          ['link', 'image'],
-          ['blockquote', 'code-block'],
-          [{ align: ['', 'center', 'right', 'justify'] }],
-          [{ float: ['', 'left', 'right'] }],
-          ['clean'],
-        ],
-      },
-      imageResize: {
-        parchment: Quill.import('parchment'),
-        modules: ['Resize', 'DisplaySize', 'Toolbar'],
-      },
-    },
-    formats: [
-      'header', 'bold', 'italic', 'underline', 'strike', 'list',
-      'link', 'image', 'blockquote', 'code-block', 'align', 'float', 'margin', 'display',
-    ],
-  });
+  // Парсинг HTML для извлечения URL-ов изображений
+  const extractTempImages = (htmlContent: string): string[] => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    const images = doc.querySelectorAll('img');
+    const tempImageUrls: string[] = [];
 
+    images.forEach((img) => {
+      const src = img.getAttribute('src');
+      if (src && src.includes('/uploads/news/temp/') && !tempImageUrls.includes(src)) {
+        tempImageUrls.push(src);
+      }
+    });
+
+    return tempImageUrls;
+  };
+
+  // Загрузка данных акции
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token || !slug) {
@@ -99,23 +90,24 @@ const PromotionsEdit: React.FC = () => {
     }
 
     axios
-      .get<PromotionsFormInputs>(
-        `http://localhost:5000/api/posts/promotions/${slug}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      .get<PromotionFormInputs>(`${import.meta.env.VITE_API_URL}/api/posts/promotions/${slug}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((response) => {
-        const promo = response.data;
-        setValue('title', promo.title);
-        setValue('shortDescription', promo.shortDescription);
-        setValue('content', promo.content);
-        setValue('isPublished', promo.isPublished);
-        setValue('slug', promo.slug);
-        setValue('metaTitle', promo.metaTitle || '');
-        setValue('metaDescription', promo.metaDescription || '');
-        setValue('startDate', new Date(promo.startDate).toISOString().split('T')[0]);
-        setValue('endDate', new Date(promo.endDate).toISOString().split('T')[0]);
-        setValue('status', promo.status);
-        setOriginalSlug(promo.slug);
+        const promotion = response.data;
+        setValue('title', promotion.title);
+        setValue('shortDescription', promotion.shortDescription);
+        setValue('content', promotion.content);
+        setValue('startDate', new Date(promotion.startDate).toISOString().slice(0, 16));
+        setValue('endDate', new Date(promotion.endDate).toISOString().slice(0, 16));
+        setValue('isPublished', promotion.isPublished);
+        setValue('slug', promotion.slug);
+        setValue('metaTitle', promotion.metaTitle || '');
+        setValue('metaDescription', promotion.metaDescription || '');
+        setValue('status', promotion.status);
+        setOriginalSlug(promotion.slug);
+        const tempUrls = extractTempImages(promotion.content);
+        setTempImages(tempUrls);
         setLoading(false);
       })
       .catch((error) => {
@@ -124,114 +116,6 @@ const PromotionsEdit: React.FC = () => {
       });
   }, [slug, setValue]);
 
-  const insertImageToEditor = useCallback((url: string) => {
-    if (quill) {
-      const fullUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
-      const range = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
-      quill.insertEmbed(range.index, 'image', fullUrl);
-      console.log('Image inserted:', fullUrl);
-      if (fullUrl.includes('/uploads/promotions/temp/')) {
-        setTempImages((prev) => [...prev, fullUrl]);
-      }
-    }
-  }, [quill]);
-
-  const uploadImageToServer = useCallback(async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('slug', watch('slug') || 'temp');
-    formData.append('entity', 'promotions');
-
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No token found');
-
-    const response = await axios.post<{ location: string }>(
-      'http://localhost:5000/api/posts/upload-image',
-      formData,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    console.log('Server response:', response.data);
-    if (!response.data.location) {
-      throw new Error('No location in server response');
-    }
-    return response.data.location;
-  }, [watch]);
-
-  const selectLocalImage = useCallback(() => {
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
-    input.click();
-
-    input.onchange = async () => {
-      console.log('File selected');
-      const file = input.files?.[0];
-      if (!file) {
-        console.log('No file selected');
-        return;
-      }
-
-      try {
-        console.log('Uploading image...');
-        const imageUrl = await uploadImageToServer(file);
-        insertImageToEditor(imageUrl);
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        alert('Ошибка при загрузке изображения: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
-      }
-    };
-  }, [uploadImageToServer, insertImageToEditor]);
-
-  const handleFloat = useCallback((value: string) => {
-    if (quill) {
-      const range = quill.getSelection();
-      if (range) {
-        const [leaf] = quill.getLeaf(range.index);
-        const domNode = leaf?.domNode;
-        if (domNode instanceof HTMLElement) {
-          domNode.style.float = value || '';
-          domNode.style.margin = value ? '0 1em 1em 0' : '0';
-          domNode.style.display = 'inline';
-          setValue('content', quill.root.innerHTML, { shouldValidate: true });
-        }
-      }
-    }
-  }, [quill, setValue]);
-
-  useEffect(() => {
-    if (quill && toolbarRef.current) {
-      console.log('Quill initialized');
-      const imageButton = toolbarRef.current.querySelector('.ql-image');
-      if (imageButton) {
-        imageButton.addEventListener('click', selectLocalImage);
-      }
-
-      const floatButtons = toolbarRef.current.querySelectorAll('.ql-float');
-      floatButtons.forEach((button) => {
-        const value = button.getAttribute('value') || '';
-        button.addEventListener('click', () => handleFloat(value));
-      });
-
-      quill.on('text-change', () => {
-        setValue('content', quill.root.innerHTML, { shouldValidate: true });
-      });
-
-      if (content && quill.root.innerHTML !== content) {
-        quill.root.innerHTML = content;
-      }
-
-      return () => {
-        if (imageButton) {
-          imageButton.removeEventListener('click', selectLocalImage);
-        }
-        floatButtons.forEach((button) => {
-          const value = button.getAttribute('value') || '';
-          button.removeEventListener('click', () => handleFloat(value));
-        });
-      };
-    }
-  }, [quill, content, setValue, selectLocalImage, handleFloat]);
-
   useEffect(() => {
     if (title) {
       const newSlug = transliterate(title);
@@ -239,35 +123,69 @@ const PromotionsEdit: React.FC = () => {
     }
   }, [title, setValue]);
 
-  const onSubmit: SubmitHandler<PromotionsFormInputs> = async (data) => {
+  useEffect(() => {
+    if (startDate && endDate) {
+      const now = new Date();
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      setValue('status', now >= start && now <= end);
+    }
+  }, [startDate, endDate, setValue]);
+
+  const handleEditorInit = useCallback((evt: unknown, editor: TinyMCEEditor) => {
+    console.log('TinyMCE initialized:', evt, editor);
+  }, []);
+
+  const handleEditorChange = useCallback(
+    (newContent: string) => {
+      setValue('content', newContent, { shouldValidate: true });
+      const tempUrls = extractTempImages(newContent);
+      setTempImages(tempUrls);
+    },
+    [setValue]
+  );
+
+  const onSubmit: SubmitHandler<PromotionFormInputs> = async (data) => {
     const token = localStorage.getItem('token');
     try {
       let updatedContent = data.content;
+
       if (tempImages.length > 0 || (originalSlug && originalSlug !== data.slug)) {
         if (tempImages.length > 0) {
           tempImages.forEach((tempUrl) => {
-            const newUrl = tempUrl.replace('/uploads/promotions/temp/', `/uploads/promotions/${data.slug}/`);
+            const newUrl = tempUrl.replace('/uploads/news/temp/', `/uploads/news/${data.slug}/`);
             updatedContent = updatedContent.replace(tempUrl, newUrl);
           });
-          await axios.post('http://localhost:5000/api/posts/move-images', {
-            oldSlug: 'temp',
-            newSlug: data.slug,
-          }, { headers: { Authorization: `Bearer ${token}` } });
+          await axios.post(
+            `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
+            {
+              oldSlug: 'temp',
+              newSlug: data.slug,
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
           setTempImages([]);
         }
         if (originalSlug && originalSlug !== data.slug) {
-          updatedContent = updatedContent.replace(new RegExp(`/uploads/promotions/${originalSlug}/`, 'g'), `/uploads/promotions/${data.slug}/`);
-          await axios.post('http://localhost:5000/api/posts/move-images', {
-            oldSlug: originalSlug,
-            newSlug: data.slug,
-          }, { headers: { Authorization: `Bearer ${token}` } });
+          updatedContent = updatedContent.replace(
+            new RegExp(`/uploads/news/${originalSlug}/`, 'g'),
+            `/uploads/news/${data.slug}/`
+          );
+          await axios.post(
+            `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
+            {
+              oldSlug: originalSlug,
+              newSlug: data.slug,
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
           setOriginalSlug(data.slug);
         }
         data.content = updatedContent;
       }
 
       await axios.patch(
-        `http://localhost:5000/api/posts/promotions/${slug}`,
+        `${import.meta.env.VITE_API_URL}/api/posts/promotions/${slug}`,
         data,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -294,30 +212,79 @@ const PromotionsEdit: React.FC = () => {
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Краткое описание</label>
-          <textarea {...register('shortDescription')} className="w-full p-2 border rounded" placeholder="Введите краткое описание..." />
-          {errors.shortDescription && <p className="text-red-500 text-sm mt-1">{errors.shortDescription.message}</p>}
+          <textarea
+            {...register('shortDescription')}
+            className="w-full p-2 border rounded"
+            placeholder="Введите краткое описание..."
+          />
+          {errors.shortDescription && (
+            <p className="text-red-500 text-sm mt-1">{errors.shortDescription.message}</p>
+          )}
         </div>
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Основное содержание</label>
-          <div ref={quillRef} className="mb-4 bg-white">
-            <div ref={toolbarRef} className="ql-toolbar ql-snow" />
-            <div className="ql-container ql-snow">
-              <div className="ql-editor" />
-            </div>
-          </div>
+          <Editor
+            tinymceScriptSrc="/tinymce/tinymce.min.js"
+            value={content}
+            onEditorChange={handleEditorChange}
+            onInit={handleEditorInit}
+            init={{
+              height: 500,
+              menubar: true,
+              plugins: [
+                'advlist',
+                'autolink',
+                'lists',
+                'link',
+                'image',
+                'charmap',
+                'anchor',
+                'searchreplace',
+                'visualblocks',
+                'code',
+                'fullscreen',
+                'insertdatetime',
+                'media',
+                'table',
+                'help',
+                'wordcount',
+              ],
+              toolbar:
+                'undo redo | formatselect | bold italic underline strikethrough | ' +
+                'alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | link image | ' +
+                'removeformat | code | help',
+              base_url: '/tinymce',
+              suffix: '.min',
+              image_uploadtab: true,
+              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image`,
+              images_upload_base_path: import.meta.env.VITE_API_URL,
+              automatic_uploads: true,
+              file_picker_types: 'image',
+              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+            }}
+          />
           {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content.message}</p>}
         </div>
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Дата начала</label>
-          <input type="date" {...register('startDate')} className="w-full p-2 border rounded" />
+          <input
+            type="datetime-local"
+            {...register('startDate')}
+            className="w-full p-2 border rounded"
+          />
           {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
         </div>
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Дата окончания</label>
-          <input type="date" {...register('endDate')} className="w-full p-2 border rounded" />
+          <input
+            type="datetime-local"
+            {...register('endDate')}
+            className="w-full p-2 border rounded"
+          />
           {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate.message}</p>}
         </div>
 
@@ -337,7 +304,12 @@ const PromotionsEdit: React.FC = () => {
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Slug</label>
-          <input {...register('slug')} className="w-full p-2 border rounded" placeholder="Автоматически генерируется..." />
+          <input
+            {...register('slug')}
+            className="w-full p-2 border rounded"
+            placeholder="Автоматически генерируется..."
+            readOnly
+          />
           {errors.slug && <p className="text-red-500 text-sm mt-1">{errors.slug.message}</p>}
         </div>
 
@@ -348,7 +320,12 @@ const PromotionsEdit: React.FC = () => {
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Meta Description</label>
-          <textarea {...register('metaDescription')} className="w-full p-2 border rounded" placeholder="Введите meta description..." rows={3} />
+          <textarea
+            {...register('metaDescription')}
+            className="w-full p-2 border rounded"
+            placeholder="Введите meta description..."
+            rows={3}
+          />
         </div>
 
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
@@ -359,4 +336,4 @@ const PromotionsEdit: React.FC = () => {
   );
 };
 
-export default PromotionsEdit; */
+export default PromotionsEdit;

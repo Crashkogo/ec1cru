@@ -130,7 +130,15 @@ export const uploadImage: RequestHandler = async (req, res) => {
 
   const file = req.files.file as UploadedFile;
   const slug = req.body.slug || 'temp';
-  const entity = req.body.entity || 'news';
+  const entity = req.body.entity; // Убираем дефолтное значение, чтобы требовать его с фронта
+
+  // Валидация entity
+  const allowedEntities = ['news', 'promotions', 'events', 'ourdevelop']; // Пример допустимых значений
+  if (!entity || !allowedEntities.includes(entity)) {
+    res.status(400).json({ message: 'Invalid or missing entity' });
+    return;
+  }
+
   const uploadDir = path.join(__dirname, '../../frontend/public/uploads', entity, slug);
 
   if (!fs.existsSync(uploadDir)) {
@@ -150,8 +158,20 @@ export const uploadImage: RequestHandler = async (req, res) => {
   }
 };
 export const moveImagesAfterCreate: RequestHandler = async (req, res) => {
-  const { oldSlug = 'temp', newSlug } = req.body;
-  const entity = 'news';
+  const { oldSlug = 'temp', newSlug, entity } = req.body;
+
+  // Валидация entity
+  const allowedEntities = ['news', 'promotions', 'events', 'ourdevelop'];
+  if (!entity || !allowedEntities.includes(entity)) {
+    res.status(400).json({ message: 'Invalid or missing entity' });
+    return;
+  }
+
+  if (!newSlug) {
+    res.status(400).json({ message: 'Missing newSlug' });
+    return;
+  }
+
   const oldDir = path.join(__dirname, '../../frontend/public/uploads', entity, oldSlug);
   const newDir = path.join(__dirname, '../../frontend/public/uploads', entity, newSlug);
 
@@ -166,7 +186,7 @@ export const moveImagesAfterCreate: RequestHandler = async (req, res) => {
         const newPath = path.join(newDir, file);
         fs.renameSync(oldPath, newPath); // Перемещаем файлы
       }
-      fs.rmdirSync(oldDir); // Удаляем старую папку, если она пуста
+      fs.rmdirSync(oldDir, { recursive: true }); // Удаляем старую папку (рекурсивно на случай, если остались вложенные файлы/папки)
     }
     res.json({ message: 'Images moved successfully' });
   } catch (error) {
