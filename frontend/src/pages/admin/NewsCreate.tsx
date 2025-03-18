@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
 import type { Editor as TinyMCEEditor } from 'tinymce';
 
-// Схема валидации
+// Схема валидации для новостей
 const newsSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   shortDescription: z.string().min(1, 'Short description is required'),
@@ -19,10 +19,6 @@ const newsSchema = z.object({
 });
 
 type NewsFormInputs = z.infer<typeof newsSchema>;
-
-interface NewsCreateProps {
-  entity?: string;
-}
 
 const transliterate = (text: string): string => {
   const ruToEn: { [key: string]: string } = {
@@ -42,7 +38,7 @@ const transliterate = (text: string): string => {
     .replace(/(^-|-$)/g, '');
 };
 
-const NewsCreate: React.FC<NewsCreateProps> = ({ entity = 'news' }) => {
+const NewsCreate: React.FC = () => {
   const navigate = useNavigate();
   const [tempImages, setTempImages] = useState<string[]>([]);
 
@@ -61,24 +57,21 @@ const NewsCreate: React.FC<NewsCreateProps> = ({ entity = 'news' }) => {
   const content = watch('content');
 
   // Парсинг HTML для извлечения URL-ов изображений
-  const extractTempImages = useCallback((htmlContent: string): string[] => {
+  const extractTempImages = (htmlContent: string): string[] => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, 'text/html');
     const images = doc.querySelectorAll('img');
     const tempImageUrls: string[] = [];
 
-    console.log('Extracting temp images from content:', htmlContent);
     images.forEach((img) => {
       const src = img.getAttribute('src');
-      console.log('Found image with src:', src);
-      if (src && src.includes(`/uploads/${entity}/temp/`) && !tempImageUrls.includes(src)) {
+      if (src && src.includes('/uploads/news/temp/') && !tempImageUrls.includes(src)) {
         tempImageUrls.push(src);
       }
     });
 
-    console.log('Extracted temp images:', tempImageUrls);
     return tempImageUrls;
-  }, [entity]);
+  };
 
   const handleEditorInit = useCallback((evt: unknown, editor: TinyMCEEditor) => {
     console.log('TinyMCE initialized:', evt, editor);
@@ -90,7 +83,7 @@ const NewsCreate: React.FC<NewsCreateProps> = ({ entity = 'news' }) => {
       const tempUrls = extractTempImages(newContent);
       setTempImages(tempUrls);
     },
-    [setValue, extractTempImages]
+    [setValue]
   );
 
   useEffect(() => {
@@ -105,56 +98,40 @@ const NewsCreate: React.FC<NewsCreateProps> = ({ entity = 'news' }) => {
     try {
       let updatedContent = data.content;
 
-      console.log('Temp images before processing:', tempImages);
-
-      // Переносим изображения из /temp в /slug и обновляем пути
       if (tempImages.length > 0) {
-        console.log(`Moving images from /${entity}/temp to /${entity}/${data.slug}`);
         tempImages.forEach((tempUrl) => {
-          const newUrl = tempUrl.replace(`/uploads/${entity}/temp/`, `/uploads/${entity}/${data.slug}/`);
+          const newUrl = tempUrl.replace('/uploads/news/temp/', `/uploads/news/${data.slug}/`);
           updatedContent = updatedContent.replace(tempUrl, newUrl);
         });
 
-        const moveResponse = await axios.post(
+        await axios.post(
           `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
           {
             oldSlug: 'temp',
             newSlug: data.slug,
-            entity,
+            entity: 'news',
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log('Move images response:', moveResponse.data);
 
         setTempImages([]);
         data.content = updatedContent;
-      } else {
-        console.log('No temp images to move');
       }
 
-      console.log('Final content before sending:', data.content);
-      const createResponse = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/posts/${entity}`,
-        data,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      console.log(`Create ${entity} response:`, createResponse.data);
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/posts/news`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      navigate(`/admin/${entity}`);
+      navigate('/admin/news');
     } catch (error) {
-      console.error(`Error creating ${entity}:`, error);
-      alert(
-        `Ошибка при создании ${entity === 'news' ? 'новости' : entity === 'promotions' ? 'акции' : 'публикации'}: ` +
-          (error instanceof Error ? error.message : 'Неизвестная ошибка')
-      );
+      console.error('Error creating news:', error);
+      alert('Ошибка при создании новости: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
     }
   };
 
   return (
     <div className="w-full mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-bold mb-4">
-        Создание {entity === 'news' ? 'новости' : entity === 'promotions' ? 'акции' : 'публикации'}
-      </h2>
+      <h2 className="text-xl font-bold mb-4">Создание новости</h2>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-4">
           <label className="block mb-2 font-medium">Заголовок</label>
@@ -210,11 +187,8 @@ const NewsCreate: React.FC<NewsCreateProps> = ({ entity = 'news' }) => {
               base_url: '/tinymce',
               suffix: '.min',
               image_uploadtab: true,
-              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?slug=${
-                watch('slug') || 'temp'
-              }&entity=${entity}`,
+              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=news`,
               images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
-              images_upload_credentials: true,
               automatic_uploads: true,
               file_picker_types: 'image',
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
@@ -243,11 +217,7 @@ const NewsCreate: React.FC<NewsCreateProps> = ({ entity = 'news' }) => {
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Meta Title</label>
-          <input
-            {...register('metaTitle')}
-            className="w-full p-2 border rounded"
-            placeholder="Введите meta title..."
-          />
+          <input {...register('metaTitle')} className="w-full p-2 border rounded" placeholder="Введите meta title..." />
         </div>
 
         <div className="mb-4">
@@ -260,11 +230,8 @@ const NewsCreate: React.FC<NewsCreateProps> = ({ entity = 'news' }) => {
           />
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
-        >
-          Сохранить {entity === 'news' ? 'новость' : entity === 'promotions' ? 'акцию' : 'публикацию'}
+        <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
+          Сохранить новость
         </button>
       </form>
     </div>

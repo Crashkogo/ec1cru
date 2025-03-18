@@ -73,7 +73,7 @@ const PromotionsEdit: React.FC = () => {
 
     images.forEach((img) => {
       const src = img.getAttribute('src');
-      if (src && src.includes('/uploads/news/temp/') && !tempImageUrls.includes(src)) {
+      if (src && src.includes('/uploads/promotions/temp/') && !tempImageUrls.includes(src)) {
         tempImageUrls.push(src);
       }
     });
@@ -153,7 +153,7 @@ const PromotionsEdit: React.FC = () => {
       if (tempImages.length > 0 || (originalSlug && originalSlug !== data.slug)) {
         if (tempImages.length > 0) {
           tempImages.forEach((tempUrl) => {
-            const newUrl = tempUrl.replace('/uploads/news/temp/', `/uploads/news/${data.slug}/`);
+            const newUrl = tempUrl.replace('/uploads/promotions/temp/', `/uploads/promotions/${data.slug}/`);
             updatedContent = updatedContent.replace(tempUrl, newUrl);
           });
           await axios.post(
@@ -161,6 +161,7 @@ const PromotionsEdit: React.FC = () => {
             {
               oldSlug: 'temp',
               newSlug: data.slug,
+              entity: 'promotions',
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
@@ -168,14 +169,15 @@ const PromotionsEdit: React.FC = () => {
         }
         if (originalSlug && originalSlug !== data.slug) {
           updatedContent = updatedContent.replace(
-            new RegExp(`/uploads/news/${originalSlug}/`, 'g'),
-            `/uploads/news/${data.slug}/`
+            new RegExp(`/uploads/promotions/${originalSlug}/`, 'g'),
+            `/uploads/promotions/${data.slug}/`
           );
           await axios.post(
             `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
             {
               oldSlug: originalSlug,
               newSlug: data.slug,
+              entity: 'promotions',
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );

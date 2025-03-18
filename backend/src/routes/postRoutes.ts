@@ -28,7 +28,4 @@ router.get('/events/:slug', getEventBySlug as RequestHandler); // Получен
 router.post('/events', createEvent as RequestHandler); // Создание нового мероприятия
 router.patch('/events/:slug', updateEvent as RequestHandler); // Обновление мероприятия по slug
 
-// Маршрут для загрузки изображений
-router.post('/upload-image', uploadImage as RequestHandler);
-
 export default router;

@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
 import type { Editor as TinyMCEEditor } from 'tinymce';
 
-// Схема валидации
+// Схема валидации для новостей
 const newsSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   shortDescription: z.string().min(1, 'Short description is required'),
@@ -66,16 +66,13 @@ const NewsEdit: React.FC = () => {
     const images = doc.querySelectorAll('img');
     const tempImageUrls: string[] = [];
 
-    console.log('Extracting temp images from content:', htmlContent);
     images.forEach((img) => {
       const src = img.getAttribute('src');
-      console.log('Found image with src:', src);
       if (src && src.includes('/uploads/news/temp/') && !tempImageUrls.includes(src)) {
         tempImageUrls.push(src);
       }
     });
 
-    console.log('Extracted temp images:', tempImageUrls);
     return tempImageUrls;
   };
 
@@ -101,7 +98,6 @@ const NewsEdit: React.FC = () => {
         setValue('metaTitle', news.metaTitle || '');
         setValue('metaDescription', news.metaDescription || '');
         setOriginalSlug(news.slug);
-        // Извлекаем изображения из /temp, если они есть в начальном контенте
         const tempUrls = extractTempImages(news.content);
         setTempImages(tempUrls);
         setLoading(false);
@@ -112,7 +108,6 @@ const NewsEdit: React.FC = () => {
       });
   }, [slug, setValue]);
 
-  // Обновление slug при изменении заголовка
   useEffect(() => {
     if (title) {
       const newSlug = transliterate(title);
@@ -127,7 +122,6 @@ const NewsEdit: React.FC = () => {
   const handleEditorChange = useCallback(
     (newContent: string) => {
       setValue('content', newContent, { shouldValidate: true });
-      // Извлекаем URL-ы изображений из нового контента
       const tempUrls = extractTempImages(newContent);
       setTempImages(tempUrls);
     },
@@ -139,65 +133,47 @@ const NewsEdit: React.FC = () => {
     try {
       let updatedContent = data.content;
 
-      console.log('Temp images before processing:', tempImages);
-      console.log('Original slug:', originalSlug, 'New slug:', data.slug);
-
-      // Обработка изображений
       if (tempImages.length > 0 || (originalSlug && originalSlug !== data.slug)) {
-        // Перенос новых изображений из /temp в /slug
         if (tempImages.length > 0) {
-          console.log('Moving images from /temp to /', data.slug);
           tempImages.forEach((tempUrl) => {
             const newUrl = tempUrl.replace('/uploads/news/temp/', `/uploads/news/${data.slug}/`);
             updatedContent = updatedContent.replace(tempUrl, newUrl);
           });
-
-          const moveTempResponse = await axios.post(
+          await axios.post(
             `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
             {
               oldSlug: 'temp',
               newSlug: data.slug,
+              entity: 'news',
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          console.log('Move temp images response:', moveTempResponse.data);
           setTempImages([]);
         }
-
-        // Перенос существующих изображений, если slug изменился
         if (originalSlug && originalSlug !== data.slug) {
-          console.log('Moving images from /', originalSlug, 'to /', data.slug);
           updatedContent = updatedContent.replace(
             new RegExp(`/uploads/news/${originalSlug}/`, 'g'),
             `/uploads/news/${data.slug}/`
           );
-
-          const moveSlugResponse = await axios.post(
+          await axios.post(
             `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
             {
               oldSlug: originalSlug,
               newSlug: data.slug,
-              entity: 'news', 
+              entity: 'news',
             },
             { headers: { Authorization: `Bearer ${token}` } }
           );
-          console.log('Move slug images response:', moveSlugResponse.data);
           setOriginalSlug(data.slug);
         }
-
         data.content = updatedContent;
-      } else {
-        console.log('No temp images or slug changes to process');
       }
 
-      console.log('Final content before sending:', data.content);
-      const updateResponse = await axios.patch(
+      await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/posts/news/${slug}`,
         data,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      console.log('Update news response:', updateResponse.data);
-
       navigate('/admin/news');
     } catch (error) {
       console.error('Error updating news:', error);
@@ -267,8 +243,8 @@ const NewsEdit: React.FC = () => {
               base_url: '/tinymce',
               suffix: '.min',
               image_uploadtab: true,
-              images_upload_url: '${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=news',
-              images_upload_base_path: '${import.meta.env.VITE_API_URL}',
+              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=news`,
+              images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
               automatic_uploads: true,
               file_picker_types: 'image',
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
