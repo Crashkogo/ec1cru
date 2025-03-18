@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaEdit } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface News {
   id: number;
@@ -14,7 +15,9 @@ interface News {
 
 const News: React.FC = () => {
   const [news, setNews] = useState<News[]>([]);
+  const [filteredNews, setFilteredNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -29,6 +32,7 @@ const News: React.FC = () => {
       })
       .then((response) => {
         setNews(response.data);
+        setFilteredNews(response.data); // Изначально показываем все новости
         setLoading(false);
       })
       .catch((error) => {
@@ -36,6 +40,25 @@ const News: React.FC = () => {
         setLoading(false);
       });
   }, []);
+
+  // Фильтрация новостей по поисковому запросу
+  useEffect(() => {
+    const filtered = news.filter((item) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        item.title.toLowerCase().includes(query) ||
+        item.shortDescription.toLowerCase().includes(query) ||
+        item.slug.toLowerCase().includes(query) ||
+        new Date(item.createdAt).toLocaleDateString('ru-RU').includes(query) ||
+        (item.isPublished ? 'да' : 'нет').includes(query)
+      );
+    });
+    setFilteredNews(filtered);
+  }, [searchQuery, news]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   if (loading) {
     return <div className="text-darkBg text-center">Загрузка...</div>;
@@ -52,7 +75,21 @@ const News: React.FC = () => {
           Создать новость
         </Link>
       </div>
-      {news.length === 0 ? (
+
+      {/* Поле поиска */}
+      <div className="mb-6">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="Поиск по всем полям..."
+          className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-greenAccent"
+        />
+      </div>
+
+      {filteredNews.length === 0 && searchQuery ? (
+        <p className="text-darkBg text-center">Ничего не найдено</p>
+      ) : filteredNews.length === 0 ? (
         <p className="text-darkBg text-center">Новостей пока нет</p>
       ) : (
         <div className="overflow-x-auto shadow-md rounded-lg">
@@ -67,19 +104,28 @@ const News: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {news.map((item) => (
-                <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-100">
-                  <td className="p-3">{item.title}</td>
-                  <td className="p-3">{item.shortDescription}</td>
-                  <td className="p-3">{new Date(item.createdAt).toLocaleDateString('ru-RU')}</td>
-                  <td className="p-3">{item.isPublished ? 'Да' : 'Нет'}</td>
-                  <td className="p-3">
-                    <Link to={`/admin/news/edit/${item.slug}`} className="text-yellowAccent hover:text-opacity-80">
-                      <FaEdit />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+              <AnimatePresence>
+                {filteredNews.map((item) => (
+                  <motion.tr
+                    key={item.id}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.3 }}
+                    className="border-b border-gray-200 hover:bg-gray-100"
+                  >
+                    <td className="p-3">{item.title}</td>
+                    <td className="p-3">{item.shortDescription}</td>
+                    <td className="p-3">{new Date(item.createdAt).toLocaleDateString('ru-RU')}</td>
+                    <td className="p-3">{item.isPublished ? 'Да' : 'Нет'}</td>
+                    <td className="p-3">
+                      <Link to={`/admin/news/edit/${item.slug}`} className="text-yellowAccent hover:text-opacity-80">
+                        <FaEdit />
+                      </Link>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
