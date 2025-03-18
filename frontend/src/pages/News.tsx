@@ -21,7 +21,7 @@ const News: React.FC = () => {
     if (!token) return;
 
     axios
-      .get('http://localhost:5000/api/posts/news', {
+      .get(`${import.meta.env.VITE_API_URL}/api/posts/news`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {

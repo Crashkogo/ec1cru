@@ -1,7 +1,7 @@
 module.exports = {
   content: [
-    './index.html', // Указываем index.html в корне
-    './src/**/*.{js,ts,jsx,tsx}', // Все файлы в src
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -15,14 +15,14 @@ module.exports = {
         lightGray: '#ccc',
       },
       spacing: {
-        '4-header': '0.5rem', // Добавляем кастомный отступ
+        '4-header': '0.5rem',
       },
     },
     container: {
-      center: true, // Центрировать контейнер
-      padding: '2rem', // Отступы по бокам
-      screens: false, // Отключить медиа-запросы
+      center: true,
+      padding: '2rem',
+      screens: false,
     },
-  },
+  },    
   plugins: [],
 };

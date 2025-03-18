@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuill } from 'react-quilljs';
-import Quill from '../../quill-config'; // Предполагается, что файл в src
-import 'quill/dist/quill.snow.css';
-import './quill-custom.css';
+import { Editor } from '@tinymce/tinymce-react';
+import type { Editor as TinyMCEEditor } from 'tinymce';
 
-// Схема валидации
+// Схема валидации для новостей
 const newsSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   shortDescription: z.string().min(1, 'Short description is required'),
@@ -44,8 +42,8 @@ const NewsEdit: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [tempImages, setTempImages] = useState<string[]>([]); // Храним временные URL
-  const [originalSlug, setOriginalSlug] = useState<string | null>(null); // Исходный slug
+  const [tempImages, setTempImages] = useState<string[]>([]);
+  const [originalSlug, setOriginalSlug] = useState<string | null>(null);
 
   const {
     register,
@@ -61,30 +59,22 @@ const NewsEdit: React.FC = () => {
   const title = watch('title');
   const content = watch('content');
 
-  // Настройка Quill
-  const { quill, quillRef } = useQuill({
-    theme: 'snow',
-    modules: {
-      toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        ['link', 'image'],
-        ['blockquote', 'code-block'],
-        [{ align: ['', 'center', 'right', 'justify'] }],
-        [{ float: ['', 'left', 'right'] }],
-        ['clean'],
-      ],
-      imageResize: {
-        parchment: Quill.import('parchment'),
-        modules: ['Resize', 'DisplaySize', 'Toolbar'],
-      },
-    },
-    formats: [
-      'header', 'bold', 'italic', 'underline', 'strike', 'list',
-      'link', 'image', 'blockquote', 'code-block', 'align', 'float', 'margin', 'display'
-    ],
-  });
+  // Парсинг HTML для извлечения URL-ов изображений
+  const extractTempImages = (htmlContent: string): string[] => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    const images = doc.querySelectorAll('img');
+    const tempImageUrls: string[] = [];
+
+    images.forEach((img) => {
+      const src = img.getAttribute('src');
+      if (src && src.includes('/uploads/news/temp/') && !tempImageUrls.includes(src)) {
+        tempImageUrls.push(src);
+      }
+    });
+
+    return tempImageUrls;
+  };
 
   // Загрузка данных новости
   useEffect(() => {
@@ -95,10 +85,9 @@ const NewsEdit: React.FC = () => {
     }
 
     axios
-      .get<{ title: string; shortDescription: string; content: string; isPublished: boolean; slug: string; metaTitle?: string; metaDescription?: string }>(
-        `http://localhost:5000/api/posts/news/${slug}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      .get<NewsFormInputs>(`${import.meta.env.VITE_API_URL}/api/posts/news/${slug}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((response) => {
         const news = response.data;
         setValue('title', news.title);
@@ -108,7 +97,9 @@ const NewsEdit: React.FC = () => {
         setValue('slug', news.slug);
         setValue('metaTitle', news.metaTitle || '');
         setValue('metaDescription', news.metaDescription || '');
-        setOriginalSlug(news.slug); // Сохраняем исходный slug
+        setOriginalSlug(news.slug);
+        const tempUrls = extractTempImages(news.content);
+        setTempImages(tempUrls);
         setLoading(false);
       })
       .catch((error) => {
@@ -117,92 +108,6 @@ const NewsEdit: React.FC = () => {
       });
   }, [slug, setValue]);
 
-  // Обработчик загрузки изображения
-  const insertImageToEditor = (url: string) => {
-    if (quill) {
-      const fullUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
-      const range = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
-      quill.insertEmbed(range.index, 'image', fullUrl);
-      console.log('Image inserted:', fullUrl);
-      if (fullUrl.includes('/uploads/news/temp/')) {
-        setTempImages((prev) => [...prev, fullUrl]); // Сохраняем временные URL
-      }
-    }
-  };
-
-  const uploadImageToServer = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('slug', watch('slug') || 'temp');
-    formData.append('entity', 'news');
-
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No token found');
-
-    const response = await axios.post<{ location: string }>(
-      'http://localhost:5000/api/posts/upload-image',
-      formData,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    console.log('Server response:', response.data);
-    if (!response.data.location) {
-      throw new Error('No location in server response');
-    }
-    return response.data.location;
-  };
-
-  const selectLocalImage = () => {
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
-    input.click();
-
-    input.onchange = async () => {
-      console.log('File selected');
-      const file = input.files?.[0];
-      if (!file) {
-        console.log('No file selected');
-        return;
-      }
-
-      try {
-        console.log('Uploading image...');
-        const imageUrl = await uploadImageToServer(file);
-        insertImageToEditor(imageUrl);
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        alert('Ошибка при загрузке изображения: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
-      }
-    };
-  };
-
-  // Привязка обработчиков через useEffect
-  useEffect(() => {
-    if (quill) {
-      console.log('Quill initialized');
-      quill.getModule('toolbar').addHandler('image', selectLocalImage);
-      quill.getModule('toolbar').addHandler('float', (value: string) => {
-        const range = quill.getSelection();
-        if (range) {
-          const [leaf] = quill.getLeaf(range.index);
-          if (leaf && (leaf.domNode as HTMLElement).tagName === 'IMG') {
-            (leaf.domNode as HTMLElement).style.float = value || '';
-            (leaf.domNode as HTMLElement).style.margin = value ? '0 1em 1em 0' : '0';
-            (leaf.domNode as HTMLElement).style.display = 'inline';
-            setValue('content', quill.root.innerHTML, { shouldValidate: true });
-          }
-        }
-      });
-      quill.on('text-change', () => {
-        setValue('content', quill.root.innerHTML, { shouldValidate: true });
-      });
-      if (content && quill.root.innerHTML !== content) {
-        quill.root.innerHTML = content;
-      }
-    }
-  }, [quill, setValue, content, selectLocalImage]);
-
-  // Синхронизация slug
   useEffect(() => {
     if (title) {
       const newSlug = transliterate(title);
@@ -210,37 +115,62 @@ const NewsEdit: React.FC = () => {
     }
   }, [title, setValue]);
 
+  const handleEditorInit = useCallback((evt: unknown, editor: TinyMCEEditor) => {
+    console.log('TinyMCE initialized:', evt, editor);
+  }, []);
+
+  const handleEditorChange = useCallback(
+    (newContent: string) => {
+      setValue('content', newContent, { shouldValidate: true });
+      const tempUrls = extractTempImages(newContent);
+      setTempImages(tempUrls);
+    },
+    [setValue]
+  );
+
   const onSubmit: SubmitHandler<NewsFormInputs> = async (data) => {
     const token = localStorage.getItem('token');
     try {
       let updatedContent = data.content;
+
       if (tempImages.length > 0 || (originalSlug && originalSlug !== data.slug)) {
-        // Обновляем URL для временных изображений
         if (tempImages.length > 0) {
           tempImages.forEach((tempUrl) => {
             const newUrl = tempUrl.replace('/uploads/news/temp/', `/uploads/news/${data.slug}/`);
             updatedContent = updatedContent.replace(tempUrl, newUrl);
           });
-          await axios.post('http://localhost:5000/api/posts/move-images', {
-            oldSlug: 'temp',
-            newSlug: data.slug,
-          }, { headers: { Authorization: `Bearer ${token}` } });
+          await axios.post(
+            `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
+            {
+              oldSlug: 'temp',
+              newSlug: data.slug,
+              entity: 'news',
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
           setTempImages([]);
         }
-        // Обновляем URL, если slug изменился
         if (originalSlug && originalSlug !== data.slug) {
-          updatedContent = updatedContent.replaceAll(`/uploads/news/${originalSlug}/`, `/uploads/news/${data.slug}/`);
-          await axios.post('http://localhost:5000/api/posts/move-images', {
-            oldSlug: originalSlug,
-            newSlug: data.slug,
-          }, { headers: { Authorization: `Bearer ${token}` } });
+          updatedContent = updatedContent.replace(
+            new RegExp(`/uploads/news/${originalSlug}/`, 'g'),
+            `/uploads/news/${data.slug}/`
+          );
+          await axios.post(
+            `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
+            {
+              oldSlug: originalSlug,
+              newSlug: data.slug,
+              entity: 'news',
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
           setOriginalSlug(data.slug);
         }
         data.content = updatedContent;
       }
 
       await axios.patch(
-        `http://localhost:5000/api/posts/news/${slug}`,
+        `${import.meta.env.VITE_API_URL}/api/posts/news/${slug}`,
         data,
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -267,13 +197,59 @@ const NewsEdit: React.FC = () => {
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Краткое описание</label>
-          <textarea {...register('shortDescription')} className="w-full p-2 border rounded" placeholder="Введите краткое описание..." />
-          {errors.shortDescription && <p className="text-red-500 text-sm mt-1">{errors.shortDescription.message}</p>}
+          <textarea
+            {...register('shortDescription')}
+            className="w-full p-2 border rounded"
+            placeholder="Введите краткое описание..."
+          />
+          {errors.shortDescription && (
+            <p className="text-red-500 text-sm mt-1">{errors.shortDescription.message}</p>
+          )}
         </div>
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Основное содержание</label>
-          <div ref={quillRef} className="mb-4 bg-white" />
+          <Editor
+            tinymceScriptSrc="/tinymce/tinymce.min.js"
+            value={content}
+            onEditorChange={handleEditorChange}
+            onInit={handleEditorInit}
+            init={{
+              height: 500,
+              menubar: true,
+              plugins: [
+                'advlist',
+                'autolink',
+                'lists',
+                'link',
+                'image',
+                'charmap',
+                'anchor',
+                'searchreplace',
+                'visualblocks',
+                'code',
+                'fullscreen',
+                'insertdatetime',
+                'media',
+                'table',
+                'help',
+                'wordcount',
+              ],
+              toolbar:
+                'undo redo | formatselect | bold italic underline strikethrough | ' +
+                'alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | link image | ' +
+                'removeformat | code | help',
+              base_url: '/tinymce',
+              suffix: '.min',
+              image_uploadtab: true,
+              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=news`,
+              images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
+              automatic_uploads: true,
+              file_picker_types: 'image',
+              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+            }}
+          />
           {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content.message}</p>}
         </div>
 
@@ -286,7 +262,12 @@ const NewsEdit: React.FC = () => {
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Slug</label>
-          <input {...register('slug')} className="w-full p-2 border rounded" placeholder="Автоматически генерируется..." />
+          <input
+            {...register('slug')}
+            className="w-full p-2 border rounded"
+            placeholder="Автоматически генерируется..."
+            readOnly
+          />
           {errors.slug && <p className="text-red-500 text-sm mt-1">{errors.slug.message}</p>}
         </div>
 
@@ -297,7 +278,12 @@ const NewsEdit: React.FC = () => {
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Meta Description</label>
-          <textarea {...register('metaDescription')} className="w-full p-2 border rounded" placeholder="Введите meta description..." rows={3} />
+          <textarea
+            {...register('metaDescription')}
+            className="w-full p-2 border rounded"
+            placeholder="Введите meta description..."
+            rows={3}
+          />
         </div>
 
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">

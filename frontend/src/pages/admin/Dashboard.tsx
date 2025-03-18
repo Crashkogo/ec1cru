@@ -5,11 +5,13 @@ import AdminMenu from '../../components/AdminMenu';
 import Users from './Users';
 import News from './News';
 import NewsCreate from './NewsCreate';
- import NewsEdit from './NewsEdit'; // Новый импорт
-/*import EventsCreate from './EventsCreate';
-import PromotionsCreate from './PromotionsCreate'; */
-import Events from './Events';
+import NewsEdit from './NewsEdit';
+/* import EventsCreate from './EventsCreate'; */
+import PromotionsCreate from './PromotionsCreate';
+import PromotionsEdit from './PromotionsEdit';
+/* import Events from './Events'; */
 import Promotions from './Promotions';
+/* import EventsEdit from './EventsEdit'; */
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ const Dashboard: React.FC = () => {
     }
 
     axios
-      .get('http://localhost:5000/api/users/protected', {
+      .get(`${import.meta.env.VITE_API_URL}/api/users/protected`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
@@ -52,11 +54,13 @@ const Dashboard: React.FC = () => {
             <Route path="/" element={<h1 className="text-3xl text-darkBg">Главная панель</h1>} />
             <Route path="/news" element={<News />} />
             <Route path="/news/create" element={<NewsCreate />} />
-            <Route path="/news/edit/:slug" element={<NewsEdit />} /> {/* Новый маршрут */}
-            <Route path="/events" element={<Events />} />
-            {/* <Route path="/events/create" element={<EventsCreate />} /> */}
+            <Route path="/news/edit/:slug" element={<NewsEdit />} /> 
+{/*             <Route path="/events" element={<Events />} />
+            <Route path="/events/create" element={<EventsCreate />} /> */}
+        {/*     <Route path="/events/edit/:slug" element={<EventsEdit />} /> */}
             <Route path="/promotions" element={<Promotions />} />
-           {/*  <Route path="/promotions/create" element={<PromotionsCreate />} /> */}
+        <Route path="/promotions/create" element={<PromotionsCreate />} />
+          <Route path="/promotions/edit/:slug" element={<PromotionsEdit /> } />
             <Route path="/users" element={<Users />} />
           </Routes>
         </div>

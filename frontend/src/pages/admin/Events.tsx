@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+/* import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaEdit } from 'react-icons/fa';
@@ -6,7 +6,7 @@ import { FaEdit } from 'react-icons/fa';
 interface Event {
   id: number;
   title: string;
-  description: string;
+  shortDescription: string;
   startDate: string;
   isPublished: boolean;
   status: boolean; // false - предстоящее, true - прошло
@@ -74,7 +74,7 @@ const Events: React.FC = () => {
               {events.map((item) => (
                 <tr key={item.id} className="border-b border-gray-200 hover:bg-gray-100">
                   <td className="p-3">{item.title}</td>
-                  <td className="p-3">{item.description}</td>
+                  <td className="p-3">{item.shortDescription}</td>
                   <td className="p-3">{new Date(item.startDate).toLocaleDateString('ru-RU')}</td>
                   <td className="p-3">{item.status ? 'Прошло' : 'Предстоящее'}</td>
                   <td className="p-3">{item.ours ? 'Да' : 'Нет'}</td>
@@ -94,4 +94,4 @@ const Events: React.FC = () => {
   );
 };
 
-export default Events;
+export default Events; */

@@ -1,24 +1,24 @@
-/* import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import './quill-custom.css';
+import { Editor } from '@tinymce/tinymce-react';
+import type { Editor as TinyMCEEditor } from 'tinymce';
 
+// Схема валидации
 const promotionSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
+  shortDescription: z.string().min(1, 'Short description is required'),
   content: z.string().min(1, 'Content is required'),
-  startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(1, 'End date is required'),
+  startDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Valid start date is required' }),
+  endDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Valid end date is required' }),
   isPublished: z.boolean(),
-  status: z.boolean(),
   slug: z.string().min(1, 'Slug is required'),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
+  status: z.boolean(),
 });
 
 type PromotionFormInputs = z.infer<typeof promotionSchema>;
@@ -30,6 +30,7 @@ const transliterate = (text: string): string => {
     у: 'u', ф: 'f', х: 'kh', ц: 'ts', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y',
     ь: '', э: 'e', ю: 'yu', я: 'ya', ' ': '-', ',': '', '.': '',
   };
+
   return text
     .toLowerCase()
     .split('')
@@ -40,9 +41,9 @@ const transliterate = (text: string): string => {
     .replace(/(^-|-$)/g, '');
 };
 
-const PromotionsCreate: React.FC = () => {
+const PromotionCreate: React.FC = () => {
   const navigate = useNavigate();
-  const quillRef = useRef<ReactQuill>(null);
+  const [tempImages, setTempImages] = useState<string[]>([]);
 
   const {
     register,
@@ -52,42 +53,82 @@ const PromotionsCreate: React.FC = () => {
     formState: { errors },
   } = useForm<PromotionFormInputs>({
     resolver: zodResolver(promotionSchema),
-    defaultValues: { isPublished: false, status: true, content: '' },
+    defaultValues: { isPublished: false, content: '', status: true },
   });
 
   const title = watch('title');
   const content = watch('content');
+
+  // Парсинг HTML для извлечения URL-ов изображений
+  const extractTempImages = (htmlContent: string): string[] => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    const images = doc.querySelectorAll('img');
+    const tempImageUrls: string[] = [];
+
+    images.forEach((img) => {
+      const src = img.getAttribute('src');
+      if (src && src.includes('/uploads/promotions/temp/') && !tempImageUrls.includes(src)) {
+        tempImageUrls.push(src);
+      }
+    });
+
+    return tempImageUrls;
+  };
+
+  const handleEditorInit = useCallback((evt: unknown, editor: TinyMCEEditor) => {
+    console.log('TinyMCE initialized:', evt, editor);
+  }, []);
+
+  const handleEditorChange = useCallback(
+    (newContent: string) => {
+      setValue('content', newContent, { shouldValidate: true });
+      const tempUrls = extractTempImages(newContent);
+      setTempImages(tempUrls);
+    },
+    [setValue]
+  );
 
   useEffect(() => {
     if (title) {
       const slug = transliterate(title);
       setValue('slug', slug);
     }
-	}, [title, setValue]);
-
-  const quillModules = {
-    toolbar: {
-      container: [
-        [{ header: [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        ['link', 'image'],
-        ['blockquote', 'code-block'],
-        [{ align: [] }],
-        ['clean'],
-      ],
-     },
-  };
+  }, [title, setValue]);
 
   const onSubmit: SubmitHandler<PromotionFormInputs> = async (data) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.post('http://localhost:5000/api/posts/promotions', data, {
+      let updatedContent = data.content;
+
+      if (tempImages.length > 0) {
+        tempImages.forEach((tempUrl) => {
+          const newUrl = tempUrl.replace('/uploads/promotions/temp/', `/uploads/promotions/${data.slug}/`);
+          updatedContent = updatedContent.replace(tempUrl, newUrl);
+        });
+
+        await axios.post(
+          `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
+          {
+            oldSlug: 'temp',
+            newSlug: data.slug,
+            entity: 'promotions',
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        setTempImages([]);
+        data.content = updatedContent;
+      }
+
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/posts/promotions`, data, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       navigate('/admin/promotions');
     } catch (error) {
       console.error('Error creating promotion:', error);
+      alert('Ошибка при создании акции: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
     }
   };
 
@@ -100,24 +141,19 @@ const PromotionsCreate: React.FC = () => {
           <input {...register('title')} className="w-full p-2 border rounded" placeholder="Введите заголовок..." />
           {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>}
         </div>
+
         <div className="mb-4">
-          <label className="block mb-2 font-medium">Описание</label>
-          <textarea {...register('description')} className="w-full p-2 border rounded" placeholder="Введите описание..." />
-          {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
-        </div>
-        <div className="mb-4">
-          <label className="block mb-2 font-medium">Основное содержание</label>
-          <ReactQuill
-            ref={quillRef}
-            value={content}
-            onChange={(newValue) => {
-              setValue('content', newValue, { shouldValidate: true }); // Синхронизация с useForm
-            }}
-            modules={quillModules}
-            className="mb-4 bg-white"
+          <label className="block mb-2 font-medium">Краткое описание</label>
+          <textarea
+            {...register('shortDescription')}
+            className="w-full p-2 border rounded"
+            placeholder="Введите краткое описание..."
           />
-          {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content.message}</p>}
+          {errors.shortDescription && (
+            <p className="text-red-500 text-sm mt-1">{errors.shortDescription.message}</p>
+          )}
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Дата начала</label>
           <input
@@ -127,6 +163,7 @@ const PromotionsCreate: React.FC = () => {
           />
           {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Дата окончания</label>
           <input
@@ -136,31 +173,93 @@ const PromotionsCreate: React.FC = () => {
           />
           {errors.endDate && <p className="text-red-500 text-sm mt-1">{errors.endDate.message}</p>}
         </div>
+
+        <div className="mb-4">
+          <label className="block mb-2 font-medium">Основное содержание</label>
+          <Editor
+            tinymceScriptSrc="/tinymce/tinymce.min.js"
+            value={content}
+            onEditorChange={handleEditorChange}
+            onInit={handleEditorInit}
+            init={{
+              height: 500,
+              menubar: true,
+              plugins: [
+                'advlist',
+                'autolink',
+                'lists',
+                'link',
+                'image',
+                'charmap',
+                'anchor',
+                'searchreplace',
+                'visualblocks',
+                'code',
+                'fullscreen',
+                'insertdatetime',
+                'media',
+                'table',
+                'help',
+                'wordcount',
+              ],
+              toolbar:
+                'undo redo | formatselect | bold italic underline strikethrough | ' +
+                'alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | link image | ' +
+                'removeformat | code | help',
+              base_url: '/tinymce',
+              suffix: '.min',
+              image_uploadtab: true,
+              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=promotions`, // Добавляем entity как query-параметр
+              images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
+              automatic_uploads: true,
+              file_picker_types: 'image',
+              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+            }}
+          />
+          {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content.message}</p>}
+        </div>
+
         <div className="mb-4">
           <label className="flex items-center font-medium">
             <input type="checkbox" {...register('isPublished')} className="mr-2" />
             Опубликовано
           </label>
         </div>
+
         <div className="mb-4">
           <label className="flex items-center font-medium">
             <input type="checkbox" {...register('status')} className="mr-2" />
             Активна
           </label>
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Slug</label>
-          <input {...register('slug')} className="w-full p-2 border rounded" placeholder="Автоматически генерируется..." readOnly />
+          <input
+            {...register('slug')}
+            className="w-full p-2 border rounded"
+            placeholder="Автоматически генерируется..."
+            readOnly
+          />
           {errors.slug && <p className="text-red-500 text-sm mt-1">{errors.slug.message}</p>}
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Meta Title</label>
           <input {...register('metaTitle')} className="w-full p-2 border rounded" placeholder="Введите meta title..." />
         </div>
+
         <div className="mb-4">
           <label className="block mb-2 font-medium">Meta Description</label>
-          <textarea {...register('metaDescription')} className="w-full p-2 border rounded" placeholder="Введите meta description..." rows={3} />
+          <textarea
+            {...register('metaDescription')}
+            className="w-full p-2 border rounded"
+            placeholder="Введите meta description..."
+            rows={3}
+          />
         </div>
+
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
           Сохранить акцию
         </button>
@@ -169,4 +268,4 @@ const PromotionsCreate: React.FC = () => {
   );
 };
 
-export default PromotionsCreate; */
+export default PromotionCreate;

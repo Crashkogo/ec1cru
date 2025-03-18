@@ -30,7 +30,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
 
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/users/login', data);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, data);
       const { token } = response.data;
 
       localStorage.setItem('token', token);

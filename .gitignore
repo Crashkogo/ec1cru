@@ -1,6 +1,8 @@
 node_modules
 dist
 .env
+.env.development
+.env.production
 backend/dist
 frontend/dist
 backend/prisma

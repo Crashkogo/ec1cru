@@ -12,9 +12,18 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.use(cors());
+// Настройка CORS
+const corsOptions = {
+  origin: 'http://localhost:5173', // Укажи точный origin фронтенда (Vite работает на 5173)
+  credentials: true, // Разрешаем отправку credentials (токенов)
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'], // Разрешённые методы
+  allowedHeaders: ['Content-Type', 'Authorization'], // Разрешённые заголовки
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(fileUpload());
+
 // Отдаём статические файлы из папки фронтенда
 app.use('/uploads', express.static(path.join(__dirname, '../frontend/public/uploads')));
 
