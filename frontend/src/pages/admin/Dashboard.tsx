@@ -4,14 +4,16 @@ import axios from 'axios';
 import AdminMenu from '../../components/AdminMenu';
 import Users from './Users';
 import News from './News';
+import AdminHome from './AdminHome'; // Импортируем новый компонент
 import NewsCreate from './NewsCreate';
 import NewsEdit from './NewsEdit';
-/* import EventsCreate from './EventsCreate'; */
+import EventsCreate from './EventsCreate';
 import PromotionsCreate from './PromotionsCreate';
 import PromotionsEdit from './PromotionsEdit';
-/* import Events from './Events'; */
+import Events from './Events';
 import Promotions from './Promotions';
-/* import EventsEdit from './EventsEdit'; */
+import EventsEdit from './EventsEdit';
+import EventRegistrations from './EventRegistrations';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -51,17 +53,18 @@ const Dashboard: React.FC = () => {
         <AdminMenu role={role} />
         <div className="mt-4 bg-lightGray rounded-lg shadow-md p-6">
           <Routes>
-            <Route path="/" element={<h1 className="text-3xl text-darkBg">Главная панель</h1>} />
+          <Route path="/" element={<AdminHome />} /> 
             <Route path="/news" element={<News />} />
             <Route path="/news/create" element={<NewsCreate />} />
-            <Route path="/news/edit/:slug" element={<NewsEdit />} /> 
-{/*             <Route path="/events" element={<Events />} />
-            <Route path="/events/create" element={<EventsCreate />} /> */}
-        {/*     <Route path="/events/edit/:slug" element={<EventsEdit />} /> */}
+            <Route path="/news/edit/:slug" element={<NewsEdit />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/events/create" element={<EventsCreate />} />
+            <Route path="/events/edit/:slug" element={<EventsEdit />} />
             <Route path="/promotions" element={<Promotions />} />
-        <Route path="/promotions/create" element={<PromotionsCreate />} />
-          <Route path="/promotions/edit/:slug" element={<PromotionsEdit /> } />
-            <Route path="/users" element={<Users />} />
+            <Route path="/promotions/create" element={<PromotionsCreate />} />
+            <Route path="/promotions/edit/:slug" element={<PromotionsEdit />} />
+            <Route path="/events/:slug/registrations" element={<EventRegistrations />} />
+            <Route path="/users" element={<Users />} />         
           </Routes>
         </div>
       </div>

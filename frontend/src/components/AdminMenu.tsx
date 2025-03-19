@@ -50,6 +50,16 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
             Акции
           </NavLink>
         </li>
+        <li>
+          <NavLink
+            to="/admin/ready-solutions"
+            className={({ isActive }) =>
+              `text-whiteText ${isActive ? 'text-yellowAccent' : 'hover:text-yellowAccent'}`
+            }
+          >
+            Готовые решения
+          </NavLink>
+        </li>
         {['ADMIN', 'MODERATOR'].includes(role) && (
           <li>
             <NavLink

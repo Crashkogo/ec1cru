@@ -3,11 +3,19 @@ import { Link } from 'react-router-dom';
 import { FaPhone, FaEnvelope, FaGlobe, FaSearch } from 'react-icons/fa';
 import logo from '../assets/logo.png'; // Импорт логотипа
 
-const Header = forwardRef<HTMLElement, object>((props, ref) => {
+// Определяем интерфейс для пропсов
+interface HeaderProps {
+  setShowLogin: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) => {
+  const handlePhoneClick = () => {
+    setShowLogin(true); // Открываем модальное окно при клике
+  };
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const menuItems = [
-    
     {
       title: 'Компания',
       items: [
@@ -24,6 +32,7 @@ const Header = forwardRef<HTMLElement, object>((props, ref) => {
       items: [
         { name: 'Сопровождение 1С', path: '/support-1c' },
         { name: 'Внедрение', path: '/implementation' },
+        { name: 'Готовые решения', path: '/ready-solutions' },
         { name: 'Автоматизация', path: '/automation' },
         { name: 'Обучение 1С', path: '/training-1c' },
         { name: 'Внешний IT-отдел', path: '/external-it' },
@@ -49,7 +58,10 @@ const Header = forwardRef<HTMLElement, object>((props, ref) => {
   ];
 
   return (
-    <header ref={ref} className="fixed top-0 left-0 w-full bg-darkBg text-whiteText p-4 shadow-md border-b-2 border-yellowAccent z-50">
+    <header
+      ref={ref}
+      className="fixed top-0 left-0 w-full bg-darkBg text-whiteText p-4 shadow-md border-b-2 border-yellowAccent z-50"
+    >
       <div className="container flex items-end justify-between h-full">
         {/* Логотип */}
         <Link to="/" className="flex-shrink-0">
@@ -62,16 +74,14 @@ const Header = forwardRef<HTMLElement, object>((props, ref) => {
             <div key={menu.title} className="relative group">
               {/* Основной пункт меню */}
               <div
-                className="text-whiteText hover:text-yellowAccent px-7  rounded-md text-base font-medium transition-colors duration-300 cursor-pointer"
+                className="text-whiteText hover:text-yellowAccent px-7 rounded-md text-base font-medium transition-colors duration-300 cursor-pointer"
                 onMouseEnter={() => setIsSearchOpen(false)}
               >
                 {menu.title}
               </div>
 
               {/* Выпадающее подменю */}
-              <div
-                className="absolute left-0 mt-2 w-64 bg-darkBg border  border-yellowAccent  shadow-lg z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-in-out"
-              >
+              <div className="absolute left-0 mt-2 w-64 bg-darkBg border border-yellowAccent shadow-lg z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 ease-in-out">
                 {menu.items.map((item) => (
                   <Link
                     key={item.name}
@@ -112,7 +122,10 @@ const Header = forwardRef<HTMLElement, object>((props, ref) => {
           {/* Контактная информация */}
           <div className="hidden md:block text-right self-end">
             <div className="flex items-center space-x-2 mb-1">
-              <FaPhone className="text-yellowAccent" />
+              <FaPhone
+                className="text-yellowAccent cursor-pointer"
+                onClick={handlePhoneClick} // Обработчик клика
+              />
               <span>8 (8443) 300-801</span>
             </div>
             <div className="flex items-center space-x-2 mb-1">

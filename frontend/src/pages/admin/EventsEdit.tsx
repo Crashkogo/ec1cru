@@ -1,29 +1,27 @@
-/* import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuill } from 'react-quilljs';
-import Quill from '../../quill-config';
-import 'quill/dist/quill.snow.css';
-import './quill-custom.css';
+import { Editor } from '@tinymce/tinymce-react';
+import type { Editor as TinyMCEEditor } from 'tinymce';
 
-// Схема валидации для мероприятий
-const eventsSchema = z.object({
+const eventSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   shortDescription: z.string().min(1, 'Short description is required'),
   content: z.string().min(1, 'Content is required'),
+  startDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Valid start date is required' }),
   isPublished: z.boolean(),
   status: z.boolean(),
   ours: z.boolean(),
   slug: z.string().min(1, 'Slug is required'),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
-  startDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Invalid start date' }),
+  eventLink: z.string().optional(),
 });
 
-type EventsFormInputs = z.infer<typeof eventsSchema>;
+type EventFormInputs = z.infer<typeof eventSchema>;
 
 const transliterate = (text: string): string => {
   const ruToEn: { [key: string]: string } = {
@@ -46,8 +44,9 @@ const transliterate = (text: string): string => {
 const EventsEdit: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [tempImages, setTempImages] = useState<string[]>([]);
-  const toolbarRef = useRef<HTMLDivElement>(null);
+  const [originalSlug, setOriginalSlug] = useState<string | null>(null);
 
   const {
     register,
@@ -55,217 +54,155 @@ const EventsEdit: React.FC = () => {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<EventsFormInputs>({
-    resolver: zodResolver(eventsSchema),
-    defaultValues: {
-      isPublished: false,
-      content: '',
-      status: false,
-      ours: true,
-      startDate: new Date().toISOString().split('T')[0],
-    },
+  } = useForm<EventFormInputs>({
+    resolver: zodResolver(eventSchema),
+    defaultValues: { isPublished: false, content: '', status: false, ours: false, eventLink: '' },
   });
 
   const title = watch('title');
   const content = watch('content');
+  const startDate = watch('startDate');
 
-  const { quill, quillRef } = useQuill({
-    theme: 'snow',
-    modules: {
-      toolbar: {
-        container: [
-          [{ header: [1, 2, 3, false] }],
-          ['bold', 'italic', 'underline', 'strike'],
-          [{ list: 'ordered' }, { list: 'bullet' }],
-          ['link', 'image'],
-          ['blockquote', 'code-block'],
-          [{ align: ['', 'center', 'right', 'justify'] }],
-          [{ float: ['', 'left', 'right'] }],
-          ['clean'],
-        ],
-      },
-      imageResize: {
-        parchment: Quill.import('parchment'),
-        modules: ['Resize', 'DisplaySize', 'Toolbar'],
-      },
-    },
-    formats: [
-      'header', 'bold', 'italic', 'underline', 'strike', 'list',
-      'link', 'image', 'blockquote', 'code-block', 'align', 'float', 'margin', 'display',
-    ],
-  });
+  const extractTempImages = (htmlContent: string): string[] => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    const images = doc.querySelectorAll('img');
+    const tempImageUrls: string[] = [];
 
-  // Загрузка данных мероприятия
+    images.forEach((img) => {
+      const src = img.getAttribute('src');
+      if (src && src.includes('/uploads/events/temp/') && !tempImageUrls.includes(src)) {
+        tempImageUrls.push(src);
+      }
+    });
+
+    return tempImageUrls;
+  };
+
   useEffect(() => {
-    const fetchEvent = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:5000/api/posts/events/${slug}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    const token = localStorage.getItem('token');
+    if (!token || !slug) {
+      setLoading(false);
+      return;
+    }
+  
+    axios
+      .get<EventFormInputs>(`${import.meta.env.VITE_API_URL}/api/posts/events/${slug}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
         const event = response.data;
         setValue('title', event.title);
         setValue('shortDescription', event.shortDescription);
         setValue('content', event.content);
+        // Форматируем Date в строку для datetime-local
+        const dateStr = event.startDate.toString().replace(':00.000Z', '');
+        setValue('startDate', dateStr);
         setValue('isPublished', event.isPublished);
         setValue('status', event.status);
         setValue('ours', event.ours);
         setValue('slug', event.slug);
-        setValue('metaTitle', event.metaTitle);
-        setValue('metaDescription', event.metaDescription);
-        setValue('startDate', new Date(event.startDate).toISOString().split('T')[0]);
-      } catch (error) {
+        setValue('metaTitle', event.metaTitle || '');
+        setValue('metaDescription', event.metaDescription || '');
+        setValue('eventLink', event.eventLink || '');
+        setOriginalSlug(event.slug);
+        const tempUrls = extractTempImages(event.content);
+        setTempImages(tempUrls);
+        setLoading(false);
+      })
+      .catch((error) => {
         console.error('Error fetching event:', error);
-        alert('Ошибка при загрузке мероприятия');
-      }
-    };
-
-    if (slug) {
-      fetchEvent();
-    }
+        setLoading(false);
+      });
   }, [slug, setValue]);
-
-  const insertImageToEditor = useCallback((url: string) => {
-    if (quill) {
-      const fullUrl = url.startsWith('http') ? url : `http://localhost:5000${url}`;
-      const range = quill.getSelection(true) || { index: quill.getLength(), length: 0 };
-      quill.insertEmbed(range.index, 'image', fullUrl);
-      console.log('Image inserted:', fullUrl);
-      if (fullUrl.includes('/uploads/events/temp/')) {
-        setTempImages((prev) => [...prev, fullUrl]);
-      }
-    }
-  }, [quill]);
-
-  const uploadImageToServer = useCallback(async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('slug', watch('slug') || 'temp');
-    formData.append('entity', 'events');
-
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No token found');
-
-    const response = await axios.post<{ location: string }>(
-      'http://localhost:5000/api/posts/upload-image',
-      formData,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    console.log('Server response:', response.data);
-    if (!response.data.location) {
-      throw new Error('No location in server response');
-    }
-    return response.data.location;
-  }, [watch]);
-
-  const selectLocalImage = useCallback(() => {
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
-    input.click();
-
-    input.onchange = async () => {
-      console.log('File selected');
-      const file = input.files?.[0];
-      if (!file) {
-        console.log('No file selected');
-        return;
-      }
-
-      try {
-        console.log('Uploading image...');
-        const imageUrl = await uploadImageToServer(file);
-        insertImageToEditor(imageUrl);
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        alert('Ошибка при загрузке изображения: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
-      }
-    };
-  }, [uploadImageToServer, insertImageToEditor]);
-
-  const handleFloat = useCallback((value: string) => {
-    if (quill) {
-      const range = quill.getSelection();
-      if (range) {
-        const [leaf] = quill.getLeaf(range.index);
-        const domNode = leaf?.domNode;
-        if (domNode instanceof HTMLElement && domNode.tagName === 'IMG') {
-          quill.formatText(range.index, 1, 'float', value || '', 'user');
-          quill.formatText(range.index, 1, 'margin', value ? '0 1em 1em 0' : '0', 'user');
-          quill.formatText(range.index, 1, 'display', 'inline', 'user');
-          setValue('content', quill.root.innerHTML, { shouldValidate: true });
-        }
-      }
-    }
-  }, [quill, setValue]);
-
-  useEffect(() => {
-    if (quill && toolbarRef.current) {
-      console.log('Quill initialized');
-      const imageButton = toolbarRef.current.querySelector('.ql-image');
-      if (imageButton) {
-        imageButton.addEventListener('click', selectLocalImage);
-      }
-
-      const floatButtons = toolbarRef.current.querySelectorAll('.ql-float');
-      floatButtons.forEach((button) => {
-        const value = button.getAttribute('value') || '';
-        button.addEventListener('click', () => handleFloat(value));
-      });
-
-      quill.on('text-change', () => {
-        setValue('content', quill.root.innerHTML, { shouldValidate: true });
-      });
-
-      if (content && quill.root.innerHTML !== content) {
-        quill.root.innerHTML = content;
-      }
-
-      return () => {
-        if (imageButton) {
-          imageButton.removeEventListener('click', selectLocalImage);
-        }
-        floatButtons.forEach((button) => {
-          const value = button.getAttribute('value') || '';
-          button.removeEventListener('click', () => handleFloat(value));
-        });
-      };
-    }
-  }, [quill, content, setValue, selectLocalImage, handleFloat]);
 
   useEffect(() => {
     if (title) {
-      const slug = transliterate(title);
-      setValue('slug', slug);
+      const newSlug = transliterate(title);
+      setValue('slug', newSlug);
     }
   }, [title, setValue]);
 
-  const onSubmit: SubmitHandler<EventsFormInputs> = async (data) => {
+  useEffect(() => {
+    if (startDate) {
+      const now = new Date();
+      const start = new Date(startDate);
+      setValue('status', now > start);
+    }
+  }, [startDate, setValue]);
+
+  const handleEditorInit = useCallback((evt: unknown, editor: TinyMCEEditor) => {
+    console.log('TinyMCE initialized:', evt, editor);
+  }, []);
+
+  const handleEditorChange = useCallback(
+    (newContent: string) => {
+      setValue('content', newContent, { shouldValidate: true });
+      const tempUrls = extractTempImages(newContent);
+      setTempImages(tempUrls);
+    },
+    [setValue]
+  );
+
+  const onSubmit: SubmitHandler<EventFormInputs> = async (data) => {
     const token = localStorage.getItem('token');
     try {
       let updatedContent = data.content;
-      if (tempImages.length > 0) {
-        tempImages.forEach((tempUrl) => {
-          const newUrl = tempUrl.replace('/uploads/events/temp/', `/uploads/events/${data.slug}/`);
-          updatedContent = updatedContent.replace(tempUrl, newUrl);
-        });
-        await axios.post('http://localhost:5000/api/posts/move-images', {
-          oldSlug: 'temp',
-          newSlug: data.slug,
-        }, { headers: { Authorization: `Bearer ${token}` } });
-        setTempImages([]);
+  
+      if (tempImages.length > 0 || (originalSlug && originalSlug !== data.slug)) {
+        if (tempImages.length > 0) {
+          tempImages.forEach((tempUrl) => {
+            const newUrl = tempUrl.replace('/uploads/events/temp/', `/uploads/events/${data.slug}/`);
+            updatedContent = updatedContent.replace(tempUrl, newUrl);
+          });
+          await axios.post(
+            `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
+            {
+              oldSlug: 'temp',
+              newSlug: data.slug,
+              entity: 'events',
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setTempImages([]);
+        }
+        if (originalSlug && originalSlug !== data.slug) {
+          updatedContent = updatedContent.replace(
+            new RegExp(`/uploads/events/${originalSlug}/`, 'g'),
+            `/uploads/events/${data.slug}/`
+          );
+          await axios.post(
+            `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
+            {
+              oldSlug: originalSlug,
+              newSlug: data.slug,
+              entity: 'events',
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          setOriginalSlug(data.slug);
+        }
         data.content = updatedContent;
       }
-
-      await axios.patch(`http://localhost:5000/api/posts/events/${slug}`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  
+      // Оставляем startDate как есть
+      console.log('Sending data:', data); // Отладка
+  
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/posts/events/${slug}`,
+        data,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       navigate('/admin/events');
     } catch (error) {
       console.error('Error updating event:', error);
       alert('Ошибка при обновлении мероприятия: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'));
     }
   };
+
+  if (loading) {
+    return <div className="text-darkBg text-center">Загрузка...</div>;
+  }
 
   return (
     <div className="w-full mx-auto bg-white p-6 rounded-lg shadow-md">
@@ -279,25 +216,70 @@ const EventsEdit: React.FC = () => {
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Краткое описание</label>
-          <textarea {...register('shortDescription')} className="w-full p-2 border rounded" placeholder="Введите краткое описание..." />
-          {errors.shortDescription && <p className="text-red-500 text-sm mt-1">{errors.shortDescription.message}</p>}
-        </div>
-
-        <div className="mb-4">
-          <label className="block mb-2 font-medium">Основное содержание</label>
-          <div ref={quillRef} className="mb-4 bg-white">
-            <div ref={toolbarRef} className="ql-toolbar ql-snow" />
-            <div className="ql-container ql-snow">
-              <div className="ql-editor" />
-            </div>
-          </div>
-          {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content.message}</p>}
+          <textarea
+            {...register('shortDescription')}
+            className="w-full p-2 border rounded"
+            placeholder="Введите краткое описание..."
+          />
+          {errors.shortDescription && (
+            <p className="text-red-500 text-sm mt-1">{errors.shortDescription.message}</p>
+          )}
         </div>
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Дата начала</label>
-          <input type="date" {...register('startDate')} className="w-full p-2 border rounded" />
+          <input
+            type="datetime-local"
+            {...register('startDate')}
+            className="w-full p-2 border rounded"
+          />
           {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
+        </div>
+
+        <div className="mb-4">
+          <label className="block mb-2 font-medium">Основное содержание</label>
+          <Editor
+            tinymceScriptSrc="/tinymce/tinymce.min.js"
+            value={content}
+            onEditorChange={handleEditorChange}
+            onInit={handleEditorInit}
+            init={{
+              height: 500,
+              menubar: true,
+              plugins: [
+                'advlist',
+                'autolink',
+                'lists',
+                'link',
+                'image',
+                'charmap',
+                'anchor',
+                'searchreplace',
+                'visualblocks',
+                'code',
+                'fullscreen',
+                'insertdatetime',
+                'media',
+                'table',
+                'help',
+                'wordcount',
+              ],
+              toolbar:
+                'undo redo | formatselect | bold italic underline strikethrough | ' +
+                'alignleft aligncenter alignright alignjustify | ' +
+                'bullist numlist outdent indent | link image | ' +
+                'removeformat | code | help',
+              base_url: '/tinymce',
+              suffix: '.min',
+              image_uploadtab: true,
+              images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=events`,
+              images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
+              automatic_uploads: true,
+              file_picker_types: 'image',
+              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+            }}
+          />
+          {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content.message}</p>}
         </div>
 
         <div className="mb-4">
@@ -309,21 +291,29 @@ const EventsEdit: React.FC = () => {
 
         <div className="mb-4">
           <label className="flex items-center font-medium">
-            <input type="checkbox" {...register('status')} className="mr-2" />
-            Прошедшее
-          </label>
-        </div>
-
-        <div className="mb-4">
-          <label className="flex items-center font-medium">
             <input type="checkbox" {...register('ours')} className="mr-2" />
             Наше мероприятие
           </label>
         </div>
 
         <div className="mb-4">
+          <label className="block mb-2 font-medium">Ссылка на мероприятие</label>
+          <input
+            {...register('eventLink')}
+            className="w-full p-2 border rounded"
+            placeholder="Введите ссылку на мероприятие..."
+          />
+          {errors.eventLink && <p className="text-red-500 text-sm mt-1">{errors.eventLink.message}</p>}
+        </div>
+
+        <div className="mb-4">
           <label className="block mb-2 font-medium">Slug</label>
-          <input {...register('slug')} className="w-full p-2 border rounded" placeholder="Автоматически генерируется..." readOnly />
+          <input
+            {...register('slug')}
+            className="w-full p-2 border rounded"
+            placeholder="Автоматически генерируется..."
+            readOnly
+          />
           {errors.slug && <p className="text-red-500 text-sm mt-1">{errors.slug.message}</p>}
         </div>
 
@@ -334,15 +324,20 @@ const EventsEdit: React.FC = () => {
 
         <div className="mb-4">
           <label className="block mb-2 font-medium">Meta Description</label>
-          <textarea {...register('metaDescription')} className="w-full p-2 border rounded" placeholder="Введите meta description..." rows={3} />
+          <textarea
+            {...register('metaDescription')}
+            className="w-full p-2 border rounded"
+            placeholder="Введите meta description..."
+            rows={3}
+          />
         </div>
 
         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
-          Обновить мероприятие
+          Сохранить изменения
         </button>
       </form>
     </div>
   );
 };
 
-export default EventsEdit; */
+export default EventsEdit;

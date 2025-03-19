@@ -4,12 +4,173 @@ import path from 'path';
 import fs from 'fs';
 import { UploadedFile } from 'express-fileupload';
 import { fileURLToPath } from 'url';
+import nodemailer from 'nodemailer';
+import axios from 'axios';
+import 'dotenv/config';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const prisma = new PrismaClient();
 
+// Настройка Nodemailer с переменными окружения
+const transporter = nodemailer.createTransport({
+  host: 'smtp.timeweb.ru',
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+export const registerForEvent: RequestHandler = async (req, res) => {
+  const { slug } = req.params;
+  const { name, phone, email, recaptchaToken } = req.body;
+
+  try {
+    const recaptchaResponse = await axios.post(
+      'https://www.google.com/recaptcha/api/siteverify',
+      null,
+      {
+        params: {
+          secret: process.env.CAPTCHA_SECRET,
+          response: recaptchaToken,
+        },
+      }
+    );
+
+    const { success, score } = recaptchaResponse.data;
+
+    if (!success || score < 0.5) {
+      res.status(400).json({ message: 'Ошибка проверки reCAPTCHA: подозрение на бота' });
+      return;
+    }
+  } catch (error) {
+    console.error('Error verifying reCAPTCHA:', error);
+    res.status(500).json({ message: 'Ошибка проверки reCAPTCHA' });
+    return;
+  }
+
+  try {
+    const event = await prisma.events.findUnique({
+      where: { slug },
+    });
+
+    if (!event || !event.ours || new Date() >= new Date(event.startDate)) {
+      res.status(400).json({ message: 'Регистрация недоступна' });
+      return;
+    }
+
+    const registration = await prisma.eventsRegistration.create({
+      data: {
+        eventId: event.id,
+        name,
+        phone,
+        email,
+      },
+    });
+
+    const eventDateTime = new Date(event.startDate).toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'UTC', 
+    });
+
+    const emailText = `Здравствуйте, ${name}! Вы успешно зарегистрировались на мероприятие "${event.title}".\n` +
+                     `Дата и время проведения: ${eventDateTime}.\n` +
+                     (event.eventLink
+                       ? `Ссылка на мероприятие: ${event.eventLink}`
+                       : 'Ссылку на мероприятие пришлём за день до его начала.');
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: `Регистрация на мероприятие: ${event.title}`,
+      text: emailText,
+    });
+
+    res.status(201).json(registration);
+  } catch (error) {
+    console.error('Error registering for event:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Получение списка зарегистрированных участников
+export const getEventRegistrations: RequestHandler = async (req, res) => {
+  const { slug } = req.params;
+  console.log('Received slug:', slug);
+  try {
+    const event = await prisma.events.findUnique({
+      where: { slug },
+      include: { registrations: true },
+    });
+    console.log('Found event:', event);
+    if (!event || !event.ours) {
+      res.status(404).json({ message: 'Мероприятие не найдено или регистрация недоступна' });
+      return;
+    }
+    res.json({
+      eventTitle: event.title,
+      eventId: event.id,
+      eventLink: event.eventLink,
+      registrations: event.registrations,
+    });
+  } catch (error) {
+    console.error('Error fetching registrations:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
+
+export const sendEventReminder: RequestHandler = async (req, res) => {
+  const { eventId } = req.params;
+
+  try {
+    const event = await prisma.events.findUnique({
+      where: { id: Number(eventId) },
+      include: { registrations: true },
+    });
+
+    if (!event) {
+      res.status(404).json({ message: 'Мероприятие не найдено' });
+      return;
+    }
+
+    // Форматируем дату без смещения
+    const eventDateTime = event.startDate.toISOString().replace('T', ' ').replace(':00.000Z', '');
+    console.log('Event date for reminder:', eventDateTime);
+
+    for (const reg of event.registrations) {
+      const emailText = `Здравствуйте, ${reg.name}! Напоминаем вам, что вы были зарегистрированы на мероприятие "${event.title}".\n` +
+                       `Дата и время проведения: ${eventDateTime}.\n` +
+                       `Ссылка на мероприятие: ${event.eventLink}`;
+
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: reg.email,
+        subject: `Напоминание о мероприятии: ${event.title}`,
+        text: emailText,
+      });
+
+      // Задержка 3 секунды между письмами
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+
+    res.json({ message: 'Напоминания отправлены' });
+  } catch (error) {
+    console.error('Error sending reminder:', error);
+    res.status(500).json({ message: 'Ошибка при отправке напоминаний' });
+  }
+};
+
+
+//Получение новости по :slug
 export const getNewsBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;
 
@@ -298,13 +459,14 @@ export const updatePromotion: RequestHandler = async (req, res) => {
   }
 };
 
-// Получение мероприятия по slug
+// Получение мероприятия по slug (с регистрациями)
 export const getEventBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;
 
   try {
     const event = await prisma.events.findUnique({
       where: { slug },
+      include: { registrations: true }, // Включаем связанные регистрации
     });
 
     if (!event) {
@@ -319,16 +481,15 @@ export const getEventBySlug: RequestHandler = async (req, res) => {
   }
 };
 
-// Получение опубликованных мероприятий
+// Получение опубликованных и предстоящих мероприятий
 export const getEvents: RequestHandler = async (req, res) => {
   try {
-    const take = parseInt(req.query.take as string) || undefined; // Получаем параметр take
+    const take = parseInt(req.query.take as string) || undefined;
     const events = await prisma.events.findMany({
       orderBy: { createdAt: 'desc' },
-      take, // Ограничиваем количество записей
+      take,
       where: {
-        isPublished: true, // Показываем только опубликованные мероприятия
-        status: false, // Показываем только предстоящие мероприятия (status: false)
+        isPublished: true // Только опубликованные        // Только наши мероприятия
       },
     });
 
@@ -354,13 +515,38 @@ export const getAllEvents: RequestHandler = async (req, res) => {
 
 // Создание мероприятия
 export const createEvent: RequestHandler = async (req, res) => {
-  const { title, shortDescription, content, startDate, isPublished, status, ours, slug, metaTitle, metaDescription } = req.body;
+  const {
+    title,
+    shortDescription,
+    content,
+    startDate,
+    isPublished,
+    status,
+    ours,
+    slug,
+    metaTitle,
+    metaDescription,
+    eventLink,
+  } = req.body;
 
   try {
-    console.log('Slug:', slug);
+    if (!title || !slug || !startDate) {
+      res.status(400).json({ message: 'Title, slug, and startDate are required' });
+      return;
+    }
+
+    console.log('Received startDate:', startDate); // Отладка
+
     const existingEvent = await prisma.events.findUnique({ where: { slug } });
     if (existingEvent) {
       res.status(400).json({ message: 'Slug already exists' });
+      return;
+    }
+
+    // Преобразуем строку startDate в Date без смещения
+    const parsedStartDate = new Date(`${startDate}:00.000Z`); // Добавляем секунды и Z
+    if (isNaN(parsedStartDate.getTime())) {
+      res.status(400).json({ message: 'Invalid startDate format' });
       return;
     }
 
@@ -369,27 +555,41 @@ export const createEvent: RequestHandler = async (req, res) => {
         title,
         shortDescription,
         content,
-        startDate: new Date(startDate),
+        startDate: parsedStartDate, // Сохраняем как Date
         isPublished: isPublished === 'true' || isPublished === true,
         status: status === 'true' || status === true,
         ours: ours === 'true' || ours === true,
         slug,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
+        eventLink: eventLink || null,
       },
     });
 
+    console.log('Created event with startDate:', newEvent.startDate); // Отладка
     res.status(201).json(newEvent);
   } catch (error) {
     console.error('Error creating event:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: 'Internal server error', error: error instanceof Error ? error.message : 'Unknown error' });
   }
 };
 
 // Обновление мероприятия
 export const updateEvent: RequestHandler = async (req, res) => {
   const { slug } = req.params;
-  const { title, shortDescription, content, startDate, isPublished, status, ours, metaTitle, metaDescription } = req.body;
+  const {
+    title,
+    shortDescription,
+    content,
+    startDate,
+    isPublished,
+    status,
+    ours,
+    slug: newSlug,
+    metaTitle,
+    metaDescription,
+    eventLink,
+  } = req.body;
 
   try {
     const existingEvent = await prisma.events.findUnique({ where: { slug } });
@@ -398,25 +598,92 @@ export const updateEvent: RequestHandler = async (req, res) => {
       return;
     }
 
+    if (newSlug && newSlug !== slug) {
+      const slugExists = await prisma.events.findUnique({ where: { slug: newSlug } });
+      if (slugExists) {
+        res.status(400).json({ message: 'New slug already exists' });
+        return;
+      }
+    }
+
+    // Обработка startDate
+    let updatedStartDate = existingEvent.startDate;
+    if (startDate) {
+      updatedStartDate = new Date(`${startDate}:00.000Z`); // Форматируем как ISO Date
+      if (isNaN(updatedStartDate.getTime())) {
+        res.status(400).json({ message: 'Invalid startDate format' });
+        return;
+      }
+      console.log('Received startDate:', startDate, 'Formatted:', updatedStartDate); // Отладка
+    }
+
     const updatedEvent = await prisma.events.update({
       where: { slug },
       data: {
         title,
         shortDescription,
         content,
-        startDate: startDate ? new Date(startDate) : existingEvent.startDate,
+        startDate: updatedStartDate,
         isPublished: isPublished === 'true' || isPublished === true,
         status: status === 'true' || status === true,
         ours: ours === 'true' || ours === true,
-        slug, // Оставляем тот же slug
+        slug: newSlug || slug,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
+        eventLink: eventLink || null,
       },
     });
 
+    console.log('Updated event with startDate:', updatedEvent.startDate); // Отладка
     res.status(200).json(updatedEvent);
   } catch (error) {
     console.error('Error updating event:', error);
+    res.status(500).json({ message: 'Internal server error', error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+};
+
+
+// Настройки в админке
+// Новые функции для программ
+export const getPrograms: RequestHandler = async (req, res) => {
+  try {
+    const programs = await prisma.program.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    res.status(200).json(programs);
+  } catch (error) {
+    console.error('Error fetching programs:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const createProgram: RequestHandler = async (req, res) => {
+  const { fullName, shortName } = req.body;
+
+  try {
+    if (!fullName || !shortName) {
+      res.status(400).json({ message: 'Full name and short name are required' });
+      return;
+    }
+
+    const existingProgram = await prisma.program.findFirst({
+      where: { fullName },
+    });
+    if (existingProgram) {
+      res.status(400).json({ message: 'Program with this full name already exists' });
+      return;
+    }
+
+    const newProgram = await prisma.program.create({
+      data: {
+        fullName,
+        shortName,
+      },
+    });
+
+    res.status(201).json(newProgram);
+  } catch (error) {
+    console.error('Error creating program:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 };

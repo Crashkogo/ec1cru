@@ -1,31 +1,51 @@
+// src/routes/postRoutes.ts
 import express from 'express';
-import { getAllEvents, getEventBySlug,  updateEvent , createNews, uploadImage, moveImagesAfterCreate, getNews, getAllNews, createPromotion, getPromotions, updatePromotion, getPromotionBySlug, getAllPromotions, createEvent, getEvents, getNewsBySlug, updateNews  } from '../controllers/postController';
+import { getAllEvents, getEventBySlug, updateEvent, createNews, uploadImage, moveImagesAfterCreate, getNews, getAllNews, createPromotion, getPromotions, 
+    updatePromotion, getPromotionBySlug, getAllPromotions, createEvent, getEvents, getNewsBySlug, updateNews, registerForEvent,
+    getEventRegistrations, sendEventReminder, getPrograms, createProgram, getAllReadySolutions, createReadySolution, updateReadySolution } from '../controllers/postController';
 import { RequestHandler } from 'express';
+import { authMiddleware } from '../middleware/authMiddleware';
 
 const router = express.Router();
-//Маршруты для картинок в постах
+
+// Маршруты для картинок в постах
 router.post('/upload-image', uploadImage as RequestHandler);
-router.post('/move-images', moveImagesAfterCreate); // Новый маршрут для перемещения
+router.post('/move-images', moveImagesAfterCreate);
+
 // Существующие маршруты для новостей
 router.get('/news', getNews as RequestHandler);
-router.get('/admin/news', getAllNews);
-router.get('/news/:slug', getNewsBySlug as RequestHandler); // Новый маршрут для получения новости
-router.post('/news', createNews as RequestHandler);
-router.patch('/news/:slug', updateNews as RequestHandler); // Новый маршрут для обновления новости
+router.get('/admin/news', authMiddleware, getAllNews);
+router.get('/news/:slug', getNewsBySlug as RequestHandler);
+router.post('/news', authMiddleware, createNews as RequestHandler);
+router.patch('/news/:slug', authMiddleware, updateNews as RequestHandler);
 
-// Существующие маршруты для акций (Promotions)
 // Маршруты для акций
-router.get('/promotions', getPromotions as RequestHandler); // Получение опубликованных и активных акций
-router.get('/admin/promotions', getAllPromotions as RequestHandler); // Получение всех акций для админки
-router.get('/promotions/:slug', getPromotionBySlug as RequestHandler); // Получение акции по slug
-router.post('/promotions', createPromotion as RequestHandler); // Создание новой акции
-router.patch('/promotions/:slug', updatePromotion as RequestHandler); // Обновление акции по slug
-// Новые маршруты для мероприятий (Events)
+router.get('/promotions', getPromotions as RequestHandler);
+router.get('/admin/promotions', authMiddleware, getAllPromotions as RequestHandler);
+router.get('/promotions/:slug', getPromotionBySlug as RequestHandler);
+router.post('/promotions', authMiddleware, createPromotion as RequestHandler);
+router.patch('/promotions/:slug', authMiddleware, updatePromotion as RequestHandler);
+
 // Маршруты для мероприятий
-router.get('/events', getEvents as RequestHandler); // Получение опубликованных и предстоящих мероприятий
-router.get('/admin/events', getAllEvents as RequestHandler); // Получение всех мероприятий для админки
-router.get('/events/:slug', getEventBySlug as RequestHandler); // Получение мероприятия по slug
-router.post('/events', createEvent as RequestHandler); // Создание нового мероприятия
-router.patch('/events/:slug', updateEvent as RequestHandler); // Обновление мероприятия по slug
+router.get('/events', getEvents as RequestHandler);
+router.get('/admin/events', authMiddleware, getAllEvents as RequestHandler);
+router.get('/events/:slug', getEventBySlug as RequestHandler);
+router.post('/events', authMiddleware, createEvent as RequestHandler);
+router.patch('/events/:slug', authMiddleware, updateEvent as RequestHandler);
+
+// Регистрация на мероприятие
+router.post('/events/:slug/register', registerForEvent as RequestHandler);
+
+// Админка: участники и напоминания
+router.get('/admin/events/:slug/registrations', authMiddleware, getEventRegistrations as RequestHandler);
+router.post('/admin/events/:eventId/remind', authMiddleware, sendEventReminder as RequestHandler);
+
+// Новые маршруты для программ
+router.get('/admin/programs', authMiddleware, getPrograms as RequestHandler); // Список всех программ
+router.post('/admin/programs', authMiddleware, createProgram as RequestHandler); // Создание программы
+// Новые маршруты для ReadySolution
+router.get('/admin/ready-solutions', authMiddleware, getAllReadySolutions as RequestHandler); // Список всех решений
+router.post('/admin/ready-solutions', authMiddleware, createReadySolution as RequestHandler); // Создание решения
+router.patch('/admin/ready-solutions/:slug', authMiddleware, updateReadySolution as RequestHandler); // Редактирование решения
 
 export default router;

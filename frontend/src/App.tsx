@@ -7,6 +7,7 @@ import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import NewsDetail from './components/NewsDetail';
 import PromotionsDetail from './components/PromotionsDetail';
+import EventsDetail from './components/EventsDetail';
 
 const App: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);
@@ -29,8 +30,9 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="w-full h-full ">
-        <Header ref={headerRef} />
+      <div className="w-full h-full">
+        {/* Передаём только ref и setShowLogin */}
+        <Header ref={headerRef} setShowLogin={setShowLogin} />
         <Suspense fallback={<div className="text-whiteText">Loading...</div>}>
           <Routes>
             <Route
@@ -53,15 +55,23 @@ const App: React.FC = () => {
               path="/news/:slug"
               element={
                 <PageWrapper headerHeight={headerHeight}>
-                <NewsDetail />
+                  <NewsDetail />
                 </PageWrapper>
               }
             />
-             <Route
+            <Route
               path="/promotions/:slug"
               element={
                 <PageWrapper headerHeight={headerHeight}>
-                <PromotionsDetail />
+                  <PromotionsDetail />
+                </PageWrapper>
+              }
+            />
+            <Route
+              path="/events/:slug"
+              element={
+                <PageWrapper headerHeight={headerHeight}>
+                  <EventsDetail />
                 </PageWrapper>
               }
             />
