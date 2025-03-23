@@ -2,7 +2,8 @@
 import express from 'express';
 import { getAllEvents, getEventBySlug, updateEvent, createNews, uploadImage, moveImagesAfterCreate, getNews, getAllNews, createPromotion, getPromotions, 
     updatePromotion, getPromotionBySlug, getAllPromotions, createEvent, getEvents, getNewsBySlug, updateNews, registerForEvent,
-    getEventRegistrations, sendEventReminder, getPrograms, createProgram, getAllReadySolutions, createReadySolution, updateReadySolution } from '../controllers/postController';
+    getEventRegistrations, sendEventReminder, getPrograms, createProgram, getAllReadySolutions, createReadySolution, updateReadySolution,
+    uploadGalleryImage, moveGalleryImagesAfterCreate, getReadySolutions, getReadySolutionBySlug } from '../controllers/postController';
 import { RequestHandler } from 'express';
 import { authMiddleware } from '../middleware/authMiddleware';
 
@@ -41,11 +42,19 @@ router.get('/admin/events/:slug/registrations', authMiddleware, getEventRegistra
 router.post('/admin/events/:eventId/remind', authMiddleware, sendEventReminder as RequestHandler);
 
 // Новые маршруты для программ
-router.get('/admin/programs', authMiddleware, getPrograms as RequestHandler); // Список всех программ
+router.get('/admin/programs', authMiddleware, getPrograms as RequestHandler); // Список всех программ (для админов)
 router.post('/admin/programs', authMiddleware, createProgram as RequestHandler); // Создание программы
+router.get('/programs', getPrograms as RequestHandler); // Публичный маршрут для программ (будет /api/posts/programs)
+
 // Новые маршруты для ReadySolution
-router.get('/admin/ready-solutions', authMiddleware, getAllReadySolutions as RequestHandler); // Список всех решений
-router.post('/admin/ready-solutions', authMiddleware, createReadySolution as RequestHandler); // Создание решения
-router.patch('/admin/ready-solutions/:slug', authMiddleware, updateReadySolution as RequestHandler); // Редактирование решения
+router.get('/admin/ready-solutions', authMiddleware, getAllReadySolutions as RequestHandler);
+router.post('/admin/ready-solutions', authMiddleware, createReadySolution as RequestHandler);
+router.patch('/admin/ready-solutions/:slug', authMiddleware, updateReadySolution as RequestHandler);
+
+// Маршруты для галереи ReadySolution
+router.post('/upload-gallery-image', authMiddleware, uploadGalleryImage as RequestHandler);
+router.post('/move-gallery-images', authMiddleware, moveGalleryImagesAfterCreate as RequestHandler);
+router.get('/ready-solutions', getReadySolutions as RequestHandler);
+router.get('/ready-solutions/:slug', getReadySolutionBySlug as RequestHandler);
 
 export default router;

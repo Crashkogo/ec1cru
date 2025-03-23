@@ -14,6 +14,9 @@ import Events from './Events';
 import Promotions from './Promotions';
 import EventsEdit from './EventsEdit';
 import EventRegistrations from './EventRegistrations';
+import ReadySolutions from './ReadySolutions'; // Новый компонент
+import ReadySolutionsCreate from './ReadySolutionsCreate'; // Новый компонент
+import ReadySolutionsEdit from './ReadySolutionsEdit'; // Новый компонент
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -64,7 +67,10 @@ const Dashboard: React.FC = () => {
             <Route path="/promotions/create" element={<PromotionsCreate />} />
             <Route path="/promotions/edit/:slug" element={<PromotionsEdit />} />
             <Route path="/events/:slug/registrations" element={<EventRegistrations />} />
-            <Route path="/users" element={<Users />} />         
+            <Route path="/users" element={<Users />} /> 
+            <Route path="/ready-solutions" element={<ReadySolutions />} />
+            <Route path="/ready-solutions/create" element={<ReadySolutionsCreate />} />
+            <Route path="/ready-solutions/edit/:slug" element={<ReadySolutionsEdit />} />        
           </Routes>
         </div>
       </div>

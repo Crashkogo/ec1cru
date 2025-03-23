@@ -8,6 +8,8 @@ import Dashboard from './pages/admin/Dashboard';
 import NewsDetail from './components/NewsDetail';
 import PromotionsDetail from './components/PromotionsDetail';
 import EventsDetail from './components/EventsDetail';
+import ReadySolutionsList from './components/ReadySolutionsList';
+import ReadySolutionDetail from './components/ReadySolutionDetail';
 
 const App: React.FC = () => {
   const headerRef = useRef<HTMLDivElement>(null);
@@ -72,6 +74,22 @@ const App: React.FC = () => {
               element={
                 <PageWrapper headerHeight={headerHeight}>
                   <EventsDetail />
+                </PageWrapper>
+              }
+            />
+                        <Route
+              path="/ready-solutions"
+              element={
+                <PageWrapper headerHeight={headerHeight}>
+                  <ReadySolutionsList  />
+                </PageWrapper>
+              }
+            />
+                        <Route
+              path="/ready-solutions/:slug"
+              element={
+                <PageWrapper headerHeight={headerHeight}>
+                  <ReadySolutionDetail  />
                 </PageWrapper>
               }
             />

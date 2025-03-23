@@ -1,4 +1,4 @@
-import { Request, Response, RequestHandler } from 'express';
+import { RequestHandler } from 'express';
 import { PrismaClient } from '@prisma/client';
 import path from 'path';
 import fs from 'fs';
@@ -7,13 +7,13 @@ import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import axios from 'axios';
 import 'dotenv/config';
+import slugify from 'slugify';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const prisma = new PrismaClient();
 
-// Настройка Nodemailer с переменными окружения
 const transporter = nodemailer.createTransport({
   host: 'smtp.timeweb.ru',
   port: 465,
@@ -77,14 +77,15 @@ export const registerForEvent: RequestHandler = async (req, res) => {
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'UTC', 
+      timeZone: 'UTC',
     });
 
-    const emailText = `Здравствуйте, ${name}! Вы успешно зарегистрировались на мероприятие "${event.title}".\n` +
-                     `Дата и время проведения: ${eventDateTime}.\n` +
-                     (event.eventLink
-                       ? `Ссылка на мероприятие: ${event.eventLink}`
-                       : 'Ссылку на мероприятие пришлём за день до его начала.');
+    const emailText =
+      `Здравствуйте, ${name}! Вы успешно зарегистрировались на мероприятие "${event.title}".\n` +
+      `Дата и время проведения: ${eventDateTime}.\n` +
+      (event.eventLink
+        ? `Ссылка на мероприятие: ${event.eventLink}`
+        : 'Ссылку на мероприятие пришлём за день до его начала.');
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -100,7 +101,6 @@ export const registerForEvent: RequestHandler = async (req, res) => {
   }
 };
 
-// Получение списка зарегистрированных участников
 export const getEventRegistrations: RequestHandler = async (req, res) => {
   const { slug } = req.params;
   console.log('Received slug:', slug);
@@ -126,8 +126,6 @@ export const getEventRegistrations: RequestHandler = async (req, res) => {
   }
 };
 
-
-
 export const sendEventReminder: RequestHandler = async (req, res) => {
   const { eventId } = req.params;
 
@@ -142,14 +140,14 @@ export const sendEventReminder: RequestHandler = async (req, res) => {
       return;
     }
 
-    // Форматируем дату без смещения
     const eventDateTime = event.startDate.toISOString().replace('T', ' ').replace(':00.000Z', '');
     console.log('Event date for reminder:', eventDateTime);
 
     for (const reg of event.registrations) {
-      const emailText = `Здравствуйте, ${reg.name}! Напоминаем вам, что вы были зарегистрированы на мероприятие "${event.title}".\n` +
-                       `Дата и время проведения: ${eventDateTime}.\n` +
-                       `Ссылка на мероприятие: ${event.eventLink}`;
+      const emailText =
+        `Здравствуйте, ${reg.name}! Напоминаем вам, что вы были зарегистрированы на мероприятие "${event.title}".\n` +
+        `Дата и время проведения: ${eventDateTime}.\n` +
+        `Ссылка на мероприятие: ${event.eventLink}`;
 
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
@@ -158,7 +156,6 @@ export const sendEventReminder: RequestHandler = async (req, res) => {
         text: emailText,
       });
 
-      // Задержка 3 секунды между письмами
       await new Promise((resolve) => setTimeout(resolve, 3000));
     }
 
@@ -169,8 +166,6 @@ export const sendEventReminder: RequestHandler = async (req, res) => {
   }
 };
 
-
-//Получение новости по :slug
 export const getNewsBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;
 
@@ -181,7 +176,7 @@ export const getNewsBySlug: RequestHandler = async (req, res) => {
 
     if (!news) {
       res.status(404).json({ message: 'News not found' });
-      return; // Просто прерываем выполнение, не возвращаем Response
+      return;
     }
 
     res.status(200).json(news);
@@ -190,14 +185,14 @@ export const getNewsBySlug: RequestHandler = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-// Получение новостей
+
 export const getNews: RequestHandler = async (req, res) => {
   try {
-    const take = parseInt(req.query.take as string) || undefined; // Получаем параметр take
+    const take = parseInt(req.query.take as string) || undefined;
     const news = await prisma.news.findMany({
       orderBy: { createdAt: 'desc' },
-      take, // Ограничиваем количество записей
-      where: { isPublished: true }, // Показываем только опубликованные новости
+      take,
+      where: { isPublished: true },
     });
     res.status(200).json(news);
   } catch (error) {
@@ -205,7 +200,7 @@ export const getNews: RequestHandler = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-// Новый роут для админки (все новости)
+
 export const getAllNews: RequestHandler = async (req, res) => {
   try {
     const news = await prisma.news.findMany({
@@ -218,7 +213,6 @@ export const getAllNews: RequestHandler = async (req, res) => {
   }
 };
 
-// Создание новости
 export const createNews: RequestHandler = async (req, res) => {
   const { title, shortDescription, content, isPublished, slug, metaTitle, metaDescription } = req.body;
 
@@ -248,7 +242,6 @@ export const createNews: RequestHandler = async (req, res) => {
   }
 };
 
-// Обновление новости
 export const updateNews: RequestHandler = async (req, res) => {
   const { slug } = req.params;
   const { title, shortDescription, content, isPublished, metaTitle, metaDescription } = req.body;
@@ -257,7 +250,7 @@ export const updateNews: RequestHandler = async (req, res) => {
     const existingNews = await prisma.news.findUnique({ where: { slug } });
     if (!existingNews) {
       res.status(404).json({ message: 'News not found' });
-      return; // Просто прерываем выполнение, не возвращаем Response
+      return;
     }
 
     const updatedNews = await prisma.news.update({
@@ -267,7 +260,7 @@ export const updateNews: RequestHandler = async (req, res) => {
         shortDescription,
         content,
         isPublished: isPublished === 'true' || isPublished === true,
-        slug, // Оставляем тот же slug, чтобы не менять уникальный идентификатор
+        slug,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
       },
@@ -280,9 +273,6 @@ export const updateNews: RequestHandler = async (req, res) => {
   }
 };
 
-
-
-// Загрузка изображений
 export const uploadImage: RequestHandler = async (req, res) => {
   if (!req.files || !req.files.file) {
     res.status(400).json({ message: 'No file uploaded' });
@@ -291,12 +281,9 @@ export const uploadImage: RequestHandler = async (req, res) => {
 
   const file = req.files.file as UploadedFile;
   const slug = req.body.slug || 'temp';
-  
-  // Извлекаем entity из query-параметров, если он есть, иначе из тела запроса, либо используем 'news' по умолчанию
-  console.log(req.query.entity);
-  const entity = req.query.entity || req.body.entity || 'news';
-  
-  const uploadDir = path.join(__dirname, '../../frontend/public/uploads', entity as string, slug);
+  const entity = typeof req.query.entity === 'string' ? req.query.entity : req.body.entity || 'news';
+
+  const uploadDir = path.join(__dirname, '../../frontend/public/uploads', entity, slug);
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -314,6 +301,7 @@ export const uploadImage: RequestHandler = async (req, res) => {
     res.status(500).json({ message: 'Error uploading image' });
   }
 };
+
 export const moveImagesAfterCreate: RequestHandler = async (req, res) => {
   const { oldSlug = 'temp', newSlug } = req.body;
   const entity = req.body.entity;
@@ -329,9 +317,9 @@ export const moveImagesAfterCreate: RequestHandler = async (req, res) => {
       for (const file of files) {
         const oldPath = path.join(oldDir, file);
         const newPath = path.join(newDir, file);
-        fs.renameSync(oldPath, newPath); // Перемещаем файлы
+        fs.renameSync(oldPath, newPath);
       }
-      fs.rmdirSync(oldDir); // Удаляем старую папку, если она пуста
+      fs.rmdirSync(oldDir);
     }
     res.json({ message: 'Images moved successfully' });
   } catch (error) {
@@ -340,8 +328,6 @@ export const moveImagesAfterCreate: RequestHandler = async (req, res) => {
   }
 };
 
-
-// Получение акции по slug
 export const getPromotionBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;
 
@@ -362,7 +348,6 @@ export const getPromotionBySlug: RequestHandler = async (req, res) => {
   }
 };
 
-// Получение опубликованных акций
 export const getPromotions: RequestHandler = async (req, res) => {
   try {
     const take = parseInt(req.query.take as string) || undefined;
@@ -378,7 +363,6 @@ export const getPromotions: RequestHandler = async (req, res) => {
   }
 };
 
-// Получение всех акций (для админки)
 export const getAllPromotions: RequestHandler = async (req, res) => {
   try {
     const promotions = await prisma.promotions.findMany({
@@ -391,7 +375,6 @@ export const getAllPromotions: RequestHandler = async (req, res) => {
   }
 };
 
-// Создание акции
 export const createPromotion: RequestHandler = async (req, res) => {
   const { title, shortDescription, content, startDate, endDate, isPublished, slug, metaTitle, metaDescription, status } = req.body;
 
@@ -424,7 +407,6 @@ export const createPromotion: RequestHandler = async (req, res) => {
   }
 };
 
-// Обновление акции
 export const updatePromotion: RequestHandler = async (req, res) => {
   const { slug } = req.params;
   const { title, shortDescription, content, startDate, endDate, isPublished, metaTitle, metaDescription, status } = req.body;
@@ -459,14 +441,13 @@ export const updatePromotion: RequestHandler = async (req, res) => {
   }
 };
 
-// Получение мероприятия по slug (с регистрациями)
 export const getEventBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;
 
   try {
     const event = await prisma.events.findUnique({
       where: { slug },
-      include: { registrations: true }, // Включаем связанные регистрации
+      include: { registrations: true },
     });
 
     if (!event) {
@@ -481,7 +462,6 @@ export const getEventBySlug: RequestHandler = async (req, res) => {
   }
 };
 
-// Получение опубликованных и предстоящих мероприятий
 export const getEvents: RequestHandler = async (req, res) => {
   try {
     const take = parseInt(req.query.take as string) || undefined;
@@ -489,7 +469,7 @@ export const getEvents: RequestHandler = async (req, res) => {
       orderBy: { createdAt: 'desc' },
       take,
       where: {
-        isPublished: true // Только опубликованные        // Только наши мероприятия
+        isPublished: true,
       },
     });
 
@@ -500,7 +480,6 @@ export const getEvents: RequestHandler = async (req, res) => {
   }
 };
 
-// Получение всех мероприятий для админки
 export const getAllEvents: RequestHandler = async (req, res) => {
   try {
     const events = await prisma.events.findMany({
@@ -513,7 +492,6 @@ export const getAllEvents: RequestHandler = async (req, res) => {
   }
 };
 
-// Создание мероприятия
 export const createEvent: RequestHandler = async (req, res) => {
   const {
     title,
@@ -535,16 +513,14 @@ export const createEvent: RequestHandler = async (req, res) => {
       return;
     }
 
-    console.log('Received startDate:', startDate); // Отладка
-
+    console.log('Received startDate:', startDate);
     const existingEvent = await prisma.events.findUnique({ where: { slug } });
     if (existingEvent) {
       res.status(400).json({ message: 'Slug already exists' });
       return;
     }
 
-    // Преобразуем строку startDate в Date без смещения
-    const parsedStartDate = new Date(`${startDate}:00.000Z`); // Добавляем секунды и Z
+    const parsedStartDate = new Date(`${startDate}:00.000Z`);
     if (isNaN(parsedStartDate.getTime())) {
       res.status(400).json({ message: 'Invalid startDate format' });
       return;
@@ -555,7 +531,7 @@ export const createEvent: RequestHandler = async (req, res) => {
         title,
         shortDescription,
         content,
-        startDate: parsedStartDate, // Сохраняем как Date
+        startDate: parsedStartDate,
         isPublished: isPublished === 'true' || isPublished === true,
         status: status === 'true' || status === true,
         ours: ours === 'true' || ours === true,
@@ -566,7 +542,7 @@ export const createEvent: RequestHandler = async (req, res) => {
       },
     });
 
-    console.log('Created event with startDate:', newEvent.startDate); // Отладка
+    console.log('Created event with startDate:', newEvent.startDate);
     res.status(201).json(newEvent);
   } catch (error) {
     console.error('Error creating event:', error);
@@ -574,7 +550,6 @@ export const createEvent: RequestHandler = async (req, res) => {
   }
 };
 
-// Обновление мероприятия
 export const updateEvent: RequestHandler = async (req, res) => {
   const { slug } = req.params;
   const {
@@ -606,15 +581,14 @@ export const updateEvent: RequestHandler = async (req, res) => {
       }
     }
 
-    // Обработка startDate
     let updatedStartDate = existingEvent.startDate;
     if (startDate) {
-      updatedStartDate = new Date(`${startDate}:00.000Z`); // Форматируем как ISO Date
+      updatedStartDate = new Date(`${startDate}:00.000Z`);
       if (isNaN(updatedStartDate.getTime())) {
         res.status(400).json({ message: 'Invalid startDate format' });
         return;
       }
-      console.log('Received startDate:', startDate, 'Formatted:', updatedStartDate); // Отладка
+      console.log('Received startDate:', startDate, 'Formatted:', updatedStartDate);
     }
 
     const updatedEvent = await prisma.events.update({
@@ -634,7 +608,7 @@ export const updateEvent: RequestHandler = async (req, res) => {
       },
     });
 
-    console.log('Updated event with startDate:', updatedEvent.startDate); // Отладка
+    console.log('Updated event with startDate:', updatedEvent.startDate);
     res.status(200).json(updatedEvent);
   } catch (error) {
     console.error('Error updating event:', error);
@@ -642,18 +616,18 @@ export const updateEvent: RequestHandler = async (req, res) => {
   }
 };
 
-
-// Настройки в админке
-// Новые функции для программ
 export const getPrograms: RequestHandler = async (req, res) => {
   try {
     const programs = await prisma.program.findMany({
-      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        shortName: true,
+      },
     });
-    res.status(200).json(programs);
+    res.json(programs);
   } catch (error) {
     console.error('Error fetching programs:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: 'Failed to fetch programs' });
   }
 };
 
@@ -685,5 +659,229 @@ export const createProgram: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error('Error creating program:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const getAllReadySolutions: RequestHandler = async (req, res) => {
+  try {
+    const solutions = await prisma.readySolution.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { programs: { include: { program: true } } },
+    });
+    res.status(200).json(solutions);
+  } catch (error) {
+    console.error('Error fetching ready solutions:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const createReadySolution: RequestHandler = async (req, res) => {
+  const { type, freshSupport, title, shortDescription, fullDescription, price, images, isPublished, metaTitle, metaDescription, programIds } = req.body;
+
+  try {
+    const slug = slugify(title, { lower: true, strict: true });
+    const existingSolution = await prisma.readySolution.findUnique({ where: { slug } });
+    if (existingSolution) {
+      res.status(400).json({ message: 'Solution with this title already exists' });
+      return;
+    }
+
+    const solution = await prisma.readySolution.create({
+      data: {
+        type,
+        freshSupport,
+        title,
+        shortDescription,
+        fullDescription,
+        price: parseFloat(price),
+        images,
+        isPublished,
+        slug,
+        metaTitle,
+        metaDescription,
+        programs: {
+          create: programIds && Array.isArray(programIds)
+            ? programIds.map((programId: number) => ({
+                program: { connect: { id: programId } },
+              }))
+            : [],
+        },
+      },
+      include: { programs: { include: { program: true } } },
+    });
+
+    res.status(201).json(solution);
+  } catch (error) {
+    console.error('Error creating ready solution:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const updateReadySolution: RequestHandler = async (req, res) => {
+  const { slug } = req.params;
+  const { type, freshSupport, title, shortDescription, fullDescription, price, images, isPublished, metaTitle, metaDescription, programIds } = req.body;
+
+  try {
+    const newSlug = slugify(title, { lower: true, strict: true });
+    const solution = await prisma.readySolution.update({
+      where: { slug },
+      data: {
+        type,
+        freshSupport,
+        title,
+        shortDescription,
+        fullDescription,
+        price: parseFloat(price),
+        images,
+        isPublished,
+        slug: newSlug,
+        metaTitle,
+        metaDescription,
+        programs: {
+          deleteMany: {},
+          create: programIds && Array.isArray(programIds)
+            ? programIds.map((programId: number) => ({
+                program: { connect: { id: programId } },
+              }))
+            : [],
+        },
+      },
+      include: { programs: { include: { program: true } } },
+    });
+
+    res.status(200).json(solution);
+  } catch (error) {
+    console.error('Error updating ready solution:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const getReadySolutions: RequestHandler = async (req, res) => {
+  try {
+    const { page = '1', limit = '10', search, freshSupport, programIds, type } = req.query;
+
+    const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
+    const take = parseInt(limit as string);
+
+    const where: any = {};
+
+    if (search) {
+      where.title = { contains: search as string, mode: 'insensitive' };
+    }
+    if (freshSupport !== undefined) {
+      where.freshSupport = freshSupport === 'true';
+    }
+    if (type) {
+      where.type = type as string;
+    }
+    if (programIds) {
+      const programIdsArray = Array.isArray(programIds) ? programIds.map(Number) : (programIds as string).split(',').map(Number);
+      where.programs = { some: { programId: { in: programIdsArray } } };
+    }
+
+    const solutions = await prisma.readySolution.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { id: 'desc' },
+      include: {
+        programs: {
+          include: {
+            program: true,
+          },
+        },
+      },
+    });
+
+    res.json(solutions);
+  } catch (error) {
+    console.error('Error fetching ready solutions:', error);
+    res.status(500).json({ error: 'Failed to fetch ready solutions' });
+  }
+};
+
+export const getReadySolutionBySlug: RequestHandler = async (req, res) => {
+  const { slug } = req.params;
+  try {
+    const solution = await prisma.readySolution.findUnique({
+      where: { slug, isPublished: true },
+      include: { programs: { include: { program: true } } },
+    });
+    if (!solution) {
+      res.status(404).json({ message: 'Solution not found' });
+      return;
+    }
+    res.json(solution);
+  } catch (error) {
+    console.error('Error fetching ready solution by slug:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const uploadGalleryImage: RequestHandler = async (req, res) => {
+  console.log('Request received:', req.files);
+  if (!req.files || !req.files.image) {
+    console.log('No image uploaded');
+    res.status(400).json({ message: 'No image uploaded' });
+    return;
+  }
+
+  const image = req.files.image as UploadedFile;
+  const entity = 'ready-solutions';
+  const slug = 'temp';
+  const uploadDir = path.join(__dirname, '../../frontend/public/uploads', entity, slug);
+
+  console.log('Upload dir:', uploadDir);
+
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+    console.log('Created upload dir:', uploadDir);
+  }
+
+  const fileName = `${Date.now()}-${image.name}`;
+  const filePath = path.join(uploadDir, fileName);
+
+  try {
+    await image.mv(filePath);
+    const imageUrl = `/uploads/${entity}/${slug}/${fileName}`;
+    console.log('Image uploaded:', imageUrl);
+    res.json({ url: imageUrl });
+  } catch (error) {
+    console.error('Error uploading gallery image:', error);
+    res.status(500).json({ message: 'Error uploading image' });
+  }
+};
+
+export const moveGalleryImagesAfterCreate: RequestHandler = async (req, res) => {
+  const { images, slug } = req.body;
+  const entity = 'ready-solutions';
+
+  const oldDir = path.join(__dirname, '../../frontend/public/uploads', entity, 'temp');
+  const newDir = path.join(__dirname, '../../frontend/public/uploads', entity, slug);
+
+  try {
+    if (!fs.existsSync(newDir)) {
+      fs.mkdirSync(newDir, { recursive: true });
+    }
+
+    const movedImages = images.map((imageUrl: string) => {
+      const fileName = path.basename(imageUrl);
+      const oldPath = path.join(oldDir, fileName);
+      const newPath = path.join(newDir, fileName);
+
+      if (fs.existsSync(oldPath)) {
+        fs.renameSync(oldPath, newPath);
+      }
+      return `/uploads/${entity}/${slug}/${fileName}`;
+    });
+
+    if (fs.existsSync(oldDir) && fs.readdirSync(oldDir).length === 0) {
+      fs.rmdirSync(oldDir);
+    }
+
+    res.status(200).json({ images: movedImages });
+  } catch (error) {
+    console.error('Error moving gallery images:', error);
+    res.status(500).json({ message: 'Error moving gallery images' });
   }
 };
