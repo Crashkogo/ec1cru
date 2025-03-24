@@ -193,47 +193,47 @@ const ReadySolutionsList: React.FC = () => {
 
         {/* Список решений */}
         <div className="space-y-4">
-          {solutions.map((solution) => (
-            <Link
-              key={solution.id}
-              to={`/ready-solutions/${solution.slug}`}
-              className="block border-2 border-darkBg rounded-md p-4 hover:shadow-lg hover:border-blue-500 transition-all duration-300"
-            >
-              <h2 className="text-xl font-semibold text-darkBg mb-2">{solution.title}</h2>
-              <p className="text-sm text-gray-500 mb-2">{solution.shortDescription}</p>
-              <div className="text-sm text-gray-500 flex flex-wrap gap-4">
-                <span>
-                  <span className="font-medium">Цена:</span> {solution.price.toLocaleString()} ₽
-                </span>
-                <span>
-                  <span className="font-medium">Тип:</span>{' '}
-                  {solution.type === 'PROCESSING'
-                    ? 'Обработка'
-                    : solution.type === 'PRINT_FORM'
-                    ? 'Печатная форма'
-                    : 'Отчёт'}
-                </span>
-                <span>
-                  <span className="font-medium">1C:Fresh:</span> {solution.freshSupport ? 'Да' : 'Нет'}
-                </span>
-                <span>
-                  <span className="font-medium">Программы:</span>{' '}
-                  {solution.programs.map((p) => p.program.shortName).join(', ')}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {solutions.map((solution) => (
+          <Link
+            key={solution.id}
+            to={`/ready-solutions/${solution.slug}`}
+            className="block border-2 border-darkBg rounded-md p-4 hover:shadow-lg hover:border-blue-500 transition-all duration-300"
+          >
+            <h2 className="text-xl font-semibold text-darkBg mb-2">{solution.title}</h2>
+            <p className="text-sm text-gray-500 mb-2">{solution.shortDescription}</p>
+            <div className="text-sm text-gray-500 flex flex-wrap gap-4">
+              <span>
+                <span className="font-medium">Цена:</span> {solution.price.toLocaleString()} ₽
+              </span>
+              <span>
+                <span className="font-medium">Тип:</span>{' '}
+                {solution.type === 'PROCESSING'
+                  ? 'Обработка'
+                  : solution.type === 'PRINT_FORM'
+                  ? 'Печатная форма'
+                  : 'Отчёт'}
+              </span>
+              <span>
+                <span className="font-medium">1C:Fresh:</span> {solution.freshSupport ? 'Да' : 'Нет'}
+              </span>
+              <span>
+                <span className="font-medium">Программы:</span>{' '}
+                {solution.programs.map((p) => p.program.shortName).join(', ')}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
 
         {/* Индикатор загрузки */}
-        {loading && (
-          <div className="text-center mt-8">
-            <div className="inline-block w-8 h-8 border-4 border-darkBg border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
-        {!hasMore && solutions.length > 0 && (
-          <p className="text-center mt-8 text-gray-500">Все решения загружены</p>
-        )}
+        {loading && hasMore && (
+        <div className="text-center mt-8">
+          <div className="inline-block w-8 h-8 border-4 border-darkBg border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
+      {!hasMore && solutions.length > 0 && (
+        <p className="text-center mt-8 text-gray-500">Все решения загружены</p>
+      )}
       </div>
     </div>
   );
