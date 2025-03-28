@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaAngleDown, FaAngleUp } from 'react-icons/fa';
+import { debounce } from 'lodash'
 
 interface Program {
   id: number;
@@ -53,7 +54,7 @@ const ReadySolutionsList: React.FC = () => {
   const fetchSolutions = useCallback(async (reset = false) => {
     if (loading || (!hasMore && !reset)) return;
     setLoading(true);
-
+  
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/posts/ready-solutions`, {
         params: {
@@ -61,11 +62,11 @@ const ReadySolutionsList: React.FC = () => {
           limit: itemsPerPage,
           search: searchQuery || undefined,
           freshSupport: freshSupportFilter !== null ? freshSupportFilter : undefined,
-          programIds: selectedPrograms.length > 0 ? selectedPrograms : undefined, // Передаём массив чисел
+          programIds: selectedPrograms.length > 0 ? selectedPrograms : undefined,
           type: typeFilter || undefined,
         },
       });
-
+  
       const newSolutions = response.data;
       setSolutions((prev) => (reset ? newSolutions : [...prev, ...newSolutions]));
       setHasMore(newSolutions.length === itemsPerPage);
@@ -76,6 +77,12 @@ const ReadySolutionsList: React.FC = () => {
       setLoading(false);
     }
   }, [page, searchQuery, freshSupportFilter, selectedPrograms, typeFilter, loading, hasMore]);
+  
+/*   // Создаём debounced версию fetchSolutions
+  const debouncedFetchSolutions = useCallback(
+    () => debounce(fetchSolutions, 300)(), // Встроенная функция вызывает debounced версию
+    [fetchSolutions] // Зависимость только от fetchSolutions
+  ); */
 
   // Первоначальная загрузка и сброс при изменении фильтров
   useEffect(() => {
@@ -83,8 +90,9 @@ const ReadySolutionsList: React.FC = () => {
   }, [fetchSolutions, searchQuery, freshSupportFilter, selectedPrograms, typeFilter]);
 
   // Бесконечная подгрузка при скролле
+
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = debounce(() => {
       if (
         window.innerHeight + document.documentElement.scrollTop >=
           document.documentElement.offsetHeight - 100 &&
@@ -93,7 +101,8 @@ const ReadySolutionsList: React.FC = () => {
       ) {
         fetchSolutions();
       }
-    };
+    }, 300);
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [fetchSolutions, loading, hasMore]);
