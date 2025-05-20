@@ -16,7 +16,7 @@ const app = express();
 const corsOptions = {
   origin: 'http://localhost:5173', // Укажи точный origin фронтенда (Vite работает на 5173)
   credentials: true, // Разрешаем отправку credentials (токенов)
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'], // Разрешённые методы
+  methods: ['GET', 'POST','PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Разрешённые методы
   allowedHeaders: ['Content-Type', 'Authorization'], // Разрешённые заголовки
 };
 
