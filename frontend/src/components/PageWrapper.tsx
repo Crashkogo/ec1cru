@@ -1,14 +1,13 @@
-// src/components/PageWrapper.tsx
 import React from 'react';
 
 interface PageWrapperProps {
   children: React.ReactNode;
-  headerHeight?: number; // Делаем параметр необязательным
+  headerHeight?: number;
 }
 
-const PageWrapper: React.FC<PageWrapperProps> = ({ children, headerHeight = 112 }) => {
+const PageWrapper: React.FC<PageWrapperProps> = ({ children, headerHeight = 64 }) => {
   return (
-    <div style={{ paddingTop: `${headerHeight}px` }} className="h-full min-h-screen bg-darkBg">
+    <div style={{ paddingTop: `${headerHeight}px` }} className="h-full min-h-screen bg-lightGray">
       {children}
     </div>
   );
