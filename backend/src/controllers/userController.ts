@@ -42,8 +42,8 @@ export const registerUser: RequestHandler = async (req, res) => {
 };
 //Логин пользователей.
 const loginSchema = z.object({
-  name: z.string().min(3).max(50),
-  password: z.string().min(6).max(100),
+  name: z.string().min(3),
+  password: z.string().min(6),
 });
 
 export const loginUser: RequestHandler = async (req, res) => {
@@ -52,6 +52,7 @@ export const loginUser: RequestHandler = async (req, res) => {
     const { name, password } = validatedData;
 
     const user = await prisma.user.findUnique({ where: { name } });
+    console.log('User from DB:', user); // Логируем данные пользователя
     if (!user) {
       res.status(400).json({ message: 'Invalid credentials' });
       return;
@@ -64,7 +65,7 @@ export const loginUser: RequestHandler = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ message: 'Login successful', token });
+    res.status(200).json({ message: 'Login successful', token, role: user.role });
   } catch (error) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ message: 'Validation error', errors: error.errors });

@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const plugin = require('tailwindcss/plugin');
+
 module.exports = {
   content: [
     './index.html',
@@ -7,28 +9,54 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Основная палитра
-        lightGray: '#F5F5F5', // Основной фон
-        darkPurple: '#818CFF', // Темно-фиолетовый для акцентов
-        hoverButton: '#C5CAE9',
-        lightPurple: '#A2A9FF', // Светло-фиолетовый для ховер-эффектов
-        orange: '#F77C2F', // Оранжевый для CTA-кнопок
-        turquoise: '#49E2F8', // Бирюзовый для выделения
-        white: '#FFFFFF', // Белый для текста и фонов
-        darkGray: '#333333', // Темно-серый для текста
-        grayAccent: '#E5E7EB', // Серый для границ и второстепенных элементов
+        lightGray: '#F5F5F5',
+        white: '#FFFFFF',
+        darkGray: '#333333',
+        grayAccent: '#E5E7EB',
+        primaryBlue: '#8DCEDF',
+        hoverBlue: '#6BA8C7',
+        lightBlue: '#BDEDF6',
+        accentSkyTransparent: '#4FC2F780',
+        accentSky: '#4FC3F7',
+        primaryOrange: '#FCCF8C',
+        hoverOrange: '#E8B978',
+        secondaryOrange: '#FDB265',
+        hoverSecondaryOrange: '#E89B4F',
+        accentYellow: '#F5A623',
+        hoverYellow: '#D68F1F',
+        textBlue: '#2D6A8B', // Новый цвет для текста и иконок
       },
       spacing: {
-        '4-header': '0.5rem', // Сохраняем твой кастомный отступ
-        'header': '4rem', // Высота хедера
+        '4-header': '0.5rem',
+        'header': '4rem',
       },
       fontSize: {
-        'xs': '0.75rem', // 12px
-        'sm': '0.875rem', // 14px
-        'base': '1rem', // 16px
-        'lg': '1.125rem', // 18px
-        'xl': '1.25rem', // 20px
-        '2xl': '1.5rem', // 24px
+        'xs': '0.75rem',
+        'sm': '0.875rem',
+        'base': '1rem',
+        'lg': '1.125rem',
+        'xl': '1.25rem',
+        '2xl': '1.5rem',
+      },
+      backgroundImage: {
+        // Текущий градиент (слева направо, мягкий голубой)
+        //'header-gradient': 'linear-gradient(90deg, #BDEDF6AA 0%, #E6F5FA 50%, #F0F9FD 100%)',
+
+        // Вариант 1: Более насыщенный голубой с диагональным направлением
+         'header-gradient': 'linear-gradient(135deg, #8DCEDFAA 0%, #BDEDF6 50%, #E6F5FA 100%)',
+
+        // Вариант 2: Вертикальный градиент сверху вниз с акцентом
+        // 'header-gradient': 'linear-gradient(to bottom, #4FC3F7AA 0%, #BDEDF6 50%, #F0F9FD 100%)',
+
+        // Вариант 3: Мягкий градиент с добавлением оранжевого оттенка
+        // 'header-gradient': 'linear-gradient(90deg, #BDEDF6AA 0%, #FCCF8CAA 50%, #F0F9FD 100%)',
+
+        // Вариант 4: Более контрастный с прозрачностью
+        // 'header-gradient': 'linear-gradient(to right, #4FC3F780 0%, #8DCEDF80 50%, #E6F5FA80 100%)',
+      },
+      textShadow: {
+        sm: '0 0 1px var(--tw-shadow-color), 0 0 1px var(--tw-shadow-color), 0 0 1px var(--tw-shadow-color), 0 0 1px var(--tw-shadow-color)',
+        md: '0 0 2px var(--tw-shadow-color), 0 0 2px var(--tw-shadow-color), 0 0 2px var(--tw-shadow-color), 0 0 2px var(--tw-shadow-color)',
       },
     },
     container: {
@@ -37,5 +65,22 @@ module.exports = {
       screens: false,
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(function ({ addUtilities }) {
+      addUtilities({
+        '.text-stroke-1': {
+          '-webkit-text-stroke-width': '1px',
+          'text-stroke-width': '1px',
+        },
+        '.text-stroke-color-dark': {
+          '-webkit-text-stroke-color': '#333333',
+          'text-stroke-color': '#333333',
+        },
+        '.text-stroke-color-gray': {
+          '-webkit-text-stroke-color': '#666666',
+          'text-stroke-color': '#666666',
+        },
+      });
+    }),
+  ],
 };

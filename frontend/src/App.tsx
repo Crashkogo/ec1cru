@@ -1,106 +1,112 @@
 // frontend/src/App.tsx
-import React, { Suspense, useRef, useState, useEffect } from 'react';
+import React, { Suspense, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async'; // Добавляем HelmetProvider
-import Header from './components/Header';
+import { HelmetProvider } from 'react-helmet-async';
+import { Admin } from 'react-admin';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { dataProvider } from './admin/dataProvider';
+import { authProvider } from './admin/authProvider';
 import Home from './pages/Home';
-import PageWrapper from './components/PageWrapper';
 import Login from './pages/admin/Login';
-import Dashboard from './pages/admin/Dashboard';
 import NewsDetail from './components/NewsDetail';
 import PromotionsDetail from './components/PromotionsDetail';
 import EventsDetail from './components/EventsDetail';
 import ReadySolutionsList from './components/ReadySolutionsList';
 import ReadySolutionDetail from './components/ReadySolutionDetail';
+import PageWrapper from './components/PageWrapper';
+import Header from './components/Header';
+
+// Создаем QueryClient
+const queryClient = new QueryClient();
 
 const App: React.FC = () => {
-  const headerRef = useRef<HTMLDivElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(0);
   const [showLogin, setShowLogin] = useState(false);
 
-  useEffect(() => {
-    if (headerRef.current) {
-      setHeaderHeight(headerRef.current.offsetHeight);
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'L') {
-        setShowLogin(true);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   return (
-    <HelmetProvider> {/* Оборачиваем приложение в HelmetProvider */}
-      <Router>
-        <div className="w-full h-full">
-          <Header ref={headerRef} setShowLogin={setShowLogin} />
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <Router>
           <Suspense fallback={<div className="text-darkGray">Loading...</div>}>
             <Routes>
               <Route
                 path="/"
                 element={
-                  <PageWrapper headerHeight={headerHeight}>
-                    <Home />
-                  </PageWrapper>
-                }
-              />
-              <Route
-                path="/admin/*"
-                element={
-                  <PageWrapper headerHeight={headerHeight}>
-                    <Dashboard />
-                  </PageWrapper>
+                  <div>
+                    <Header setShowLogin={setShowLogin} />
+                    <PageWrapper>
+                      <Home />
+                    </PageWrapper>
+                  </div>
                 }
               />
               <Route
                 path="/news/:slug"
                 element={
-                  <PageWrapper headerHeight={headerHeight}>
-                    <NewsDetail />
-                  </PageWrapper>
+                  <div>
+                    <Header setShowLogin={setShowLogin} />
+                    <PageWrapper>
+                      <NewsDetail />
+                    </PageWrapper>
+                  </div>
                 }
               />
               <Route
                 path="/promotions/:slug"
                 element={
-                  <PageWrapper headerHeight={headerHeight}>
-                    <PromotionsDetail />
-                  </PageWrapper>
+                  <div>
+                    <Header setShowLogin={setShowLogin} />
+                    <PageWrapper>
+                      <PromotionsDetail />
+                    </PageWrapper>
+                  </div>
                 }
               />
               <Route
                 path="/events/:slug"
                 element={
-                  <PageWrapper headerHeight={headerHeight}>
-                    <EventsDetail />
-                  </PageWrapper>
+                  <div>
+                    <Header setShowLogin={setShowLogin} />
+                    <PageWrapper>
+                      <EventsDetail />
+                    </PageWrapper>
+                  </div>
                 }
               />
               <Route
                 path="/ready-solutions"
                 element={
-                  <PageWrapper headerHeight={headerHeight}>
-                    <ReadySolutionsList />
-                  </PageWrapper>
+                  <div>
+                    <Header setShowLogin={setShowLogin} />
+                    <PageWrapper>
+                      <ReadySolutionsList />
+                    </PageWrapper>
+                  </div>
                 }
               />
               <Route
                 path="/ready-solutions/:slug"
                 element={
-                  <PageWrapper headerHeight={headerHeight}>
-                    <ReadySolutionDetail />
-                  </PageWrapper>
+                  <div>
+                    <Header setShowLogin={setShowLogin} />
+                    <PageWrapper>
+                      <ReadySolutionDetail />
+                    </PageWrapper>
+                  </div>
                 }
               />
+              <Route
+                path="/admin/*"
+                element={
+                  <Admin dataProvider={dataProvider} authProvider={authProvider} loginPage={Login} />
+                }
+              />
+              <Route path="/client" element={<div>Личный кабинет клиента (будет позже)</div>} />
             </Routes>
             {showLogin && <Login onClose={() => setShowLogin(false)} />}
           </Suspense>
-        </div>
-      </Router>
-    </HelmetProvider>
+        </Router>
+      </HelmetProvider>
+    </QueryClientProvider>
   );
 };
 
