@@ -10,15 +10,19 @@ export const authProvider: AuthProvider = {
       console.log('Environment:', import.meta.env); // Логируем окружение
       console.log('Login request to:', loginUrl); // Логируем URL
       console.log('Request payload:', { name: username, password: '****' }); // Логируем тело
-
       console.log('Starting axios request...');
-      const response = await axios.post(loginUrl, {
-        name: username,
-        password,
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 10000, // Увеличили таймаут до 10 секунд
-      });
+
+      const response = await axios.post(
+        loginUrl,
+        {
+          name: username,
+          password,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: 10000,
+        }
+      );
 
       console.log('Axios request completed');
       console.log('Full response object:', JSON.stringify(response, null, 2));
@@ -42,19 +46,22 @@ export const authProvider: AuthProvider = {
       localStorage.setItem('role', role);
       console.log('Saved to localStorage:', { token: token.slice(0, 20) + '...', role });
 
-      return Promise.resolve();
+      // Предотвращаем автоматический редирект React-Admin
+      return { redirectTo: false };
     } catch (error: any) {
       console.error('Login error:', {
         message: error.message,
         code: error.code,
         response: error.response ? JSON.stringify(error.response.data, null, 2) : null,
         status: error.response?.status,
-        config: error.config ? {
-          url: error.config.url,
-          method: error.config.method,
-          data: error.config.data,
-          headers: error.config.headers,
-        } : null,
+        config: error.config
+          ? {
+              url: error.config.url,
+              method: error.config.method,
+              data: error.config.data,
+              headers: error.config.headers,
+            }
+          : null,
       });
       throw new Error(`Authentication failed: ${error.message}`);
     }
