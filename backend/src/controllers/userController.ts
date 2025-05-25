@@ -52,7 +52,6 @@ export const loginUser: RequestHandler = async (req, res) => {
     const { name, password } = validatedData;
 
     const user = await prisma.user.findUnique({ where: { name } });
-    console.log('User from DB:', user); // Логируем данные пользователя
     if (!user) {
       res.status(400).json({ message: 'Invalid credentials' });
       return;

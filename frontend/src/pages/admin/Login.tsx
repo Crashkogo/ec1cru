@@ -1,11 +1,12 @@
 // frontend/src/pages/admin/Login.tsx
-import React, { useState } from 'react';
-import { useLogin, useNotify } from 'react-admin';
+import React, { useState, useEffect } from 'react';
+import { useNotify } from 'react-admin';
 import { useNavigate } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { authProvider } from '../../admin/authProvider';
 
 const loginSchema = z.object({
   name: z.string().min(3, 'Имя должно содержать минимум 3 символа'),
@@ -19,8 +20,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onClose }) => {
-  const [mode, setMode] = useState<'client' | 'employee'>('employee');
-  const login = useLogin();
+  const [mode, setMode] = useState<'client' | 'employee'>('client');
   const notify = useNotify();
   const navigate = useNavigate();
   const {
@@ -33,14 +33,34 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
     resolver: zodResolver(loginSchema),
   });
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await authProvider.checkAuth({});
+        const role = localStorage.getItem('role');
+        if (role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
+          navigate('/admin');
+          if (onClose) onClose();
+        } else if (role === 'CLINE') {
+          navigate('/client');
+          if (onClose) onClose();
+        }
+      } catch {
+        // Пользователь не авторизован, ничего не делаем
+      }
+    };
+    checkAuth();
+  }, [navigate, onClose]);
+
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     try {
       localStorage.removeItem('token');
       localStorage.removeItem('role');
-      console.log('Before login attempt:', { username: data.name, mode }); // Лог перед логином
-      await login({ username: data.name, password: data.password });
+
+      await authProvider.login({ username: data.name, password: data.password });
+
       const role = localStorage.getItem('role');
-      console.log('Login attempt:', { mode, role, username: data.name }); // Лог после логина
+
       if (mode === 'employee' && role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
         navigate('/admin');
         if (onClose) onClose();
@@ -48,14 +68,13 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
         navigate('/client');
         if (onClose) onClose();
       } else {
-        setError('root', { 
-          message: `Доступ запрещён. Роль: ${role || 'не указана'}, режим: ${mode}.` 
+        setError('root', {
+          message: `Доступ запрещён. Роль: ${role || 'не указана'}, режим: ${mode}.`,
         });
         localStorage.removeItem('token');
         localStorage.removeItem('role');
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch {
       setError('root', { message: 'Неверное имя пользователя или пароль' });
       notify('Ошибка входа', { type: 'error' });
     }
@@ -118,9 +137,7 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
               } transition-all duration-200`}
               placeholder="Введите имя"
             />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-            )}
+            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
           </div>
           <div>
             <label htmlFor="password" className="block text-darkGray font-medium mb-1">
@@ -135,13 +152,9 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
               } transition-all duration-200`}
               placeholder="Введите пароль"
             />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-            )}
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
           </div>
-          {errors.root && (
-            <p className="text-red-500 text-sm mb-4">{errors.root.message}</p>
-          )}
+          {errors.root && <p className="text-red-500 text-sm mb-4">{errors.root.message}</p>}
           <button
             type="submit"
             className={`w-full p-2 rounded text-textBlue border transition-all duration-200 transform hover:scale-105 ${

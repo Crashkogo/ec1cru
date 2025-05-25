@@ -1,6 +1,8 @@
+// frontend/src/components/Header.tsx
 import { useState, useEffect, useRef, forwardRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserCircleIcon, Bars3Icon, XMarkIcon, PhoneIcon, ComputerDesktopIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { authProvider } from '../admin/authProvider';
 import logo from '../assets/logo.png';
 
 interface MenuItemSimple {
@@ -97,10 +99,27 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const navigate = useNavigate();
 
   const closeMenus = () => {
     setOpenDropdown(null);
     setIsMenuOpen(false);
+  };
+
+  const handleLoginClick = async () => {
+    try {
+      await authProvider.checkAuth({});
+      const role = localStorage.getItem('role');
+      if (role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
+        navigate('/admin');
+      } else if (role === 'CLINE') {
+        navigate('/client');
+      } else {
+        setShowLogin(true);
+      }
+    } catch {
+      setShowLogin(true);
+    }
   };
 
   useEffect(() => {
@@ -251,7 +270,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
           </div>
           <div className="self-center">
             <button
-              onClick={() => setShowLogin(true)}
+              onClick={handleLoginClick}
               className="bg-accentSkyTransparent text-textBlue p-2 rounded-md group w-12 h-12 flex items-center justify-center hover:bg-accentSky hover:text-textBlue transition-colors duration-300 shadow-sm"
               aria-label="Открыть форму входа"
             >
@@ -375,7 +394,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
             </button>
             <button
               onClick={() => {
-                setShowLogin(true);
+                handleLoginClick();
                 setIsMenuOpen(false);
               }}
               className="w-full bg-accentSkyTransparent text-textBlue p-2 rounded-md group h-12 flex items-center justify-center hover:bg-accentSky hover:text-textBlue transition-colors duration-300 shadow-sm"
