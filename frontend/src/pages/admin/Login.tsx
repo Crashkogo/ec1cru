@@ -1,12 +1,11 @@
 // frontend/src/pages/admin/Login.tsx
-import React, { useState, useEffect } from 'react';
-import { useNotify } from 'react-admin';
+import React, { useState } from 'react';
+import { useLogin, useNotify } from 'react-admin';
 import { useNavigate } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { authProvider } from '../../admin/authProvider';
 
 const loginSchema = z.object({
   name: z.string().min(3, 'Имя должно содержать минимум 3 символа'),
@@ -20,7 +19,8 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onClose }) => {
-  const [mode, setMode] = useState<'client' | 'employee'>('client');
+  const [mode, setMode] = useState<'client' | 'employee'>('employee');
+  const login = useLogin();
   const notify = useNotify();
   const navigate = useNavigate();
   const {
@@ -56,11 +56,10 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
     try {
       localStorage.removeItem('token');
       localStorage.removeItem('role');
-
-      await authProvider.login({ username: data.name, password: data.password });
-
+      console.log('Before login attempt:', { username: data.name, mode }); // Лог перед логином
+      await login({ username: data.name, password: data.password });
       const role = localStorage.getItem('role');
-
+      console.log('Login attempt:', { mode, role, username: data.name }); // Лог после логина
       if (mode === 'employee' && role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
         navigate('/admin');
         if (onClose) onClose();
@@ -74,7 +73,8 @@ const Login: React.FC<LoginProps> = ({ onClose }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
       }
-    } catch {
+    } catch (error) {
+      console.error('Login error:', error);
       setError('root', { message: 'Неверное имя пользователя или пароль' });
       notify('Ошибка входа', { type: 'error' });
     }
