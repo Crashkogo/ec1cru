@@ -2,7 +2,7 @@
 import React, { Suspense, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import { Admin } from 'react-admin';
+import { Admin, Resource } from 'react-admin';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { dataProvider } from './admin/dataProvider';
 import { authProvider } from './admin/authProvider';
@@ -15,6 +15,7 @@ import ReadySolutionsList from './components/ReadySolutionsList';
 import ReadySolutionDetail from './components/ReadySolutionDetail';
 import PageWrapper from './components/PageWrapper';
 import Header from './components/Header';
+import Dashboard from './pages/admin/Dashboard'; // Импортируем кастомный дашборд
 
 // Создаем QueryClient
 const queryClient = new QueryClient();
@@ -97,7 +98,19 @@ const App: React.FC = () => {
               <Route
                 path="/admin/*"
                 element={
-                  <Admin dataProvider={dataProvider} authProvider={authProvider} loginPage={Login} />
+                  <Admin
+                    dataProvider={dataProvider}
+                    authProvider={authProvider}
+                    loginPage={Login}
+                    dashboard={Dashboard}
+                    basename="/admin"
+                  >
+                    {/* Минимальный ресурс для проверки */}
+                    <Resource
+                      name="programs"
+                      list={() => <div>Список программ</div>} // Временная заглушка
+                    />
+                  </Admin>
                 }
               />
               <Route path="/client" element={<div>Личный кабинет клиента (будет позже)</div>} />

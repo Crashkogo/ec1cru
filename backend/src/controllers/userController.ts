@@ -6,7 +6,7 @@ import { JWT_SECRET } from '../config';
 import { z } from 'zod';
 
 const prisma = new PrismaClient();
-//Регистрация новых пользователей.
+
 const registerSchema = z.object({
   name: z.string().min(3).max(50),
   password: z.string().min(6).max(100),
@@ -40,7 +40,7 @@ export const registerUser: RequestHandler = async (req, res) => {
     }
   }
 };
-//Логин пользователей.
+
 const loginSchema = z.object({
   name: z.string().min(3),
   password: z.string().min(6),
@@ -74,7 +74,7 @@ export const loginUser: RequestHandler = async (req, res) => {
     }
   }
 };
-//Вывод списка пользователей в админке по 10 на страницу.
+
 const getUsersSchema = z.object({
   page: z.string().optional().transform(val => parseInt(val || '1')).default('1'),
   limit: z.string().optional().transform(val => parseInt(val || '10')).default('10'),
@@ -115,7 +115,6 @@ export const updateUser: RequestHandler = async (req, res) => {
     const validatedData = updateUserSchema.parse(req.body);
     const { name, password, role } = validatedData;
 
-    // Проверка прав (предполагается, что req.user добавлен через authMiddleware)
     if (req.user?.role !== 'ADMIN') {
       res.status(403).json({ message: 'Forbidden: Only admins can update users' });
       return;
@@ -142,5 +141,25 @@ export const updateUser: RequestHandler = async (req, res) => {
       console.error('Error updating user:', error);
       res.status(500).json({ message: 'Internal server error' });
     }
+  }
+};
+
+export const getCurrentUser: RequestHandler = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'Не авторизован' });
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, role: true },
+    });
+    if (!user) {
+      return res.status(404).json({ message: 'Пользователь не найден' });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error('Ошибка при получении пользователя:', error);
+    res.status(500).json({ message: 'Ошибка сервера' });
   }
 };

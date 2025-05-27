@@ -1,14 +1,17 @@
-import { RequestHandler } from 'express';
+import { RequestHandler, Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config';
 
+// Расширяем тип Request для добавления user
+interface AuthenticatedRequest extends Request {
+  user?: { id: number; role: string };
+}
 
-// Предполагаем, что тип для decoded уже определён глобально
-export const authMiddleware: RequestHandler = (req, res, next) => {
+export const authMiddleware: RequestHandler = (req: AuthenticatedRequest, res, next) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) {
     res.status(401).send('Access denied. No token provided.');
-    return; // Не возвращаем Response явно
+    return;
   }
 
   try {
@@ -17,6 +20,6 @@ export const authMiddleware: RequestHandler = (req, res, next) => {
     next();
   } catch (ex) {
     res.status(400).send('Invalid token.');
-    return; // Не возвращаем Response явно
+    return;
   }
 };
