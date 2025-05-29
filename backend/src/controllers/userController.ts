@@ -148,14 +148,16 @@ export const getCurrentUser: RequestHandler = async (req, res) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({ message: 'Не авторизован' });
+      res.status(401).json({ message: 'Не авторизован' });
+      return;
     }
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, name: true, role: true },
     });
     if (!user) {
-      return res.status(404).json({ message: 'Пользователь не найден' });
+      res.status(404).json({ message: 'Пользователь не найден' });
+      return;
     }
     res.json(user);
   } catch (error) {

@@ -1,23 +1,19 @@
-// frontend/src/App.tsx
+// src/App.tsx
 import React, { Suspense, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import { Admin, Resource } from 'react-admin';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { dataProvider } from './admin/dataProvider';
-import { authProvider } from './admin/authProvider';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import Home from './pages/Home';
 import Login from './pages/admin/Login';
+import Dashboard from './pages/admin/Dashboard';
+import Header from './components/Header';
+import PageWrapper from './components/PageWrapper';
 import NewsDetail from './components/NewsDetail';
 import PromotionsDetail from './components/PromotionsDetail';
 import EventsDetail from './components/EventsDetail';
 import ReadySolutionsList from './components/ReadySolutionsList';
 import ReadySolutionDetail from './components/ReadySolutionDetail';
-import PageWrapper from './components/PageWrapper';
-import Header from './components/Header';
-import Dashboard from './pages/admin/Dashboard'; // Импортируем кастомный дашборд
 
-// Создаем QueryClient
 const queryClient = new QueryClient();
 
 const App: React.FC = () => {
@@ -27,7 +23,7 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <Router>
-          <Suspense fallback={<div className="text-darkGray">Loading...</div>}>
+          <Suspense fallback={<div className="text-gray-600">Loading...</div>}>
             <Routes>
               <Route
                 path="/"
@@ -95,24 +91,7 @@ const App: React.FC = () => {
                   </div>
                 }
               />
-              <Route
-                path="/admin/*"
-                element={
-                  <Admin
-                    dataProvider={dataProvider}
-                    authProvider={authProvider}
-                    loginPage={Login}
-                    dashboard={Dashboard}
-                    basename="/admin"
-                  >
-                    {/* Минимальный ресурс для проверки */}
-                    <Resource
-                      name="programs"
-                      list={() => <div>Список программ</div>} // Временная заглушка
-                    />
-                  </Admin>
-                }
-              />
+              <Route path="/admin/*" element={<Dashboard />} />
               <Route path="/client" element={<div>Личный кабинет клиента (будет позже)</div>} />
             </Routes>
             {showLogin && <Login onClose={() => setShowLogin(false)} />}

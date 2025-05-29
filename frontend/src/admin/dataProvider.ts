@@ -17,18 +17,28 @@ export const dataProvider: DataProvider = {
       order,
       ...params.filter,
     };
-    const url = resource === 'users' ? `${apiUrl}/users` : `${apiUrl}/${resource}`;
+    const url =
+      resource === 'users'
+        ? `${apiUrl}/api/users`
+        : resource === 'programs'
+        ? `${apiUrl}/api/posts/admin/${resource}`
+        : `${apiUrl}/api/posts/${resource}`;
     const { json } = await fetchUtils.fetchJson(`${url}?${stringify(query)}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
     return {
-      data: json.users || json,
-      total: json.total || json.length,
+      data: Array.isArray(json) ? json : json.items || json,
+      total: json.total || (Array.isArray(json) ? json.length : json.items?.length || 0),
     };
   },
 
   getOne: async (resource, params) => {
-    const url = `${apiUrl}/${resource}/${params.id}`;
+    const url =
+      resource === 'users'
+        ? `${apiUrl}/api/users/${params.id}`
+        : resource === 'programs'
+        ? `${apiUrl}/api/posts/admin/${resource}/${params.id}`
+        : `${apiUrl}/api/posts/${resource}/${params.id}`;
     const { json } = await fetchUtils.fetchJson(url, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
@@ -37,11 +47,16 @@ export const dataProvider: DataProvider = {
 
   getMany: async (resource, params) => {
     const query = { id: params.ids };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { json } = await fetchUtils.fetchJson(url, {
+    const url =
+      resource === 'users'
+        ? `${apiUrl}/api/users`
+        : resource === 'programs'
+        ? `${apiUrl}/api/posts/admin/${resource}`
+        : `${apiUrl}/api/posts/${resource}`;
+    const { json } = await fetchUtils.fetchJson(`${url}?${stringify(query)}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
-    return { data: json };
+    return { data: Array.isArray(json) ? json : json.items || [] };
   },
 
   getManyReference: async (resource, params) => {
@@ -57,18 +72,28 @@ export const dataProvider: DataProvider = {
       [params.target]: params.id,
       ...params.filter,
     };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { json } = await fetchUtils.fetchJson(url, {
+    const url =
+      resource === 'users'
+        ? `${apiUrl}/api/users`
+        : resource === 'programs'
+        ? `${apiUrl}/api/posts/admin/${resource}`
+        : `${apiUrl}/api/posts/${resource}`;
+    const { json } = await fetchUtils.fetchJson(`${url}?${stringify(query)}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
     return {
-      data: json,
-      total: json.total || json.length,
+      data: Array.isArray(json) ? json : json.items || [],
+      total: json.total || (Array.isArray(json) ? json.length : json.items?.length || 0),
     };
   },
 
   create: async (resource, params) => {
-    const url = resource === 'users' ? `${apiUrl}/users/register` : `${apiUrl}/${resource}`;
+    const url =
+      resource === 'users'
+        ? `${apiUrl}/api/users/register`
+        : resource === 'programs'
+        ? `${apiUrl}/api/posts/admin/${resource}`
+        : `${apiUrl}/api/posts/${resource}`;
     const { json } = await fetchUtils.fetchJson(url, {
       method: 'POST',
       body: JSON.stringify(params.data),
@@ -78,7 +103,12 @@ export const dataProvider: DataProvider = {
   },
 
   update: async (resource, params) => {
-    const url = `${apiUrl}/${resource}/${params.id}`;
+    const url =
+      resource === 'users'
+        ? `${apiUrl}/api/users/${params.id}`
+        : resource === 'programs'
+        ? `${apiUrl}/api/posts/admin/${resource}/${params.id}`
+        : `${apiUrl}/api/posts/${resource}/${params.id}`;
     const { json } = await fetchUtils.fetchJson(url, {
       method: resource === 'users' ? 'PUT' : 'PATCH',
       body: JSON.stringify(params.data),
@@ -89,8 +119,13 @@ export const dataProvider: DataProvider = {
 
   updateMany: async (resource, params) => {
     const query = { id: params.ids };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { json } = await fetchUtils.fetchJson(url, {
+    const url =
+      resource === 'users'
+        ? `${apiUrl}/api/users`
+        : resource === 'programs'
+        ? `${apiUrl}/api/posts/admin/${resource}`
+        : `${apiUrl}/api/posts/${resource}`;
+    const { json } = await fetchUtils.fetchJson(`${url}?${stringify(query)}`, {
       method: resource === 'users' ? 'PUT' : 'PATCH',
       body: JSON.stringify(params.data),
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -99,7 +134,12 @@ export const dataProvider: DataProvider = {
   },
 
   delete: async (resource, params) => {
-    const url = `${apiUrl}/${resource}/${params.id}`;
+    const url =
+      resource === 'users'
+        ? `${apiUrl}/api/users/${params.id}`
+        : resource === 'programs'
+        ? `${apiUrl}/api/posts/admin/${resource}/${params.id}`
+        : `${apiUrl}/api/posts/${resource}/${params.id}`;
     const { json } = await fetchUtils.fetchJson(url, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -109,8 +149,13 @@ export const dataProvider: DataProvider = {
 
   deleteMany: async (resource, params) => {
     const query = { id: params.ids };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { json } = await fetchUtils.fetchJson(url, {
+    const url =
+      resource === 'users'
+        ? `${apiUrl}/api/users`
+        : resource === 'programs'
+        ? `${apiUrl}/api/posts/admin/${resource}`
+        : `${apiUrl}/api/posts/${resource}`;
+    const { json } = await fetchUtils.fetchJson(`${url}?${stringify(query)}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
     });
