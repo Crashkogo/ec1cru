@@ -1,119 +1,197 @@
-// frontend/src/admin/dataProvider.ts
-import { DataProvider, fetchUtils } from 'react-admin';
+import { DataProvider, fetchUtils, RaRecord, DeleteParams, DeleteResult } from 'react-admin';
 import { stringify } from 'query-string';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
+interface HttpError {
+  status: number;
+  body?: { message?: string };
+}
+
 export const dataProvider: DataProvider = {
+  // Получение списка пользователей
   getList: async (resource, params) => {
+    if (resource !== 'users') return Promise.reject('Resource not supported');
     const pagination = params.pagination || { page: 1, perPage: 10 };
-    const sort = params.sort || { field: 'id', order: 'ASC' };
     const { page, perPage } = pagination;
-    const { field, order } = sort;
-    const query = {
-      page,
-      limit: perPage,
-      sort: field,
-      order,
-      ...params.filter,
-    };
-    const url = resource === 'users' ? `${apiUrl}/users` : `${apiUrl}/${resource}`;
-    const { json } = await fetchUtils.fetchJson(`${url}?${stringify(query)}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-    return {
-      data: json.users || json,
-      total: json.total || json.length,
-    };
+    const query = { page: page.toString(), limit: perPage.toString() };
+    const url = `${apiUrl}/api/users?${stringify(query)}`;
+    const token = localStorage.getItem('token');
+    console.log('Токен:', token);
+    const headers = new Headers();
+    if (token) {
+      headers.append('Authorization', `Bearer ${token}`);
+    }
+    const { json } = await fetchUtils.fetchJson(url, { headers });
+    return { data: json.users, total: json.total };
   },
 
+  // Получение одного пользователя
   getOne: async (resource, params) => {
-    const url = `${apiUrl}/${resource}/${params.id}`;
-    const { json } = await fetchUtils.fetchJson(url, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-    return { data: json };
+    if (resource !== 'users') return Promise.reject('Resource not supported');
+    const url = `${apiUrl}/api/users/${params.id}`;
+    const token = localStorage.getItem('token');
+    const headers = new Headers();
+    if (token) {
+      headers.append('Authorization', `Bearer ${token}`);
+    }
+    try {
+      const { json } = await fetchUtils.fetchJson(url, { headers });
+      return { data: json };
+    } catch (error) {
+      console.error('GetOne error:', error);
+      throw new Error(
+        (error as HttpError).body?.message || 'Failed to fetch user'
+      );
+    }
   },
 
+  // Получение нескольких пользователей по ID
   getMany: async (resource, params) => {
-    const query = { id: params.ids };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { json } = await fetchUtils.fetchJson(url, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-    return { data: json };
+    if (resource !== 'users') return Promise.reject('Resource not supported');
+    const query = { id: params.ids.join(',') };
+    const url = `${apiUrl}/api/users?${stringify(query)}`;
+    const token = localStorage.getItem('token');
+    const headers = new Headers();
+    if (token) {
+      headers.append('Authorization', `Bearer ${token}`);
+    }
+    const { json } = await fetchUtils.fetchJson(url, { headers });
+    return { data: Array.isArray(json) ? json : [json] };
   },
 
+  // Получение записей, ссылающихся на другую запись
   getManyReference: async (resource, params) => {
+    if (resource !== 'users') return Promise.reject('Resource not supported');
     const pagination = params.pagination || { page: 1, perPage: 10 };
-    const sort = params.sort || { field: 'id', order: 'ASC' };
     const { page, perPage } = pagination;
-    const { field, order } = sort;
     const query = {
-      page,
-      limit: perPage,
-      sort: field,
-      order,
       [params.target]: params.id,
-      ...params.filter,
+      page: page.toString(),
+      limit: perPage.toString(),
     };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { json } = await fetchUtils.fetchJson(url, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-    return {
-      data: json,
-      total: json.total || json.length,
-    };
+    const url = `${apiUrl}/api/users?${stringify(query)}`;
+    const token = localStorage.getItem('token');
+    const headers = new Headers();
+    if (token) {
+      headers.append('Authorization', `Bearer ${token}`);
+    }
+    const { json } = await fetchUtils.fetchJson(url, { headers });
+    return { data: json, total: json.total || json.length };
   },
 
+  // Создание нового пользователя
   create: async (resource, params) => {
-    const url = resource === 'users' ? `${apiUrl}/users/register` : `${apiUrl}/${resource}`;
+    if (resource !== 'users') return Promise.reject('Resource not supported');
+    const url = `${apiUrl}/api/users/register`;
+    const token = localStorage.getItem('token');
+    const headers = new Headers();
+    if (token) {
+      headers.append('Authorization', `Bearer ${token}`);
+    }
     const { json } = await fetchUtils.fetchJson(url, {
       method: 'POST',
       body: JSON.stringify(params.data),
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      headers,
     });
-    return { data: json };
+    return { data: json.user };
   },
 
+  // Обновление пользователя
   update: async (resource, params) => {
-    const url = `${apiUrl}/${resource}/${params.id}`;
-    const { json } = await fetchUtils.fetchJson(url, {
-      method: resource === 'users' ? 'PUT' : 'PATCH',
-      body: JSON.stringify(params.data),
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-    return { data: json };
+    if (resource !== 'users') return Promise.reject('Resource not supported');
+    const url = `${apiUrl}/api/users/${params.id}`;
+    const token = localStorage.getItem('token');
+    const headers = new Headers();
+    if (token) {
+      headers.append('Authorization', `Bearer ${token}`);
+    }
+    const data = {
+      name: params.data.name,
+      role: params.data.role,
+      ...(params.data.password ? { password: params.data.password } : {}),
+    };
+    try {
+      const { json } = await fetchUtils.fetchJson(url, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+        headers,
+      });
+      return { data: json.user };
+    } catch (error) {
+      console.error('Update error:', error);
+      throw new Error(
+        (error as HttpError).body?.message || 'Failed to update user'
+      );
+    }
   },
 
+  // Обновление нескольких пользователей
   updateMany: async (resource, params) => {
-    const query = { id: params.ids };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { json } = await fetchUtils.fetchJson(url, {
-      method: resource === 'users' ? 'PUT' : 'PATCH',
-      body: JSON.stringify(params.data),
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-    return { data: json };
+    if (resource !== 'users') return Promise.reject('Resource not supported');
+    const token = localStorage.getItem('token');
+    const headers = new Headers();
+    if (token) {
+      headers.append('Authorization', `Bearer ${token}`);
+    }
+    const data = {
+      name: params.data.name,
+      role: params.data.role,
+      ...(params.data.password ? { password: params.data.password } : {}),
+    };
+    const results = await Promise.all(
+      params.ids.map((id) =>
+        fetchUtils.fetchJson(`${apiUrl}/api/users/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(data),
+          headers,
+        })
+      )
+    );
+    return { data: results.map(({ json }) => json.user.id) };
   },
 
-  delete: async (resource, params) => {
-    const url = `${apiUrl}/${resource}/${params.id}`;
-    const { json } = await fetchUtils.fetchJson(url, {
+  // Удаление пользователя
+delete: async <RecordType extends RaRecord>(
+  resource: string,
+  params: DeleteParams<RecordType>
+): Promise<DeleteResult<RecordType>> => {
+  if (resource !== 'users') return Promise.reject('Resource not supported');
+  const url = `${apiUrl}/api/users/${params.id}`;
+  const token = localStorage.getItem('token');
+  console.log('dataProvider.delete: token:', token); // Отладка: токен перед отправкой
+  const headers = new Headers();
+  if (token) {
+    headers.append('Authorization', `Bearer ${token}`);
+  }
+  try {
+    await fetchUtils.fetchJson(url, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      headers,
     });
-    return { data: json };
-  },
+    return { data: { id: Number(params.id), name: '', role: '' } as unknown as RecordType };
+  } catch (error) {
+    console.error('Delete error:', error);
+    throw new Error((error as HttpError).body?.message || 'Failed to delete user');
+  }
+},
 
-  deleteMany: async (resource, params) => {
-    const query = { id: params.ids };
-    const url = `${apiUrl}/${resource}?${stringify(query)}`;
-    const { json } = await fetchUtils.fetchJson(url, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-    return { data: json };
-  },
+  // Удаление нескольких пользователей
+ deleteMany: async (resource, params) => {
+  if (resource !== 'users') return Promise.reject('Resource not supported');
+  const token = localStorage.getItem('token');
+  const headers = new Headers();
+  if (token) {
+    headers.append('Authorization', `Bearer ${token}`);
+  }
+  await Promise.all(
+    params.ids.map(id =>
+      fetchUtils.fetchJson(`${apiUrl}/api/users/${id}`, {
+        method: 'DELETE',
+        headers,
+      })
+    )
+  );
+  return { data: params.ids }; // Возвращаем массив ID
+},
 };

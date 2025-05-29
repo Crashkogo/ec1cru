@@ -43,7 +43,7 @@ module.exports = {
         //'header-gradient': 'linear-gradient(90deg, #BDEDF6AA 0%, #E6F5FA 50%, #F0F9FD 100%)',
 
         // Вариант 1: Более насыщенный голубой с диагональным направлением
-         'header-gradient': 'linear-gradient(135deg, #8DCEDFAA 0%, #BDEDF6 50%, #E6F5FA 100%)',
+        'header-gradient': 'linear-gradient(135deg, #8DCEDFAA 0%, #BDEDF6 50%, #E6F5FA 100%)',
 
         // Вариант 2: Вертикальный градиент сверху вниз с акцентом
         // 'header-gradient': 'linear-gradient(to bottom, #4FC3F7AA 0%, #BDEDF6 50%, #F0F9FD 100%)',
