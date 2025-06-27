@@ -5,6 +5,9 @@ import './index.css';
 import App from './App.tsx'
 import { StrictMode } from 'react';
 
+// Импортируем тестовую функцию для разработки
+import './utils/transliterate';
+
 // Инициализация тёмной темы
 const initializeTheme = () => {
   const savedTheme = localStorage.getItem('theme');
@@ -20,7 +23,7 @@ initializeTheme();
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
     <StrictMode>
-    <App />
+      <App />
     </StrictMode>
   </Provider>
 )

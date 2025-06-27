@@ -32,12 +32,10 @@ export const registerUser: RequestHandler = async (req, res) => {
     });
 
     const { password: _, ...userWithoutPassword } = newUser;
-    res
-      .status(201)
-      .json({
-        message: "User registered successfully",
-        user: userWithoutPassword,
-      });
+    res.status(201).json({
+      message: "User registered successfully",
+      user: userWithoutPassword,
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       res
@@ -91,7 +89,7 @@ export const loginUser: RequestHandler = async (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "30d",
     });
     res
       .status(200)
@@ -123,26 +121,51 @@ const getUsersSchema = z.object({
 
 export const getUsers: RequestHandler = async (req, res) => {
   try {
-    const { page, limit } = getUsersSchema.parse(req.query);
-    const skip = (page - 1) * limit;
+    // Поддержка пагинации React Admin
+    const page = parseInt(req.query._start as string) || 0;
+    const limit = parseInt(req.query._end as string) || 10;
+    const skip = page;
+    const take = limit - page;
 
-    const users = await prisma.user.findMany({
-      skip,
-      take: limit,
-      select: { id: true, name: true, role: true },
-    });
-    const total = await prisma.user.count();
+    // Поддержка сортировки
+    const sortField = (req.query._sort as string) || "id";
+    const sortOrder =
+      (req.query._order as string)?.toLowerCase() === "asc" ? "asc" : "desc";
 
-    res.status(200).json({ users, total, page, limit });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      res
-        .status(400)
-        .json({ message: "Validation error", errors: error.errors });
-    } else {
-      console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Internal server error" });
+    // Поддержка поиска и фильтрации
+    const searchQuery = req.query.q as string;
+    const roleFilter = req.query.role as string;
+
+    const where: any = {};
+    if (searchQuery) {
+      where.name = { contains: searchQuery, mode: "insensitive" };
     }
+    if (roleFilter) {
+      where.role = roleFilter;
+    }
+
+    const orderBy: any = {};
+    orderBy[sortField] = sortOrder;
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        orderBy,
+        skip,
+        take,
+        select: { id: true, name: true, role: true, createdAt: true },
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    // Устанавливаем заголовок для React Admin пагинации
+    res.set("X-Total-Count", total.toString());
+    res.set("Access-Control-Expose-Headers", "X-Total-Count");
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -187,12 +210,10 @@ export const updateUser: RequestHandler = async (req, res) => {
     });
 
     const { password: _, ...userWithoutPassword } = updatedUser;
-    res
-      .status(200)
-      .json({
-        message: "User updated successfully",
-        user: userWithoutPassword,
-      });
+    res.status(200).json({
+      message: "User updated successfully",
+      user: userWithoutPassword,
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       res

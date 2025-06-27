@@ -6,9 +6,9 @@ import {
   Menu,
   LayoutProps,
   AppBar,
-  Toolbar,
   useSidebarState,
 } from 'react-admin';
+import { Toolbar } from '@mui/material';
 import { dataProvider } from '../../admin/dataProvider';
 import { authProvider } from '../../admin/authProvider';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -22,10 +22,27 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import HomeIcon from '@mui/icons-material/Home';
 import PeopleIcon from '@mui/icons-material/People';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CodeIcon from '@mui/icons-material/Code';
 import { Collapse, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { UserList } from './UserList';
 import { UserCreate } from './UserCreate';
 import { UserEdit } from './UserEdit';
+import { UserShow } from './UserShow';
+import { NewsList } from './NewsList';
+import { NewsCreate } from './NewsCreate';
+import { NewsEdit } from './NewsEdit';
+import { EventsList } from './EventsList';
+import { EventsCreate } from './EventsCreate';
+import { EventsEdit } from './EventsEdit';
+import { PromotionsList } from './PromotionsList';
+import { PromotionsCreate } from './PromotionsCreate';
+import { PromotionsEdit } from './PromotionsEdit';
+import ReadySolutionsList from './ReadySolutionsList';
+import ReadySolutionsCreate from './ReadySolutionsCreate';
+import ReadySolutionsEdit from './ReadySolutionsEdit';
+import { ProgramsList } from './ProgramsList';
+import { ProgramsCreate } from './ProgramsCreate';
+import { ProgramsEdit } from './ProgramsEdit';
 import { i18nProvider } from '../../admin/i18nProvider';
 
 // MUI тема с цветами из Tailwind
@@ -176,9 +193,9 @@ const MyMenu: React.FC = () => {
         }}
       >
         <Menu.Item
-          to="/admin/settings/programs"
+          to="/admin/programs"
           primaryText={isSidebarOpen ? 'Программы' : ''}
-          leftIcon={<BuildIcon className="text-textBlue" />}
+          leftIcon={<CodeIcon className="text-textBlue" />}
           className="hover:bg-hoverBlue hover:text-textBlue rounded-lg my-1 font-medium text-base transition-colors duration-300 px-4 py-2"
           sx={{
             pl: isSidebarOpen ? 6 : 2.5,
@@ -292,16 +309,17 @@ const Dashboard: React.FC = () => (
         </div>
       )}
     >
-      <Resource name="news" list={PlaceholderList} create={PlaceholderCreate} edit={PlaceholderEdit} />
-      <Resource name="events" list={PlaceholderList} create={PlaceholderCreate} edit={PlaceholderEdit} />
-      <Resource name="promotions" list={PlaceholderList} create={PlaceholderCreate} edit={PlaceholderEdit} />
-      <Resource name="ready-solutions" list={PlaceholderList} create={PlaceholderCreate} edit={PlaceholderEdit} />
-      <Resource name="programs" list={PlaceholderList} />
+      <Resource name="news" list={NewsList} create={NewsCreate} edit={NewsEdit} />
+      <Resource name="events" list={EventsList} create={EventsCreate} edit={EventsEdit} />
+      <Resource name="promotions" list={PromotionsList} create={PromotionsCreate} edit={PromotionsEdit} />
+      <Resource name="ready-solutions" list={ReadySolutionsList} create={ReadySolutionsCreate} edit={ReadySolutionsEdit} />
+      <Resource name="programs" list={ProgramsList} create={ProgramsCreate} edit={ProgramsEdit} />
       <Resource
         name="users"
         list={UserList}
         create={UserCreate}
         edit={UserEdit}
+        show={UserShow}
         recordRepresentation="name"
       />
     </Admin>
