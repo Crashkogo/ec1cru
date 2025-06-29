@@ -1,7 +1,7 @@
-// frontend/src/components/Header.tsx
+// frontend/src/components/Header.tsx - СОВРЕМЕННАЯ ВЕРСИЯ
 import { useState, useEffect, useRef, forwardRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { UserCircleIcon, Bars3Icon, XMarkIcon, PhoneIcon, ComputerDesktopIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, Bars3Icon, XMarkIcon, PhoneIcon, ComputerDesktopIcon, ChevronDownIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import { authProvider } from '../admin/authProvider';
 import logo from '../assets/logo.png';
 
@@ -20,76 +20,50 @@ interface MenuItemWithSubItems {
   items: SubItem[];
 }
 
-interface MenuItemWithColumns {
-  title: string;
-  items: { column: string; subItems: SubItem[] }[];
-}
-
-type MenuItem = MenuItemSimple | MenuItemWithSubItems | MenuItemWithColumns;
+type MenuItem = MenuItemSimple | MenuItemWithSubItems;
 
 const menuItems: MenuItem[] = [
+  { title: 'Новости', path: '/news' },
+  { title: 'Акции', path: '/promotions' },
   {
-    title: 'Компания',
+    title: 'Продукты',
     items: [
-      { name: 'Информация', path: '/about' },
-      { name: 'Наша команда', path: '/team' },
-      { name: 'Вакансии', path: '/careers' },
-      { name: 'Наша жизнь', path: '/life' },
+      { name: 'Программы 1С', path: '/1c-programs' },
+      { name: 'Сервисы 1С', path: '/1c-services' },
+      { name: 'Оборудование', path: '/equipment' },
+      { name: 'Наши разработки', path: '/ready-solutions' },
     ],
   },
   {
     title: 'Услуги',
     items: [
-      {
-        column: 'Поддержка',
-        subItems: [
-          { name: 'Сопровождение 1С', path: '/support-1c' },
-          { name: 'Техподдержка', path: '/tech-support' },
-          { name: 'Консультации', path: '/consulting' },
-          { name: 'Обновления', path: '/updates' },
-        ],
-      },
-      {
-        column: 'Автоматизация',
-        subItems: [
-          { name: 'Внедрение 1С', path: '/implementation' },
-          { name: 'Интеграции', path: '/integrations' },
-          { name: 'Кастомизация', path: '/customization' },
-          { name: 'Роботизация', path: '/robotization' },
-        ],
-      },
-      {
-        column: 'IT-аутсорсинг',
-        subItems: [
-          { name: 'Обслуживание ПК', path: '/pc-maintenance' },
-          { name: 'Сетевые решения', path: '/network-solutions' },
-          { name: 'Серверы', path: '/servers' },
-          { name: 'Безопасность', path: '/security' },
-        ],
-      },
-      {
-        column: 'Обучение',
-        subItems: [
-          { name: 'Курсы 1С', path: '/1c-courses' },
-          { name: 'Вебинары', path: '/webinars' },
-          { name: 'Сертификация', path: '/certification' },
-          { name: 'Тренинги', path: '/trainings' },
-        ],
-      },
+      { name: 'Сопровождение', path: '/support' },
+      { name: 'Внедрение', path: '/implementation' },
+      { name: 'Доработка', path: '/customization' },
+      { name: 'Обновление', path: '/updates' },
+      { name: 'Техническое обслуживание', path: '/tech-maintenance' },
     ],
   },
-  { title: 'Клиенты', path: '/clients' },
-  { title: 'Акции', path: '/promotions' },
-  { title: 'Новости', path: '/news' },
+  {
+    title: 'Обучение',
+    items: [
+      { name: 'Курсы 1С', path: '/1c-courses' },
+      { name: 'Сертификация', path: '/certification' },
+    ],
+  },
+  {
+    title: 'Компания',
+    items: [
+      { name: 'Информация', path: '/about' },
+      { name: 'Наша команда', path: '/team' },
+      { name: 'Мероприятия', path: '/events' },
+      { name: 'Вакансии', path: '/careers' },
+      { name: 'Наша жизнь', path: '/life' },
+    ],
+  },
 ];
 
-function isMenuItemWithSubItems(item: MenuItem): item is MenuItemWithSubItems {
-  return 'items' in item && Array.isArray(item.items) && 'name' in item.items[0];
-}
 
-function isMenuItemWithColumns(item: MenuItem): item is MenuItemWithColumns {
-  return 'items' in item && Array.isArray(item.items) && 'column' in item.items[0];
-}
 
 interface HeaderProps {
   setShowLogin: React.Dispatch<React.SetStateAction<boolean>>;
@@ -98,6 +72,7 @@ interface HeaderProps {
 const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const navigate = useNavigate();
 
@@ -111,7 +86,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
       await authProvider.checkAuth({});
       const role = localStorage.getItem('role');
       if (role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
-        navigate('/admin');
+        navigate('/admin/dashboard');
       } else if (role === 'CLINE') {
         navigate('/client');
       } else {
@@ -122,7 +97,13 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
     }
   };
 
+
+
   useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
     const handleClickOutside = (event: MouseEvent) => {
       const clickedOutside = !Array.from(dropdownRefs.current.values()).some(
         (ref) => ref && ref.contains(event.target as Node)
@@ -131,8 +112,14 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
         setOpenDropdown(null);
       }
     };
+
+    window.addEventListener('scroll', handleScroll);
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -146,267 +133,271 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
   return (
     <header
       ref={ref}
-      className="fixed top-0 left-0 w-full bg-white bg-header-gradient shadow-md z-50"
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out ${isScrolled
+        ? 'backdrop-blur-lg bg-white/80 shadow-modern-md border-b border-modern-gray-200/50'
+        : 'bg-white/95 backdrop-blur-sm shadow-modern'
+        }`}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between">
-        <div className="flex-shrink-0 self-center">
-          <Link to="/" aria-label="Перейти на главную страницу">
-            <img src={logo} alt="1C Support Logo" className="h-20 w-auto" />
-          </Link>
-        </div>
-
-        <nav className="hidden lg:flex flex-grow items-end ml-16 space-x-8">
-          {menuItems.map((item) => (
-            <div
-              key={item.title}
-              className="relative"
-              ref={(el) => {
-                if (el) {
-                  dropdownRefs.current.set(item.title, el);
-                } else {
-                  dropdownRefs.current.delete(item.title);
-                }
-              }}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center h-20">
+          {/* Logo */}
+          <div className="flex-shrink-0">
+            <Link
+              to="/"
+              aria-label="Перейти на главную страницу"
+              className="group flex items-center"
             >
-              {'items' in item ? (
-                <>
-                  <button
-                    onClick={() => toggleDropdown(item.title)}
-                    className="text-textBlue bg-primaryBlue px-3 py-2 rounded-md h-10 flex items-center hover:bg-hoverBlue hover:text-textBlue font-medium text-base transition-colors duration-300 group"
-                    aria-expanded={openDropdown === item.title}
-                    aria-label={`Открыть меню ${item.title}`}
-                  >
-                    <span>{item.title}</span>
-                    <ChevronDownIcon
-                      className="h-4 w-4 ml-1 mt-2 text-textBlue opacity-0 group-hover:opacity-100 transform group-hover:-translate-y-0.5 transition-all duration-200"
-                      aria-hidden="true"
-                    />
-                  </button>
-                  {openDropdown === item.title && (
-                    <div
-                      className="absolute left-0 mt-2 bg-lightGray border border-grayAccent shadow-lg rounded-lg z-10 transition-all duration-300 ease-in-out transform opacity-100 scale-100"
-                      style={{
-                        opacity: openDropdown === item.title ? 1 : 0,
-                        transform: openDropdown === item.title ? 'scale(1)' : 'scale(0.95)',
-                      }}
-                    >
-                      {isMenuItemWithColumns(item) ? (
-                        <div className="grid grid-cols-4 gap-4 p-4 w-[48rem] max-w-[90vw]">
-                          {item.items.map((column) => (
-                            <div key={column.column}>
-                              <h3 className="text-primaryBlue font-semibold mb-2 px-4">
-                                {column.column}
-                              </h3>
-                              {column.subItems.map((subItem) => (
-                                <Link
-                                  key={subItem.name}
-                                  to={subItem.path}
-                                  className="block px-4 py-2 text-darkGray hover:bg-lightBlue hover:text-darkGray rounded-md transition-colors duration-200"
-                                  onClick={closeMenus}
-                                >
-                                  {subItem.name}
-                                </Link>
-                              ))}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="py-2 w-48">
-                          {isMenuItemWithSubItems(item) &&
-                            item.items.map((subItem) => (
-                              <Link
-                                key={subItem.name}
-                                to={subItem.path}
-                                className="block px-4 py-2 text-darkGray hover:bg-lightBlue hover:text-darkGray rounded-md transition-colors duration-200"
-                                onClick={closeMenus}
-                              >
-                                {subItem.name}
-                              </Link>
-                            ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Link
-                  to={item.path}
-                  className="text-textBlue bg-primaryBlue px-4 py-2 rounded-md h-10 flex items-center hover:bg-hoverBlue hover:text-textBlue font-medium text-base transition-colors duration-300"
-                  onClick={closeMenus}
-                >
-                  {item.title}
-                </Link>
-              )}
-            </div>
-          ))}
-        </nav>
-
-        <div className="hidden lg:flex items-end space-x-10">
-          <div className="flex flex-col items-end space-y-2">
-            <button
-              className="bg-accentSkyTransparent text-textBlue px-4 py-2 rounded-md group w-56 hover:bg-accentSky hover:text-textBlue transition-colors duration-300 shadow-sm flex items-center space-x-2 whitespace-nowrap"
-              aria-label="Заказать звонок"
-            >
-              <PhoneIcon
-                className="h-7 w-7 -ml-1 text-textBlue group-hover:scale-105 transition-transform duration-200"
-                aria-hidden="true"
+              <img
+                src={logo}
+                alt="1C Support Logo"
+                className="h-16 w-auto transition-transform duration-200 group-hover:scale-105"
               />
-              <span className="group-hover:scale-105 transition-transform duration-200 inline-block">
-                Заказать звонок
-              </span>
-            </button>
-            <button
-              className="bg-accentSkyTransparent text-textBlue px-4 py-2 rounded-md group w-56 hover:bg-accentSky hover:text-textBlue transition-colors duration-300 shadow-sm flex items-center space-x-2 whitespace-nowrap"
-              aria-label="Удаленный доступ"
-            >
-              <ComputerDesktopIcon
-                className="h-7 w-7 -ml-1 text-textBlue group-hover:scale-105 transition-transform duration-200"
-                aria-hidden="true"
-              />
-              <span className="group-hover:scale-105 transition-transform duration-200 inline-block text-base">
-                Удаленный доступ
-              </span>
-            </button>
+            </Link>
           </div>
-          <div className="self-center">
-            <button
-              onClick={handleLoginClick}
-              className="bg-accentSkyTransparent text-textBlue p-2 rounded-md group w-12 h-12 flex items-center justify-center hover:bg-accentSky hover:text-textBlue transition-colors duration-300 shadow-sm"
-              aria-label="Открыть форму входа"
-            >
-              <UserCircleIcon
-                className="h-7 w-7 text-textBlue group-hover:scale-105 transition-transform duration-200"
-                aria-hidden="true"
-              />
-            </button>
-          </div>
-        </div>
 
-        <button
-          className="lg:hidden text-darkGray hover:text-primaryBlue self-center"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label={isMenuOpen ? 'Закрыть меню' : 'Открыть меню'}
-        >
-          {isMenuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
-        </button>
-      </div>
-
-      {isMenuOpen && (
-        <nav className="lg:hidden bg-white border-t border-grayAccent px-4 py-4 max-h-[calc(100vh-4rem)] overflow-y-auto shadow-md">
-          {menuItems.map((item) => (
-            <div
-              key={item.title}
-              className="py-2"
-              ref={(el) => {
-                if (el) {
-                  dropdownRefs.current.set(item.title, el);
-                } else {
-                  dropdownRefs.current.delete(item.title);
-                }
-              }}
-            >
-              {'items' in item ? (
-                <>
-                  <button
-                    onClick={() => toggleDropdown(item.title)}
-                    className="text-darkGray hover:text-primaryBlue font-medium text-base w-full text-left flex items-center justify-between py-2"
-                    aria-expanded={openDropdown === item.title}
-                    aria-label={
-                      openDropdown === item.title
-                        ? `Закрыть подменю ${item.title}`
-                        : `Открыть подменю ${item.title}`
+          {/* Desktop Navigation - центрированное меню */}
+          <nav className="hidden lg:flex items-center justify-center flex-1 px-8">
+            <div className="flex items-center space-x-2">
+              {menuItems.map((item) => (
+                <div
+                  key={item.title}
+                  className="relative"
+                  ref={(el) => {
+                    if (el) {
+                      dropdownRefs.current.set(item.title, el);
+                    } else {
+                      dropdownRefs.current.delete(item.title);
                     }
-                  >
-                    {item.title}
-                    <span>{openDropdown === item.title ? '−' : '+'}</span>
-                  </button>
-                  {openDropdown === item.title && (
-                    <div className="pl-4 transition-all duration-200 ease-in-out">
-                      {isMenuItemWithColumns(item) ? (
-                        item.items.map((column) => (
-                          <div key={column.column} className="py-2">
-                            <h3 className="text-primaryBlue font-semibold">
-                              {column.column}
-                            </h3>
-                            {column.subItems.map((subItem) => (
+                  }}
+                >
+                  {'items' in item ? (
+                    <>
+                      <button
+                        onClick={() => toggleDropdown(item.title)}
+                        className="group flex items-center px-4 py-2 text-modern-gray-700 hover:text-modern-primary-600 font-medium text-sm transition-all duration-200 rounded-lg hover:bg-modern-gray-50"
+                        aria-expanded={openDropdown === item.title}
+                        aria-label={`Открыть меню ${item.title}`}
+                      >
+                        <span>{item.title}</span>
+                        <ChevronDownIcon
+                          className={`ml-1 h-4 w-4 transition-transform duration-200 ${openDropdown === item.title ? 'rotate-180' : ''
+                            }`}
+                          aria-hidden="true"
+                        />
+                      </button>
+                      {openDropdown === item.title && (
+                        <div className="absolute left-0 mt-2 bg-white border border-modern-gray-200 shadow-modern-lg rounded-xl z-10 transition-all duration-200 ease-out animate-in slide-in-from-top-2">
+                          <div className="py-2 w-56">
+                            {item.items.map((subItem) => (
                               <Link
                                 key={subItem.name}
                                 to={subItem.path}
-                                className="block py-2 pl-4 text-darkGray hover:bg-lightBlue hover:text-darkGray rounded-md transition-colors duration-200"
+                                className="block px-4 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg mx-2 transition-all duration-150 text-sm"
                                 onClick={closeMenus}
                               >
                                 {subItem.name}
                               </Link>
                             ))}
                           </div>
-                        ))
-                      ) : (
-                        isMenuItemWithSubItems(item) &&
-                        item.items.map((subItem) => (
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      className="flex items-center px-4 py-2 text-modern-gray-700 hover:text-modern-primary-600 font-medium text-sm transition-all duration-200 rounded-lg hover:bg-modern-gray-50"
+                      onClick={closeMenus}
+                    >
+                      {item.title}
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </div>
+          </nav>
+
+          {/* Desktop Action Buttons */}
+          <div className="hidden lg:flex items-center space-x-4">
+            <button
+              className="group flex items-center px-5 py-2.5 bg-modern-primary-50 text-modern-primary-700 rounded-xl hover:bg-modern-primary-100 transition-all duration-200 text-sm font-medium border border-modern-primary-200/50"
+              aria-label="Заказать звонок"
+            >
+              <PhoneIcon
+                className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200"
+                aria-hidden="true"
+              />
+              <span>Заказать звонок</span>
+            </button>
+
+            <button
+              className="group flex items-center px-5 py-2.5 bg-modern-accent-50 text-modern-accent-700 rounded-xl hover:bg-modern-accent-100 transition-all duration-200 text-sm font-medium border border-modern-accent-200/50"
+              aria-label="Удаленный доступ"
+            >
+              <ComputerDesktopIcon
+                className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200"
+                aria-hidden="true"
+              />
+              <span>Удаленный доступ</span>
+            </button>
+
+            {/* Contact Info */}
+            <div className="flex flex-col text-left px-3">
+              <a
+                href="tel:+78443300801"
+                className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                aria-label="Позвонить по телефону 8(8443)300-801"
+              >
+                <PhoneIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                8 (8443) 300-801
+              </a>
+              <a
+                href="mailto:mail@ec-1c.ru"
+                className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                aria-label="Написать на email mail@ec-1c.ru"
+              >
+                <EnvelopeIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                mail@ec-1c.ru
+              </a>
+            </div>
+
+            <button
+              onClick={handleLoginClick}
+              className="group flex items-center px-4 py-2.5 bg-modern-gray-100 hover:bg-modern-gray-200 text-modern-gray-600 hover:text-modern-gray-800 rounded-xl transition-all duration-200 text-sm font-medium"
+              aria-label="Открыть форму входа"
+            >
+              <UserCircleIcon
+                className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200"
+                aria-hidden="true"
+              />
+              <span>Войти</span>
+            </button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden ml-auto">
+            <button
+              className="flex items-center justify-center w-10 h-10 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg transition-all duration-200 border border-modern-gray-200 hover:border-modern-primary-200"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? 'Закрыть меню' : 'Открыть меню'}
+            >
+              {isMenuOpen ? (
+                <XMarkIcon className="h-6 w-6" />
+              ) : (
+                <Bars3Icon className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMenuOpen && (
+        <div className="lg:hidden bg-white border-t border-modern-gray-200">
+          <nav className="px-4 py-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
+            {menuItems.map((item) => (
+              <div
+                key={item.title}
+                className="py-1"
+                ref={(el) => {
+                  if (el) {
+                    dropdownRefs.current.set(item.title, el);
+                  } else {
+                    dropdownRefs.current.delete(item.title);
+                  }
+                }}
+              >
+                {'items' in item ? (
+                  <>
+                    <button
+                      onClick={() => toggleDropdown(item.title)}
+                      className="w-full flex items-center justify-between px-3 py-3 text-modern-gray-700 hover:text-modern-primary-600 hover:bg-modern-gray-50 font-medium text-base rounded-lg transition-all duration-200"
+                      aria-expanded={openDropdown === item.title}
+                    >
+                      {item.title}
+                      <ChevronDownIcon
+                        className={`h-4 w-4 transition-transform duration-200 ${openDropdown === item.title ? 'rotate-180' : ''
+                          }`}
+                      />
+                    </button>
+                    {openDropdown === item.title && (
+                      <div className="pl-4 pt-2 pb-3 space-y-1">
+                        {item.items.map((subItem) => (
                           <Link
                             key={subItem.name}
                             to={subItem.path}
-                            className="block py-2 pl-4 text-darkGray hover:bg-lightBlue hover:text-darkGray rounded-md transition-colors duration-200"
+                            className="block px-6 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg transition-all duration-150 text-sm"
                             onClick={closeMenus}
                           >
                             {subItem.name}
                           </Link>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <Link
-                  to={item.path}
-                  className="block py-2 pl-4 text-darkGray hover:bg-lightBlue hover:text-darkGray font-medium rounded-md transition-colors duration-200"
-                  onClick={closeMenus}
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className="block px-3 py-3 text-modern-gray-700 hover:text-modern-primary-600 hover:bg-modern-gray-50 font-medium rounded-lg transition-all duration-200"
+                    onClick={closeMenus}
+                  >
+                    {item.title}
+                  </Link>
+                )}
+              </div>
+            ))}
+
+            {/* Mobile Action Buttons */}
+            <div className="pt-4 mt-4 border-t border-modern-gray-200/50 space-y-2">
+              <button
+                className="w-full flex items-center justify-center px-4 py-3 bg-modern-primary-50 text-modern-primary-700 rounded-xl hover:bg-modern-primary-100 transition-all duration-200 font-medium border border-modern-primary-200/50"
+                aria-label="Заказать звонок"
+              >
+                <PhoneIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+                <span>Заказать звонок</span>
+              </button>
+
+              <button
+                className="w-full flex items-center justify-center px-4 py-3 bg-modern-accent-50 text-modern-accent-700 rounded-xl hover:bg-modern-accent-100 transition-all duration-200 font-medium border border-modern-accent-200/50"
+                aria-label="Удаленный доступ"
+              >
+                <ComputerDesktopIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+                <span>Удаленный доступ</span>
+              </button>
+
+              {/* Mobile Contact Info */}
+              <div className="flex flex-col items-center space-y-1 py-2">
+                <a
+                  href="tel:+78443300801"
+                  className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                  aria-label="Позвонить по телефону 8(8443)300-801"
                 >
-                  {item.title}
-                </Link>
-              )}
+                  <PhoneIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+                  8(8443)300-801
+                </a>
+                <a
+                  href="mailto:mail@ec-1c.ru"
+                  className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                  aria-label="Написать на email mail@ec-1c.ru"
+                >
+                  <EnvelopeIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+                  mail@ec-1c.ru
+                </a>
+              </div>
+
+              <button
+                onClick={() => {
+                  handleLoginClick();
+                  setIsMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-center px-4 py-3 bg-modern-gray-100 text-modern-gray-700 rounded-xl hover:bg-modern-gray-200 transition-all duration-200 font-medium"
+                aria-label="Открыть форму входа"
+              >
+                <UserCircleIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+                <span>Личный кабинет</span>
+              </button>
             </div>
-          ))}
-          <div className="py-4 space-y-2">
-            <button
-              className="w-full bg-accentSkyTransparent text-textBlue px-4 py-2 rounded-md group hover:bg-accentSky hover:text-textBlue transition-colors duration-300 shadow-sm flex items-center space-x-2 whitespace-nowrap"
-              aria-label="Заказать звонок"
-            >
-              <PhoneIcon
-                className="h-7 w-7 -ml-1 text-textBlue group-hover:scale-105 transition-transform duration-200"
-                aria-hidden="true"
-              />
-              <span className="group-hover:scale-105 transition-transform duration-200 inline-block">
-                Заказать звонок
-              </span>
-            </button>
-            <button
-              className="w-full bg-accentSkyTransparent text-textBlue px-4 py-2 rounded-md group hover:bg-accentSky hover:text-textBlue transition-colors duration-300 shadow-sm flex items-center space-x-2 whitespace-nowrap"
-              aria-label="Удаленный доступ"
-            >
-              <ComputerDesktopIcon
-                className="h-7 w-7 -ml-1 text-textBlue group-hover:scale-105 transition-transform duration-200"
-                aria-hidden="true"
-              />
-              <span className="group-hover:scale-105 transition-transform duration-200 inline-block text-base">
-                Удаленный доступ
-              </span>
-            </button>
-            <button
-              onClick={() => {
-                handleLoginClick();
-                setIsMenuOpen(false);
-              }}
-              className="w-full bg-accentSkyTransparent text-textBlue p-2 rounded-md group h-12 flex items-center justify-center hover:bg-accentSky hover:text-textBlue transition-colors duration-300 shadow-sm"
-              aria-label="Открыть форму входа"
-            >
-              <UserCircleIcon
-                className="h-7 w-7 text-textBlue group-hover:scale-105 transition-transform duration-200"
-                aria-hidden="true"
-              />
-            </button>
-          </div>
-        </nav>
+          </nav>
+        </div>
       )}
     </header>
   );

@@ -151,12 +151,75 @@ export const getEventBySlug: RequestHandler = async (req, res) => {
 
 export const getEvents: RequestHandler = async (req, res) => {
   try {
-    const take = parseInt(req.query.take as string) || undefined;
-    const events = await prisma.events.findMany({
-      orderBy: { createdAt: "desc" },
+    const {
+      page = "1",
+      limit = "10",
       take,
-      where: { isPublished: true },
+      search,
+      ours,
+      status,
+      dateFrom,
+      dateTo,
+    } = req.query;
+
+    // Если передан take, используем старую логику для совместимости
+    if (take) {
+      const events = await prisma.events.findMany({
+        orderBy: { createdAt: "desc" },
+        take: parseInt(take as string),
+        where: { isPublished: true },
+      });
+      res.status(200).json(events);
+      return;
+    }
+
+    // Новая логика с пагинацией и фильтрами
+    const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
+    const takeNum = parseInt(limit as string);
+
+    const where: any = { isPublished: true };
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search as string, mode: "insensitive" } },
+        {
+          shortDescription: { contains: search as string, mode: "insensitive" },
+        },
+      ];
+    }
+
+    if (ours !== undefined) {
+      where.ours = ours === "true";
+    }
+
+    if (status !== undefined) {
+      const now = new Date();
+      if (status === "future") {
+        where.startDate = { gte: now };
+      } else if (status === "past") {
+        where.startDate = { lt: now };
+      }
+    }
+
+    if (dateFrom || dateTo) {
+      where.startDate = where.startDate || {};
+      if (dateFrom) {
+        where.startDate.gte = new Date(dateFrom as string);
+      }
+      if (dateTo) {
+        const endDate = new Date(dateTo as string);
+        endDate.setHours(23, 59, 59, 999); // Включаем весь день
+        where.startDate.lte = endDate;
+      }
+    }
+
+    const events = await prisma.events.findMany({
+      where,
+      orderBy: { startDate: "desc" },
+      skip,
+      take: takeNum,
     });
+
     res.status(200).json(events);
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -392,12 +455,10 @@ export const createEvent: RequestHandler = async (req, res) => {
     res.status(201).json(newEvent);
   } catch (error) {
     console.error("Error creating event:", error);
-    res
-      .status(500)
-      .json({
-        message: "Internal server error",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
+    res.status(500).json({
+      message: "Internal server error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
 
@@ -461,11 +522,9 @@ export const updateEvent: RequestHandler = async (req, res) => {
     res.status(200).json(updatedEvent);
   } catch (error) {
     console.error("Error updating event:", error);
-    res
-      .status(500)
-      .json({
-        message: "Internal server error",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
+    res.status(500).json({
+      message: "Internal server error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };

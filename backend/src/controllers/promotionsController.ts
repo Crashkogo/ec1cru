@@ -18,12 +18,65 @@ export const getPromotionBySlug: RequestHandler = async (req, res) => {
 
 export const getPromotions: RequestHandler = async (req, res) => {
   try {
-    const take = parseInt(req.query.take as string) || undefined;
-    const promotions = await prisma.promotions.findMany({
-      orderBy: { createdAt: "desc" },
+    const {
+      page = "1",
+      limit = "10",
       take,
-      where: { isPublished: true },
+      search,
+      status,
+      dateFrom,
+      dateTo,
+    } = req.query;
+
+    // Если передан take, используем старую логику для совместимости
+    if (take) {
+      const promotions = await prisma.promotions.findMany({
+        orderBy: { createdAt: "desc" },
+        take: parseInt(take as string),
+        where: { isPublished: true },
+      });
+      res.status(200).json(promotions);
+      return;
+    }
+
+    // Новая логика с пагинацией и фильтрами
+    const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
+    const takeNum = parseInt(limit as string);
+
+    const where: any = { isPublished: true };
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search as string, mode: "insensitive" } },
+        {
+          shortDescription: { contains: search as string, mode: "insensitive" },
+        },
+      ];
+    }
+
+    if (status !== undefined) {
+      where.status = status === "true";
+    }
+
+    if (dateFrom || dateTo) {
+      where.createdAt = {};
+      if (dateFrom) {
+        where.createdAt.gte = new Date(dateFrom as string);
+      }
+      if (dateTo) {
+        const endDate = new Date(dateTo as string);
+        endDate.setHours(23, 59, 59, 999); // Включаем весь день
+        where.createdAt.lte = endDate;
+      }
+    }
+
+    const promotions = await prisma.promotions.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: takeNum,
     });
+
     res.status(200).json(promotions);
   } catch (error) {
     console.error("Error fetching promotions:", error);
