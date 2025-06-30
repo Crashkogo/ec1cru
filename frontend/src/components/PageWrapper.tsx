@@ -1,5 +1,5 @@
 // frontend/src/components/PageWrapper.tsx - Модальное окно логина
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
@@ -33,11 +33,11 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ showLogin, setShowLogin }) =>
     resolver: zodResolver(loginSchema),
   });
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setShowLogin(false);
     reset();
     setMode('employee');
-  };
+  }, [setShowLogin, reset]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -58,7 +58,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ showLogin, setShowLogin }) =>
     if (showLogin) {
       checkAuth();
     }
-  }, [navigate, showLogin]);
+  }, [navigate, showLogin, closeModal]);
 
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     setIsLoading(true);
@@ -115,7 +115,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ showLogin, setShowLogin }) =>
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
     };
-  }, [showLogin]);
+  }, [showLogin, closeModal]);
 
   if (!showLogin) return null;
 

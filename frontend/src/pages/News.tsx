@@ -71,6 +71,7 @@ const News: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, dateFrom, dateTo]);
 
   // Бесконечная подгрузка при скролле
@@ -88,6 +89,7 @@ const News: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, hasMore]);
 
   const resetFilters = () => {

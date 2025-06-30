@@ -143,7 +143,7 @@ const EventsDetail: React.FC = () => {
         <Helmet>
           <title>Загрузка... - 1С Поддержка</title>
         </Helmet>
-        <div className="min-h-screen bg-modern-gray-50 pt-20">
+        <div className="min-h-screen bg-modern-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="w-4/5 mx-auto">
               <div className="animate-pulse">
@@ -169,7 +169,7 @@ const EventsDetail: React.FC = () => {
         <Helmet>
           <title>Мероприятие не найдено - 1С Поддержка</title>
         </Helmet>
-        <div className="min-h-screen bg-modern-gray-50 pt-20">
+        <div className="min-h-screen bg-modern-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="w-4/5 mx-auto text-center">
               <div className="bg-modern-white rounded-xl shadow-modern p-12">
@@ -201,7 +201,7 @@ const EventsDetail: React.FC = () => {
         <meta name="description" content={event.metaDescription || event.shortDescription} />
       </Helmet>
 
-      <div className="min-h-screen bg-modern-gray-50 pt-20">
+      <div className="min-h-screen bg-modern-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="w-4/5 mx-auto">
 

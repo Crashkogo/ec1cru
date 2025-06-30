@@ -36,7 +36,7 @@ interface EventItem {
   title: string;
   shortDescription: string;
   slug: string;
-  eventDate: string;
+  startDate: string;
   isPublished: boolean;
   ours: boolean;
   status: boolean;
@@ -316,7 +316,7 @@ const Home: React.FC = () => {
                       </h4>
                       <div className="flex items-center text-xs text-modern-gray-500">
                         <CalendarIcon className="h-3 w-3 mr-1" />
-                        {new Date(item.eventDate).toLocaleDateString('ru-RU')}
+                        {new Date(item.startDate).toLocaleDateString('ru-RU')}
                       </div>
                     </Link>
                   ))}

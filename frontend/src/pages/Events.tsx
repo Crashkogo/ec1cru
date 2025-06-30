@@ -79,6 +79,7 @@ const Events: React.FC = () => {
         }, 300);
 
         return () => clearTimeout(timeoutId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchQuery, oursFilter, statusFilter, dateFrom, dateTo]);
 
     // Бесконечная подгрузка при скролле
@@ -96,6 +97,7 @@ const Events: React.FC = () => {
 
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, hasMore]);
 
     const isPastEvent = (eventDate: string) => {

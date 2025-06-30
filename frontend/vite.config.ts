@@ -10,7 +10,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'tinymce': path.resolve(__dirname, 'node_modules/tinymce'),
+      tinymce: path.resolve(__dirname, 'node_modules/tinymce'),
     },
   },
   server: {
@@ -26,5 +26,10 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, '/api'), // Сохраняем /api
       },
     },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
   },
 });

@@ -1,5 +1,5 @@
 // src/pages/ReadySolutionsList.tsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
@@ -60,7 +60,7 @@ const ReadySolutionsList: React.FC = () => {
   }, []);
 
   // Загрузка решений с фильтрами и пагинацией
-  const fetchSolutions = useCallback(async (reset = false) => {
+  const fetchSolutions = async (reset = false) => {
     if (loading || (!hasMore && !reset)) return;
     setLoading(true);
 
@@ -86,7 +86,7 @@ const ReadySolutionsList: React.FC = () => {
       setLoading(false);
       if (reset) setInitialLoading(false);
     }
-  }, [page, searchQuery, freshSupportFilter, selectedPrograms, typeFilter, loading, hasMore]);
+  };
 
   // Первоначальная загрузка и сброс при изменении фильтров
   useEffect(() => {
@@ -98,6 +98,7 @@ const ReadySolutionsList: React.FC = () => {
     }, 300);
 
     return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, freshSupportFilter, selectedPrograms, typeFilter]);
 
   // Бесконечная подгрузка при скролле
@@ -115,7 +116,8 @@ const ReadySolutionsList: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [fetchSolutions, loading, hasMore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, hasMore]);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -287,7 +289,7 @@ const ReadySolutionsList: React.FC = () => {
         <meta name="description" content="Готовые решения 1С для автоматизации бизнеса. Обработки, отчёты, печатные формы для различных конфигураций." />
       </Helmet>
 
-      <div className="min-h-screen bg-modern-gray-50 pt-20">
+      <div className="min-h-screen bg-modern-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
           {/* Мобильная кнопка фильтров */}

@@ -1,29 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Admin,
   Resource,
-  Layout,
-  Menu,
   LayoutProps,
-  AppBar,
-  useSidebarState,
+  usePermissions,
+  useRedirect
 } from 'react-admin';
-import { Toolbar } from '@mui/material';
 import { dataProvider } from '../../admin/dataProvider';
 import { authProvider } from '../../admin/authProvider';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Typography } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import ArticleIcon from '@mui/icons-material/Article';
-import EventIcon from '@mui/icons-material/Event';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import BuildIcon from '@mui/icons-material/Build';
-import SettingsIcon from '@mui/icons-material/Settings';
-import HomeIcon from '@mui/icons-material/Home';
-import PeopleIcon from '@mui/icons-material/People';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import CodeIcon from '@mui/icons-material/Code';
-import { Collapse, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { CssBaseline, Card, CardContent } from '@mui/material';
+import {
+  NewspaperIcon,
+  CalendarDaysIcon,
+  GiftIcon
+} from '@heroicons/react/24/outline';
+import AdminMenu from '../../components/AdminMenu';
 import { UserList } from './UserList';
 import { UserCreate } from './UserCreate';
 import { UserEdit } from './UserEdit';
@@ -44,270 +36,170 @@ import { ProgramsList } from './ProgramsList';
 import { ProgramsCreate } from './ProgramsCreate';
 import { ProgramsEdit } from './ProgramsEdit';
 import { i18nProvider } from '../../admin/i18nProvider';
+import LoginPage from './Login';
 
-// MUI тема с цветами из Tailwind
+// Современная тема в стиле основного сайта
 const theme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: '#4FC3F7' }, // accentSky
-    secondary: { main: '#8DCEDF' }, // primaryBlue
-    text: {
-      primary: '#2D6A8B', // textBlue
-      secondary: '#333333', // darkGray
+    primary: {
+      main: '#3b82f6',
+      light: '#60a5fa',
+      dark: '#1d4ed8',
+    },
+    secondary: {
+      main: '#f59e0b',
+      light: '#fbbf24',
+      dark: '#d97706',
     },
     background: {
-      default: '#B3E5FC', // accentSky
-      paper: '#B3E5FC', // accentSky
+      default: '#f8fafc',
+      paper: '#ffffff',
     },
+    text: {
+      primary: '#1f2937',
+      secondary: '#6b7280',
+    },
+  },
+  typography: {
+    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    h1: {
+      fontSize: '2.25rem',
+      fontWeight: 700,
+    },
+    h2: {
+      fontSize: '1.875rem',
+      fontWeight: 600,
+    },
+    h3: {
+      fontSize: '1.5rem',
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 12,
   },
   components: {
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: 'linear-gradient(135deg, #8DCEDF 0%, #B3E5FC 100%)',
-          color: '#2D6A8B',
-          boxShadow: 'none',
-          zIndex: 1301,
+          backgroundColor: '#ffffff',
+          color: '#1f2937',
+          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+          borderBottom: '1px solid #e5e7eb',
         },
       },
     },
-    MuiToolbar: {
+    MuiCard: {
       styleOverrides: {
         root: {
-          minHeight: '64px',
-          paddingLeft: '16px',
-          paddingRight: '16px',
-          display: 'flex',
-          justifyContent: 'flex-start',
+          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+          border: '1px solid #e5e7eb',
         },
       },
     },
-    MuiDrawer: {
+    MuiButton: {
       styleOverrides: {
-        paper: {
-          background: 'linear-gradient(135deg, #8DCEDF 0%, #B3E5FC 100%)',
-          top: '64px',
-          height: '100vh',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.05)',
-          zIndex: 1300,
-          display: 'flex',
-          flexDirection: 'column',
-        },
-      },
-    },
-    MuiCssBaseline: {
-      styleOverrides: {
-        html: {
-          background: '#B3E5FC',
-        },
-        body: {
-          background: '#B3E5FC',
+        root: {
+          textTransform: 'none',
+          fontWeight: 500,
+          borderRadius: '0.75rem',
         },
       },
     },
   },
 });
 
-const MyMenu: React.FC = () => {
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [isSidebarOpen] = useSidebarState();
 
-  const handleSettingsToggle = () => setSettingsOpen((open) => !open);
+
+// Главный Dashboard компонент
+const DashboardContent: React.FC = () => {
+  const redirect = useRedirect();
+
+  const handleCreateNews = () => {
+    redirect('/admin/news/create');
+  };
+
+  const handleCreateEvent = () => {
+    redirect('/admin/events/create');
+  };
+
+  const handleCreatePromotion = () => {
+    redirect('/admin/promotions/create');
+  };
 
   return (
-    <Menu
-      className="bg-primaryBlue py-2"
-      sx={{
-        borderRight: 'none',
-        py: 2,
-      }}
-    >
-      <Menu.Item
-        to="/admin"
-        primaryText="Dashboard"
-        leftIcon={<DashboardIcon className="text-textBlue" />}
-        className="hover:bg-hoverBlue hover:text-textBlue rounded-lg my-1 font-medium text-base transition-colors duration-300 px-4 py-2"
-      />
-      <Menu.Item
-        to="/admin/news"
-        primaryText="Новости"
-        leftIcon={<ArticleIcon className="text-textBlue" />}
-        className="hover:bg-hoverBlue hover:text-textBlue rounded-lg my-1 font-medium text-base transition-colors duration-300 px-4 py-2"
-      />
-      <Menu.Item
-        to="/admin/events"
-        primaryText="Мероприятия"
-        leftIcon={<EventIcon className="text-textBlue" />}
-        className="hover:bg-hoverBlue hover:text-textBlue rounded-lg my-1 font-medium text-base transition-colors duration-300 px-4 py-2"
-      />
-      <Menu.Item
-        to="/admin/promotions"
-        primaryText="Акции"
-        leftIcon={<LocalOfferIcon className="text-textBlue" />}
-        className="hover:bg-hoverBlue hover:text-textBlue rounded-lg my-1 font-medium text-base transition-colors duration-300 px-4 py-2"
-      />
-      <Menu.Item
-        to="/admin/ready-solutions"
-        primaryText="Готовые решения"
-        leftIcon={<BuildIcon className="text-textBlue" />}
-        className="hover:bg-hoverBlue hover:text-textBlue rounded-lg my-1 font-medium text-base transition-colors duration-300 px-4 py-2"
-      />
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-modern-gray-900 mb-2">Dashboard</h1>
+        <p className="text-modern-gray-600">Добро пожаловать в панель администратора 1С Поддержка</p>
+      </div>
 
-      {/* Настройки */}
-      <ListItemButton
-        onClick={handleSettingsToggle}
-        aria-label="Раскрыть настройки"
-        className="hover:bg-hoverBlue hover:text-textBlue rounded-lg my-1 font-medium text-base transition-colors duration-300 px-4 py-2 text-textBlue"
-        sx={{
-          pl: 2,
-          pr: 2,
-          mt: 1,
-          mb: 0,
-          minHeight: 48,
-        }}
-      >
-        <ListItemIcon>
-          <SettingsIcon className="text-textBlue" />
-        </ListItemIcon>
-        {isSidebarOpen && (
-          <>
-            <ListItemText primary="Настройки" />
-            <ExpandMoreIcon
-              className="text-textBlue"
-              sx={{
-                transform: settingsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s',
-              }}
-            />
-          </>
-        )}
-      </ListItemButton>
-      <Collapse
-        in={settingsOpen}
-        timeout="auto"
-        unmountOnExit
-        sx={{
-          '& .MuiCollapse-wrapperInner': {
-            display: 'block',
-          },
-        }}
-      >
-        <Menu.Item
-          to="/admin/programs"
-          primaryText={isSidebarOpen ? 'Программы' : ''}
-          leftIcon={<CodeIcon className="text-textBlue" />}
-          className="hover:bg-hoverBlue hover:text-textBlue rounded-lg my-1 font-medium text-base transition-colors duration-300 px-4 py-2"
-          sx={{
-            pl: isSidebarOpen ? 6 : 2.5,
-            minHeight: 40,
-          }}
-        />
-        <Menu.Item
-          to="/admin/users"
-          primaryText={isSidebarOpen ? 'Пользователи' : ''}
-          leftIcon={<PeopleIcon className="text-textBlue" />}
-          className="hover:bg-hoverBlue hover:text-textBlue rounded-lg my-1 font-medium text-base transition-colors duration-300 px-4 py-2"
-          sx={{
-            pl: isSidebarOpen ? 6 : 2.5,
-            minHeight: 40,
-          }}
-        />
-      </Collapse>
-
-      <Menu.Item
-        to="/"
-        primaryText="Главная"
-        leftIcon={<HomeIcon className="text-textBlue" />}
-        className="hover:bg-hoverBlue hover:text-textBlue rounded-lg my-1 font-medium text-base transition-colors duration-300 px-4 py-2"
-        sx={{ mt: 2 }}
-      />
-    </Menu>
+      {/* Quick Actions */}
+      <div className="max-w-lg">
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold text-modern-gray-900 mb-4">Быстрые действия</h3>
+            <div className="space-y-3">
+              <button
+                onClick={handleCreateNews}
+                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
+              >
+                <NewspaperIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
+                <span className="font-medium text-modern-gray-900">Добавить новость</span>
+              </button>
+              <button
+                onClick={handleCreateEvent}
+                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
+              >
+                <CalendarDaysIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
+                <span className="font-medium text-modern-gray-900">Создать мероприятие</span>
+              </button>
+              <button
+                onClick={handleCreatePromotion}
+                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
+              >
+                <GiftIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
+                <span className="font-medium text-modern-gray-900">Добавить акцию</span>
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 
-const MyAppBar: React.FC = () => {
+// Кастомный Layout
+const CustomLayout: React.FC<LayoutProps> = ({ children }) => {
+  const { permissions } = usePermissions();
+
   return (
-    <AppBar
-      className="shadow-none"
-      style={{
-        background: 'linear-gradient(135deg, #8DCEDFAA 0%, #BDEDF6 50%, #E6F5FA 100%)',
-      }}
-    >
-      <Toolbar>
-        <Typography
-          variant="h6"
-          className="text-textBlue font-bold"
-          sx={{ flexGrow: 1 }}
-          aria-label="Админ-панель"
-        >
-          Панель администрирования
-        </Typography>
-      </Toolbar>
-    </AppBar>
+    <div className="min-h-screen bg-modern-gray-50">
+      <AdminMenu role={permissions || 'USER'} />
+      <div className="ml-64">
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 };
 
-const MyLayout: React.FC<LayoutProps> = (props) => (
-  <Layout
-    {...props}
-    menu={MyMenu}
-    appBar={MyAppBar}
-    className="bg-primaryBlue"
-    sx={{
-      '& .RaLayout-content': {
-        marginTop: '0',
-        padding: '24px',
-        backgroundColor: '#8DCEDF', // primaryBlue
-      },
-      '& .RaLayout-appFrame': {
-        marginTop: '64px',
-      },
-    }}
-  />
-);
-
-const PlaceholderList = () => (
-  <div className="p-6 bg-lightGray rounded-lg shadow-md text-textBlue">
-    Список (в разработке)
-  </div>
-);
-
-const PlaceholderCreate = () => (
-  <div className="p-6 bg-lightGray rounded-lg shadow-md text-textBlue">
-    Создание (в разработке)
-  </div>
-);
-
-const PlaceholderEdit = () => (
-  <div className="p-6 bg-lightGray rounded-lg shadow-md text-textBlue">
-    Редактирование (в разработке)
-  </div>
-);
-
+// Главный Dashboard компонент
 const Dashboard: React.FC = () => (
   <ThemeProvider theme={theme}>
-    {/* Глобальные стили для RaSidebar-fixed, RaMenu-open, RaMenu-closed, MuiDrawer-root */}
-    <style>{`
-      .RaSidebar-fixed, .RaMenu-open, .RaMenu-closed, .MuiDrawer-root {
-        background-color: #8DCEDF !important;
-      }
-      .MuiList-root.RaMenu-open {
-        border-right: none !important;
-      }
-    `}</style>
+    <CssBaseline />
     <Admin
       basename="/admin"
-      layout={MyLayout}
+      layout={CustomLayout}
       dataProvider={dataProvider}
       authProvider={authProvider}
+      loginPage={LoginPage}
       disableTelemetry
       i18nProvider={i18nProvider}
-      dashboard={() => (
-        <div className="p-6 bg-lightGray rounded-lg shadow-md text-textBlue">
-          <h2 className="text-2xl font-bold mb-4">Добро пожаловать в админ-панель!</h2>
-          <p>Здесь будут отображаться метрики в будущем.</p>
-        </div>
-      )}
+      dashboard={DashboardContent}
     >
       <Resource name="news" list={NewsList} create={NewsCreate} edit={NewsEdit} />
       <Resource name="events" list={EventsList} create={EventsCreate} edit={EventsEdit} />

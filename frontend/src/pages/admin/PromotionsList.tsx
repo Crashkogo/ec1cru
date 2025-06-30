@@ -14,97 +14,321 @@ import {
     BooleanInput,
     Pagination,
     FunctionField,
+    useRecordContext,
 } from 'react-admin';
-import { Card } from '@mui/material';
+import { Card, Chip, IconButton, Tooltip } from '@mui/material';
+import {
+    PlusIcon,
+    FunnelIcon,
+    EyeIcon,
+    CheckCircleIcon,
+    XCircleIcon,
+    ClockIcon,
+    GiftIcon
+} from '@heroicons/react/24/outline';
 
+// Кастомный компонент для статуса публикации
+const PublishedStatus = () => {
+    const record = useRecordContext();
+    if (!record) return null;
+
+    return (
+        <div className="flex items-center">
+            {record.isPublished ? (
+                <Chip
+                    icon={<CheckCircleIcon className="h-4 w-4" />}
+                    label="Опубликовано"
+                    size="small"
+                    className="bg-green-100 text-green-800 border-green-200"
+                />
+            ) : (
+                <Chip
+                    icon={<XCircleIcon className="h-4 w-4" />}
+                    label="Черновик"
+                    size="small"
+                    className="bg-gray-100 text-gray-800 border-gray-200"
+                />
+            )}
+        </div>
+    );
+};
+
+// Кастомный компонент для статуса акции
+const PromotionStatusField = () => {
+    const record = useRecordContext();
+    if (!record) return null;
+
+    const endDate = new Date(record.endDate);
+    const now = new Date();
+    const isExpired = endDate < now;
+    const isActive = record.status && !isExpired;
+
+    if (isExpired) {
+        return (
+            <Chip
+                icon={<ClockIcon className="h-4 w-4" />}
+                label="Завершена"
+                size="small"
+                className="bg-gray-100 text-gray-800 border-gray-200"
+            />
+        );
+    }
+
+    return (
+        <div className="flex items-center">
+            {isActive ? (
+                <Chip
+                    icon={<GiftIcon className="h-4 w-4" />}
+                    label="Активная"
+                    size="small"
+                    className="bg-green-100 text-green-800 border-green-200"
+                />
+            ) : (
+                <Chip
+                    icon={<ClockIcon className="h-4 w-4" />}
+                    label="Неактивная"
+                    size="small"
+                    className="bg-orange-100 text-orange-800 border-orange-200"
+                />
+            )}
+        </div>
+    );
+};
+
+// Кастомный компонент для действий
+const ActionButtons = () => {
+    const record = useRecordContext();
+    if (!record) return null;
+
+    return (
+        <div className="flex items-center space-x-2">
+            <Tooltip title="Просмотреть">
+                <IconButton
+                    size="small"
+                    className="text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50"
+                    onClick={() => window.open(`/promotions/${record.slug}`, '_blank')}
+                >
+                    <EyeIcon className="h-4 w-4" />
+                </IconButton>
+            </Tooltip>
+            <Tooltip title="Редактировать">
+                <IconButton size="small" className="text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50">
+                    <EditButton
+                        record={record}
+                        className="!p-0 !min-w-0 !bg-transparent !text-inherit hover:!bg-transparent"
+                    />
+                </IconButton>
+            </Tooltip>
+            <Tooltip title="Удалить">
+                <IconButton size="small" className="text-modern-gray-600 hover:text-red-600 hover:bg-red-50">
+                    <DeleteButton
+                        record={record}
+                        className="!p-0 !min-w-0 !bg-transparent !text-inherit hover:!bg-transparent"
+                    />
+                </IconButton>
+            </Tooltip>
+        </div>
+    );
+};
+
+// Фильтры
 const PromotionFilter = [
     <SearchInput
         source="q"
         placeholder="Поиск по названию и описанию..."
         alwaysOn
         key="search"
+        className="w-full max-w-md"
         sx={{
             '& .MuiInputBase-root': {
-                minWidth: '400px',
                 backgroundColor: 'background.paper',
                 borderRadius: '12px',
-                border: '1px solid',
-                borderColor: 'divider',
+                border: '1px solid #e5e7eb',
+                boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)',
                 '&:hover': {
-                    borderColor: 'primary.main',
+                    borderColor: '#3b82f6',
                 },
                 '&.Mui-focused': {
-                    borderColor: 'primary.main',
-                    boxShadow: (theme) => `0 0 0 2px ${theme.palette.primary.main}20`,
+                    borderColor: '#3b82f6',
+                    boxShadow: '0 0 0 3px rgb(59 130 246 / 0.1)',
                 },
             },
             '& .MuiInputBase-input': {
                 padding: '12px 16px',
                 fontSize: '14px',
+                fontFamily: 'Inter, sans-serif',
                 '&::placeholder': {
-                    color: 'text.secondary',
+                    color: '#6b7280',
                     opacity: 1,
                 },
             },
         }}
     />,
-    <BooleanInput source="isPublished" label="Опубликовано" key="published" />,
-    <BooleanInput source="status" label="Активная" key="status" />,
+    <BooleanInput
+        source="isPublished"
+        label="Статус публикации"
+        key="published"
+        sx={{
+            '& .MuiFormControl-root': {
+                minWidth: '180px',
+            },
+        }}
+    />,
+    <BooleanInput
+        source="status"
+        label="Активная акция"
+        key="status"
+        sx={{
+            '& .MuiFormControl-root': {
+                minWidth: '180px',
+            },
+        }}
+    />,
 ];
 
+// Кастомная панель инструментов
 const PromotionListActions = () => (
-    <TopToolbar>
-        <FilterButton />
-        <CreateButton />
+    <TopToolbar className="!bg-transparent !shadow-none !border-none !p-0">
+        <div className="flex items-center space-x-3">
+            <FilterButton
+                className="!bg-white !text-modern-gray-700 !border !border-modern-gray-300 hover:!bg-modern-gray-50 !rounded-lg !px-4 !py-2 !shadow-sm"
+                startIcon={<FunnelIcon className="h-4 w-4" />}
+            />
+            <CreateButton
+                className="!bg-modern-primary-600 hover:!bg-modern-primary-700 !text-white !rounded-lg !px-4 !py-2 !shadow-sm !border-none"
+                startIcon={<PlusIcon className="h-4 w-4" />}
+                label="Добавить акцию"
+            />
+        </div>
     </TopToolbar>
 );
 
-const PromotionPagination = () => <Pagination rowsPerPageOptions={[5, 10, 25, 50]} />;
-
-// Компонент для отображения статуса акции (активна/неактивна)
-const PromotionStatusField = ({ record }: any) => {
-    if (!record || !record.startDate || !record.endDate) return null;
-
-    const startDate = new Date(record.startDate);
-    const endDate = new Date(record.endDate);
-    const now = new Date();
-
-    const isActive = now >= startDate && now <= endDate;
-
-    return (
-        <span style={{
-            color: isActive ? '#4caf50' : '#f44336',
-            fontWeight: 'bold'
-        }}>
-            {isActive ? 'Активна' : 'Неактивна'}
-        </span>
-    );
-};
+// Кастомная пагинация
+const PromotionPagination = () => (
+    <Pagination
+        rowsPerPageOptions={[5, 10, 25, 50]}
+        className="!border-t !border-modern-gray-200 !pt-4 !mt-4"
+    />
+);
 
 export const PromotionsList = () => (
-    <Card className="p-6">
-        <List
-            filters={PromotionFilter}
-            actions={<PromotionListActions />}
-            pagination={<PromotionPagination />}
-            perPage={10}
-            sort={{ field: 'createdAt', order: 'DESC' }}
-            title="Управление акциями"
+    <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+            <div>
+                <h1 className="text-2xl font-bold text-modern-gray-900">Акции</h1>
+                <p className="text-modern-gray-600 mt-1">Управление акциями и специальными предложениями</p>
+            </div>
+        </div>
+
+        {/* Content Card */}
+        <Card
+            className="!shadow-sm !border !border-modern-gray-200 !rounded-xl overflow-hidden"
+            sx={{
+                '& .RaList-main': {
+                    padding: 0,
+                },
+                '& .RaList-content': {
+                    padding: '32px',
+                },
+                '& .RaList-actions': {
+                    paddingBottom: '16px',
+                },
+                '& .RaFilterForm-form': {
+                    paddingBottom: '24px',
+                },
+                '& .MuiTableContainer-root': {
+                    borderRadius: '0px',
+                    border: 'none',
+                    boxShadow: 'none',
+                },
+                '& .MuiTable-root': {
+                    borderCollapse: 'separate',
+                    borderSpacing: 0,
+                },
+                '& .MuiTableHead-root': {
+                    backgroundColor: '#f8fafc',
+                },
+                '& .MuiTableCell-head': {
+                    backgroundColor: '#f8fafc',
+                    borderBottom: '1px solid #e5e7eb',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    color: '#374151',
+                    padding: '16px',
+                },
+                '& .MuiTableCell-body': {
+                    borderBottom: '1px solid #f3f4f6',
+                    padding: '16px',
+                    fontSize: '14px',
+                    color: '#1f2937',
+                },
+                '& .MuiTableRow-root:hover': {
+                    backgroundColor: '#f8fafc',
+                },
+            }}
         >
-            <Datagrid>
-                <TextField source="title" label="Название" />
-                <TextField source="shortDescription" label="Описание" />
-                <DateField source="startDate" label="Начало акции" showTime />
-                <DateField source="endDate" label="Конец акции" showTime />
-                <FunctionField
-                    label="Статус акции"
-                    render={PromotionStatusField}
-                />
-                <BooleanField source="isPublished" label="Опубликовано" />
-                <DateField source="createdAt" label="Создано" showTime />
-                <EditButton />
-                <DeleteButton />
-            </Datagrid>
-        </List>
-    </Card>
+            <List
+                filters={PromotionFilter}
+                actions={<PromotionListActions />}
+                pagination={<PromotionPagination />}
+                perPage={10}
+                sort={{ field: 'createdAt', order: 'DESC' }}
+                title=""
+                component="div"
+            >
+                <Datagrid
+                    bulkActionButtons={false}
+                    className="!shadow-none"
+                >
+                    <TextField
+                        source="title"
+                        label="Название"
+                        className="!font-medium"
+                        sx={{
+                            '& .MuiTypography-root': {
+                                fontSize: '14px',
+                                fontWeight: 500,
+                                color: '#1f2937',
+                            },
+                        }}
+                    />
+                    <FunctionField
+                        label="Описание"
+                        render={(record: any) => (
+                            <div className="max-w-md">
+                                <p className="text-sm text-modern-gray-600 line-clamp-2">
+                                    {record.shortDescription}
+                                </p>
+                            </div>
+                        )}
+                    />
+                    <DateField
+                        source="startDate"
+                        label="Начало акции"
+                        showTime
+                        className="!text-sm !text-modern-gray-600"
+                    />
+                    <DateField
+                        source="endDate"
+                        label="Конец акции"
+                        showTime
+                        className="!text-sm !text-modern-gray-600"
+                    />
+                    <FunctionField
+                        label="Статус акции"
+                        render={() => <PromotionStatusField />}
+                    />
+                    <FunctionField
+                        label="Публикация"
+                        render={() => <PublishedStatus />}
+                    />
+                    <FunctionField
+                        label="Действия"
+                        render={() => <ActionButtons />}
+                    />
+                </Datagrid>
+            </List>
+        </Card>
+    </div>
 ); 

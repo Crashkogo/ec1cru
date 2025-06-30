@@ -1,5 +1,5 @@
 // src/pages/ReadySolutionDetail.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
@@ -13,7 +13,11 @@ import {
   PrinterIcon,
   ComputerDesktopIcon,
   CheckCircleIcon,
-  TagIcon
+  TagIcon,
+  CurrencyRubleIcon,
+  PhotoIcon,
+  HeartIcon,
+  ShoppingCartIcon
 } from '@heroicons/react/24/outline';
 
 interface Program {
@@ -69,28 +73,28 @@ const ReadySolutionDetail: React.FC = () => {
       });
   }, [slug]);
 
-  const handleNextImage = () => {
+  const handleNextImage = useCallback(() => {
     if (selectedImageIndex !== null && solution?.images) {
       setSelectedImageIndex((prev) =>
         prev === solution.images.length - 1 ? 0 : prev! + 1
       );
     }
-  };
+  }, [selectedImageIndex, solution?.images]);
 
-  const handlePrevImage = () => {
+  const handlePrevImage = useCallback(() => {
     if (selectedImageIndex !== null && solution?.images) {
       setSelectedImageIndex((prev) =>
         prev === 0 ? solution.images.length - 1 : prev! - 1
       );
     }
-  };
+  }, [selectedImageIndex, solution?.images]);
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (selectedImageIndex === null) return;
     if (e.key === 'ArrowRight') handleNextImage();
     if (e.key === 'ArrowLeft') handlePrevImage();
     if (e.key === 'Escape') setSelectedImageIndex(null);
-  };
+  }, [selectedImageIndex, handleNextImage, handlePrevImage]);
 
   useEffect(() => {
     if (selectedImageIndex !== null) {
@@ -103,7 +107,7 @@ const ReadySolutionDetail: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
     };
-  }, [selectedImageIndex]);
+  }, [selectedImageIndex, handleKeyDown]);
 
   const closeModal = () => setSelectedImageIndex(null);
 
@@ -210,7 +214,7 @@ const ReadySolutionDetail: React.FC = () => {
         <Helmet>
           <title>Загрузка... - 1С Поддержка</title>
         </Helmet>
-        <div className="min-h-screen bg-modern-gray-50 pt-20">
+        <div className="min-h-screen bg-modern-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="w-4/5 mx-auto">
               <div className="animate-pulse">
@@ -236,7 +240,7 @@ const ReadySolutionDetail: React.FC = () => {
         <Helmet>
           <title>Решение не найдено - 1С Поддержка</title>
         </Helmet>
-        <div className="min-h-screen bg-modern-gray-50 pt-20">
+        <div className="min-h-screen bg-modern-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="w-4/5 mx-auto text-center">
               <div className="bg-modern-white rounded-xl shadow-modern p-12">
@@ -268,7 +272,7 @@ const ReadySolutionDetail: React.FC = () => {
         <meta name="description" content={solution.shortDescription} />
       </Helmet>
 
-      <div className="min-h-screen bg-modern-gray-50 pt-20">
+      <div className="min-h-screen bg-modern-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="w-4/5 mx-auto">
 
