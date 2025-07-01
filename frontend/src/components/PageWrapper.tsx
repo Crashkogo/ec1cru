@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { XMarkIcon, UserCircleIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, UserCircleIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { authProvider } from '../admin/authProvider';
 
 const loginSchema = z.object({
@@ -45,7 +45,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ showLogin, setShowLogin }) =>
         await authProvider.checkAuth({});
         const role = localStorage.getItem('role');
         if (role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
-          navigate('/admin/dashboard');
+          navigate('/admin/');
           closeModal();
         } else if (role === 'CLINE') {
           navigate('/client');
@@ -71,7 +71,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ showLogin, setShowLogin }) =>
       const role = localStorage.getItem('role');
 
       if (mode === 'employee' && role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
-        navigate('/admin/dashboard');
+        navigate('/admin/');
         closeModal();
       } else if (mode === 'client' && role === 'CLINE') {
         navigate('/client');
@@ -137,7 +137,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ showLogin, setShowLogin }) =>
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-modern-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
               {mode === 'employee' ? (
-                <BuildingOfficeIcon className="h-8 w-8 text-modern-primary-600" />
+                <BuildingOffice2Icon className="h-8 w-8 text-modern-primary-600" />
               ) : (
                 <UserCircleIcon className="h-8 w-8 text-modern-primary-600" />
               )}
@@ -169,7 +169,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ showLogin, setShowLogin }) =>
                 }`}
               onClick={() => switchMode('employee')}
             >
-              <BuildingOfficeIcon className="h-4 w-4 mr-2" />
+              <BuildingOffice2Icon className="h-4 w-4 mr-2" />
               Сотрудники
             </button>
           </div>

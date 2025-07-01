@@ -180,6 +180,50 @@ export const dataProvider: DataProvider = {
       };
     }
 
+    if (resource === 'newsletters') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'createdAt',
+        _order: params.sort?.order || 'DESC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/posts/admin/newsletters?${stringify(query)}`;
+      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
+        url,
+        { headers }
+      );
+
+      const data = Array.isArray(json) ? json : [json];
+
+      return {
+        data,
+        total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+      };
+    }
+
+    if (resource === 'subscribers') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'subscribedAt',
+        _order: params.sort?.order || 'DESC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/posts/admin/subscribers?${stringify(query)}`;
+      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
+        url,
+        { headers }
+      );
+
+      const data = Array.isArray(json) ? json : [json];
+
+      return {
+        data,
+        total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+      };
+    }
+
     return Promise.reject('Resource not supported');
   },
 
@@ -259,6 +303,32 @@ export const dataProvider: DataProvider = {
         console.error('GetOne program error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to fetch program'
+        );
+      }
+    }
+
+    if (resource === 'newsletters') {
+      const url = `${apiUrl}/api/posts/admin/newsletters/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, { headers });
+        return { data: json };
+      } catch (error) {
+        console.error('GetOne newsletter error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch newsletter'
+        );
+      }
+    }
+
+    if (resource === 'subscribers') {
+      const url = `${apiUrl}/api/posts/admin/subscribers/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, { headers });
+        return { data: json };
+      } catch (error) {
+        console.error('GetOne subscriber error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch subscriber'
         );
       }
     }
@@ -441,6 +511,16 @@ export const dataProvider: DataProvider = {
       return { data: json };
     }
 
+    if (resource === 'newsletters') {
+      const url = `${apiUrl}/api/posts/admin/newsletters`;
+      const { json } = await fetchUtils.fetchJson(url, {
+        method: 'POST',
+        body: JSON.stringify(params.data),
+        headers,
+      });
+      return { data: json };
+    }
+
     return Promise.reject('Resource not supported');
   },
 
@@ -560,6 +640,40 @@ export const dataProvider: DataProvider = {
         console.error('Update program error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to update program'
+        );
+      }
+    }
+
+    if (resource === 'newsletters') {
+      const url = `${apiUrl}/api/posts/admin/newsletters/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, {
+          method: 'PATCH',
+          body: JSON.stringify(params.data),
+          headers,
+        });
+        return { data: json };
+      } catch (error) {
+        console.error('Update newsletter error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update newsletter'
+        );
+      }
+    }
+
+    if (resource === 'subscribers') {
+      const url = `${apiUrl}/api/posts/admin/subscribers/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, {
+          method: 'PATCH',
+          body: JSON.stringify(params.data),
+          headers,
+        });
+        return { data: json };
+      } catch (error) {
+        console.error('Update subscriber error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update subscriber'
         );
       }
     }
@@ -767,6 +881,38 @@ export const dataProvider: DataProvider = {
         console.error('Delete program error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to delete program'
+        );
+      }
+    }
+
+    if (resource === 'newsletters') {
+      const url = `${apiUrl}/api/posts/admin/newsletters/${params.id}`;
+      try {
+        await fetchUtils.fetchJson(url, {
+          method: 'DELETE',
+          headers,
+        });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete newsletter error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete newsletter'
+        );
+      }
+    }
+
+    if (resource === 'subscribers') {
+      const url = `${apiUrl}/api/posts/admin/subscribers/${params.id}`;
+      try {
+        await fetchUtils.fetchJson(url, {
+          method: 'DELETE',
+          headers,
+        });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete subscriber error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete subscriber'
         );
       }
     }

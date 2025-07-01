@@ -12,7 +12,10 @@ import {
   ArrowRightOnRectangleIcon,
   BuildingOffice2Icon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  EnvelopeIcon,
+  UserGroupIcon,
+  PaperAirplaneIcon
 } from '@heroicons/react/24/outline';
 
 interface AdminMenuProps {
@@ -54,6 +57,21 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
       title: 'Готовые решения',
       path: '/admin/ready-solutions',
       icon: BuildingOffice2Icon
+    },
+    {
+      title: 'Рассылки',
+      path: '/admin/newsletters',
+      icon: EnvelopeIcon
+    },
+    {
+      title: 'Отправка рассылок',
+      path: '/admin/newsletters-send',
+      icon: PaperAirplaneIcon
+    },
+    {
+      title: 'Подписчики',
+      path: '/admin/subscribers',
+      icon: UserGroupIcon
     }
   ];
 

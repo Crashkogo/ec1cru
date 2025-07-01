@@ -35,6 +35,12 @@ import ReadySolutionsEdit from './ReadySolutionsEdit';
 import { ProgramsList } from './ProgramsList';
 import { ProgramsCreate } from './ProgramsCreate';
 import { ProgramsEdit } from './ProgramsEdit';
+import { NewslettersList } from './NewslettersList';
+import { NewslettersCreate } from './NewslettersCreate';
+import { NewslettersEdit } from './NewslettersEdit';
+import NewslettersSend from './NewslettersSend';
+import { SubscribersList } from './SubscribersList';
+import { SubscribersEdit } from './SubscribersEdit';
 import { i18nProvider } from '../../admin/i18nProvider';
 import LoginPage from './Login';
 
@@ -206,6 +212,9 @@ const Dashboard: React.FC = () => (
       <Resource name="promotions" list={PromotionsList} create={PromotionsCreate} edit={PromotionsEdit} />
       <Resource name="ready-solutions" list={ReadySolutionsList} create={ReadySolutionsCreate} edit={ReadySolutionsEdit} />
       <Resource name="programs" list={ProgramsList} create={ProgramsCreate} edit={ProgramsEdit} />
+      <Resource name="newsletters" list={NewslettersList} create={NewslettersCreate} edit={NewslettersEdit} />
+      <Resource name="newsletters-send" list={NewslettersSend} />
+      <Resource name="subscribers" list={SubscribersList} edit={SubscribersEdit} />
       <Resource
         name="users"
         list={UserList}

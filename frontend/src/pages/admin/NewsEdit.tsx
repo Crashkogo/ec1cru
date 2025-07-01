@@ -15,10 +15,14 @@ import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import { transliterate } from '../../utils/transliterate';
 
-const ContentInput = ({ source, label, ...props }: any) => {
+interface ContentInputProps {
+    source: string;
+    label: string;
+}
+
+const ContentInput = ({ source, label }: ContentInputProps) => {
     const { setValue, watch } = useFormContext();
     const content = watch(source);
-    const [tempImages, setTempImages] = useState<string[]>([]);
 
     const extractTempImages = (htmlContent: string): string[] => {
         const parser = new DOMParser();
@@ -40,7 +44,8 @@ const ContentInput = ({ source, label, ...props }: any) => {
         (newContent: string) => {
             setValue(source, newContent, { shouldValidate: true });
             const tempUrls = extractTempImages(newContent);
-            setTempImages(tempUrls);
+            // Временные изображения сохраняются в контексте для возможного использования
+            setValue('tempImages', tempUrls);
         },
         [setValue, source]
     );
@@ -94,7 +99,13 @@ const ContentInput = ({ source, label, ...props }: any) => {
     );
 };
 
-const SlugInput = ({ source, label, ...props }: any) => {
+interface SlugInputProps {
+    source: string;
+    label: string;
+    fullWidth?: boolean;
+}
+
+const SlugInput = ({ source, label, ...props }: SlugInputProps) => {
     const { setValue, watch } = useFormContext();
     const title = watch('title');
     const slug = watch(source);
@@ -130,6 +141,7 @@ const SlugInput = ({ source, label, ...props }: any) => {
             label={label}
             helperText="Изменение slug может нарушить существующие ссылки"
             onChange={handleSlugChange}
+            validate={required()}
             {...props}
         />
     );
@@ -170,13 +182,11 @@ export const NewsEdit = () => (
                 <ContentInput
                     source="content"
                     label="Основное содержание"
-                    validate={required()}
                 />
 
                 <SlugInput
                     source="slug"
                     label="Slug"
-                    validate={required()}
                     fullWidth
                 />
 

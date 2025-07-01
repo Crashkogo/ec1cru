@@ -129,7 +129,7 @@ const UsersFilter = [
     placeholder="Поиск по имени и email..."
     alwaysOn
     key="search"
-    className="w-full max-w-md"
+    className="w-full max-w-lg"
     sx={{
       '& .MuiInputBase-root': {
         backgroundColor: 'background.paper',
@@ -179,16 +179,17 @@ const UsersFilter = [
 // Кастомная панель инструментов
 const UsersListActions = () => (
   <TopToolbar className="!bg-transparent !shadow-none !border-none !p-0">
-    <div className="flex items-center space-x-3">
-      <FilterButton
-        className="!bg-white !text-modern-gray-700 !border !border-modern-gray-300 hover:!bg-modern-gray-50 !rounded-lg !px-4 !py-2 !shadow-sm"
-        startIcon={<FunnelIcon className="h-4 w-4" />}
-      />
-      <CreateButton
-        className="!bg-modern-primary-600 hover:!bg-modern-primary-700 !text-white !rounded-lg !px-4 !py-2 !shadow-sm !border-none"
-        startIcon={<PlusIcon className="h-4 w-4" />}
-        label="Добавить пользователя"
-      />
+    <div className="flex items-center justify-end w-full px-6">
+      <div className="flex items-center space-x-3">
+        <FilterButton
+          className="!bg-white !text-modern-gray-700 !border !border-modern-gray-300 hover:!bg-modern-gray-50 !rounded-lg !px-4 !py-2 !shadow-sm !min-h-[40px]"
+        />
+        <CreateButton
+          className="!bg-modern-primary-600 hover:!bg-modern-primary-700 !text-white !rounded-lg !px-4 !py-2 !shadow-sm !border-none !min-h-[40px]"
+          startIcon={<PlusIcon className="h-4 w-4" />}
+          label="Добавить пользователя"
+        />
+      </div>
     </div>
   </TopToolbar>
 );
@@ -219,13 +220,21 @@ export const UserList = () => (
           padding: 0,
         },
         '& .RaList-content': {
-          padding: '32px',
+          padding: '24px',
         },
         '& .RaList-actions': {
-          paddingBottom: '16px',
+          paddingBottom: '20px',
+          paddingTop: '8px',
         },
         '& .RaFilterForm-form': {
-          paddingBottom: '24px',
+          paddingBottom: '20px',
+          paddingLeft: '24px',
+          paddingRight: '24px',
+          backgroundColor: '#f8fafc',
+          marginLeft: '-24px',
+          marginRight: '-24px',
+          marginTop: '-24px',
+          paddingTop: '20px',
         },
         '& .MuiTableContainer-root': {
           borderRadius: '0px',

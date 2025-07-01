@@ -4,10 +4,13 @@ import axios from 'axios';
 
 const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
-    const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/users/login`, {
-      name: username,
-      password,
-    });
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/users/login`,
+      {
+        name: username,
+        password,
+      }
+    );
     const { token, role } = response.data;
     localStorage.setItem('token', token);
     localStorage.setItem('role', role);
