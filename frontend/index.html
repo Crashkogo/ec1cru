@@ -1,13 +1,63 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- SEO и основные meta теги -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="1С Поддержка - профессиональные услуги автоматизации бизнеса. 30 лет опыта, 600+ клиентов." />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#3b82f6" />
+
+  <!-- Preconnect для внешних ресурсов (быстрее подключение) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="//www.google.com" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <link rel="apple-touch-icon" href="/vite.svg" />
+
+  <!-- Preload критических ресурсов -->
+  <link rel="modulepreload" href="/src/main.tsx" />
+  <link rel="preload" href="/src/assets/logo.png" as="image" type="image/png" />
+
+  <!-- Дефолтный title (будет заменен Helmet) -->
+  <title>1С Поддержка - Профессиональная автоматизация бизнеса</title>
+
+  <!-- Оптимизации производительности -->
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+  <!-- Структурированные данные для поисковиков -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "1С Поддержка",
+      "description": "Профессиональные услуги автоматизации бизнеса",
+      "telephone": "+7-8443-300-801",
+      "email": "mail@ec-1c.ru",
+      "foundingDate": "1994"
+    }
+    </script>
+</head>
+
+<body>
+  <!-- Основной контейнер приложения -->
+  <div id="root"></div>
+
+  <!-- Главный скрипт приложения -->
+  <script type="module" src="/src/main.tsx"></script>
+
+  <!-- Fallback для пользователей с отключенным JavaScript -->
+  <noscript>
+    <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+      <h1>JavaScript отключен</h1>
+      <p>Для работы сайта необходимо включить JavaScript в браузере.</p>
+    </div>
+  </noscript>
+</body>
+
 </html>

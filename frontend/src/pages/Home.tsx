@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { usePreloadOnHover, preloadOnIdle } from '../utils/preloadRoutes';
 import {
   ClockIcon,
   ArrowRightIcon,
@@ -64,6 +65,7 @@ const Home: React.FC = () => {
   const [solutions, setSolutions] = useState<ReadySolutionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeAboutTab, setActiveAboutTab] = useState('history');
+  const { handleMouseEnter } = usePreloadOnHover();
 
   // Загрузка данных
   useEffect(() => {
@@ -88,6 +90,9 @@ const Home: React.FC = () => {
     };
 
     fetchData();
+
+    // Запускаем preloading критических маршрутов при idle
+    preloadOnIdle();
   }, []);
 
   if (loading) {
@@ -247,6 +252,7 @@ const Home: React.FC = () => {
               <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern">
                 <Link
                   to="/news"
+                  onMouseEnter={() => handleMouseEnter('/news')}
                   className="block text-center mb-4 hover:text-modern-primary-700 transition-all duration-200"
                 >
                   <h3 className="text-lg font-bold text-modern-primary-600 transition-transform duration-200 hover:scale-110">Новости</h3>
@@ -256,6 +262,7 @@ const Home: React.FC = () => {
                     <Link
                       key={item.id}
                       to={`/news/${item.slug}`}
+                      onMouseEnter={() => handleMouseEnter(`/news/${item.slug}`)}
                       className="block hover:bg-modern-gray-50 rounded-lg p-2 transition-colors duration-200 group"
                     >
                       <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-primary-600 transition-colors duration-200 line-clamp-2 mb-1">
@@ -274,6 +281,7 @@ const Home: React.FC = () => {
               <div className="bg-modern-accent-50/80 backdrop-blur-sm rounded-xl p-4 shadow-modern border border-modern-accent-200">
                 <Link
                   to="/promotions"
+                  onMouseEnter={() => handleMouseEnter('/promotions')}
                   className="block text-center mb-4 hover:text-modern-accent-700 transition-all duration-200"
                 >
                   <h3 className="text-lg font-bold text-modern-accent-600 transition-transform duration-200 hover:scale-110">Акции</h3>
@@ -283,6 +291,7 @@ const Home: React.FC = () => {
                     <Link
                       key={item.id}
                       to={`/promotions/${item.slug}`}
+                      onMouseEnter={() => handleMouseEnter(`/promotions/${item.slug}`)}
                       className="block hover:bg-modern-accent-100/50 rounded-lg p-2 transition-colors duration-200 group"
                     >
                       <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-accent-700 transition-colors duration-200 line-clamp-2 mb-1">
@@ -300,6 +309,7 @@ const Home: React.FC = () => {
               <div className="bg-modern-primary-50/80 backdrop-blur-sm rounded-xl p-4 shadow-modern border border-modern-primary-200">
                 <Link
                   to="/events"
+                  onMouseEnter={() => handleMouseEnter('/events')}
                   className="block text-center mb-4 hover:text-modern-primary-700 transition-all duration-200"
                 >
                   <h3 className="text-lg font-bold text-modern-primary-600 transition-transform duration-200 hover:scale-110">Мероприятия</h3>
@@ -309,6 +319,7 @@ const Home: React.FC = () => {
                     <Link
                       key={item.id}
                       to={`/events/${item.slug}`}
+                      onMouseEnter={() => handleMouseEnter(`/events/${item.slug}`)}
                       className="block hover:bg-modern-primary-100/50 rounded-lg p-2 transition-colors duration-200 group"
                     >
                       <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-primary-700 transition-colors duration-200 line-clamp-2 mb-1">
@@ -346,6 +357,7 @@ const Home: React.FC = () => {
                   <Link
                     key={solution.slug}
                     to={`/ready-solutions/${solution.slug}`}
+                    onMouseEnter={() => handleMouseEnter(`/ready-solutions/${solution.slug}`)}
                     className="group bg-modern-white rounded-xl p-4 shadow-modern hover:shadow-modern-lg transition-all duration-200 transform hover:scale-105 flex flex-col"
                   >
                     {/* Заголовок и программы на одном уровне */}
@@ -393,6 +405,7 @@ const Home: React.FC = () => {
               <div className="text-center">
                 <Link
                   to="/ready-solutions"
+                  onMouseEnter={() => handleMouseEnter('/ready-solutions')}
                   className="inline-flex items-center px-6 py-3 bg-modern-primary-600 text-white rounded-xl hover:bg-modern-primary-700 transition-colors duration-200 font-semibold"
                 >
                   Все готовые решения
@@ -473,6 +486,7 @@ const Home: React.FC = () => {
                     </div>
                     <Link
                       to="/about"
+                      onMouseEnter={() => handleMouseEnter('/about')}
                       className="inline-flex items-center px-6 py-3 bg-modern-primary-600 text-white rounded-xl hover:bg-modern-primary-700 transition-colors duration-200 font-semibold"
                     >
                       Подробнее о компании
@@ -505,6 +519,7 @@ const Home: React.FC = () => {
                     </div>
                     <Link
                       to="/team"
+                      onMouseEnter={() => handleMouseEnter('/team')}
                       className="inline-flex items-center px-6 py-3 bg-modern-primary-600 text-white rounded-xl hover:bg-modern-primary-700 transition-colors duration-200 font-semibold"
                     >
                       Познакомиться с командой
@@ -537,6 +552,7 @@ const Home: React.FC = () => {
                     </div>
                     <Link
                       to="/careers"
+                      onMouseEnter={() => handleMouseEnter('/careers')}
                       className="inline-flex items-center px-6 py-3 bg-modern-primary-600 text-white rounded-xl hover:bg-modern-primary-700 transition-colors duration-200 font-semibold"
                     >
                       Посмотреть вакансии

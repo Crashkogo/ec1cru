@@ -45,7 +45,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ showLogin, setShowLogin }) =>
         await authProvider.checkAuth({});
         const role = localStorage.getItem('role');
         if (role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
-          navigate('/admin/dashboard');
+          navigate('/admin/');
           closeModal();
         } else if (role === 'CLINE') {
           navigate('/client');
@@ -71,7 +71,7 @@ const PageWrapper: React.FC<PageWrapperProps> = ({ showLogin, setShowLogin }) =>
       const role = localStorage.getItem('role');
 
       if (mode === 'employee' && role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
-        navigate('/admin/dashboard');
+        navigate('/admin/');
         closeModal();
       } else if (mode === 'client' && role === 'CLINE') {
         navigate('/client');

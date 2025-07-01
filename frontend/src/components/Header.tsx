@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, forwardRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserCircleIcon, Bars3Icon, XMarkIcon, PhoneIcon, ComputerDesktopIcon, ChevronDownIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import { authProvider } from '../admin/authProvider';
+import { usePreloadOnHover } from '../utils/preloadRoutes';
 import logo from '../assets/logo.png';
 
 interface MenuItemSimple {
@@ -75,6 +76,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const navigate = useNavigate();
+  const { handleMouseEnter } = usePreloadOnHover();
 
   const closeMenus = () => {
     setOpenDropdown(null);
@@ -86,7 +88,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
       await authProvider.checkAuth({});
       const role = localStorage.getItem('role');
       if (role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
-        navigate('/admin/dashboard');
+        navigate('/admin/');
       } else if (role === 'CLINE') {
         navigate('/client');
       } else {
@@ -192,6 +194,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
                               <Link
                                 key={subItem.name}
                                 to={subItem.path}
+                                onMouseEnter={() => handleMouseEnter(subItem.path)}
                                 className="block px-4 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg mx-2 transition-all duration-150 text-sm"
                                 onClick={closeMenus}
                               >
@@ -205,6 +208,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
                   ) : (
                     <Link
                       to={item.path}
+                      onMouseEnter={() => handleMouseEnter(item.path)}
                       className="flex items-center px-4 py-2 text-modern-gray-700 hover:text-modern-primary-600 font-medium text-sm transition-all duration-200 rounded-lg hover:bg-modern-gray-50"
                       onClick={closeMenus}
                     >
@@ -262,6 +266,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
 
             <button
               onClick={handleLoginClick}
+              onMouseEnter={() => handleMouseEnter('/admin')}
               className="group flex items-center px-4 py-2.5 bg-modern-gray-100 hover:bg-modern-gray-200 text-modern-gray-600 hover:text-modern-gray-800 rounded-xl transition-all duration-200 text-sm font-medium"
               aria-label="Открыть форму входа"
             >
@@ -325,6 +330,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
                           <Link
                             key={subItem.name}
                             to={subItem.path}
+                            onMouseEnter={() => handleMouseEnter(subItem.path)}
                             className="block px-6 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg transition-all duration-150 text-sm"
                             onClick={closeMenus}
                           >
@@ -337,6 +343,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
                 ) : (
                   <Link
                     to={item.path}
+                    onMouseEnter={() => handleMouseEnter(item.path)}
                     className="block px-3 py-3 text-modern-gray-700 hover:text-modern-primary-600 hover:bg-modern-gray-50 font-medium rounded-lg transition-all duration-200"
                     onClick={closeMenus}
                   >
@@ -389,6 +396,7 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
                   handleLoginClick();
                   setIsMenuOpen(false);
                 }}
+                onMouseEnter={() => handleMouseEnter('/admin')}
                 className="w-full flex items-center justify-center px-4 py-3 bg-modern-gray-100 text-modern-gray-700 rounded-xl hover:bg-modern-gray-200 transition-all duration-200 font-medium"
                 aria-label="Открыть форму входа"
               >
