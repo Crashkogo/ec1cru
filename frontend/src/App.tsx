@@ -23,9 +23,12 @@ const PromotionsDetail = React.lazy(() => import('./components/PromotionsDetail'
 const ReadySolutionDetail = React.lazy(() => import('./components/ReadySolutionDetail'));
 const ReadySolutionsList = React.lazy(() => import('./components/ReadySolutionsList'));
 
+<<<<<<< HEAD
 // Специальные страницы
 const Unsubscribe = React.lazy(() => import('./pages/Unsubscribe'));
 
+=======
+>>>>>>> 6b3d3dce7ebf2e0cf699ed043e0dc7a90326d206
 // Админка
 const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
 
@@ -120,6 +123,51 @@ function App() {
                     <Suspense fallback={<PageLoading message="Загрузка сервисов..." />}>
                       <Services />
                     </Suspense>
+<<<<<<< HEAD
+=======
+                  </Layout>
+                }
+              />
+
+              {/* Detail страницы - обязательно lazy (самые тяжелые) */}
+              <Route
+                path="/news/:slug"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка новости..." />}>
+                      <NewsDetail />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/events/:slug"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка мероприятия..." />}>
+                      <EventsDetail />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/promotions/:slug"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка акции..." />}>
+                      <PromotionsDetail />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/ready-solutions/:slug"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка решения..." />}>
+                      <ReadySolutionDetail />
+                    </Suspense>
+>>>>>>> 6b3d3dce7ebf2e0cf699ed043e0dc7a90326d206
                   </Layout>
                 }
               />

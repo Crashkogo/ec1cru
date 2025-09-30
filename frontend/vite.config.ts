@@ -7,12 +7,15 @@ export default defineConfig({
   plugins: [react()],
   css: {
     postcss: './postcss.config.cjs',
+<<<<<<< HEAD
   },
   define: {
     // Устанавливаем дефолтное значение для VITE_API_URL если не задано в .env
     'import.meta.env.VITE_API_URL': JSON.stringify(
       process.env.VITE_API_URL || 'http://localhost:5000'
     ),
+=======
+>>>>>>> 6b3d3dce7ebf2e0cf699ed043e0dc7a90326d206
   },
   resolve: {
     alias: {
