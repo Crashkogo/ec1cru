@@ -62,7 +62,7 @@ const Login: React.FC = () => {
             Панель администратора
           </h2>
           <p className="text-modern-gray-600">
-            Войдите в систему управления 1С Поддержка
+            Войдите в систему управления ООО «Инженер-центр»
           </p>
         </div>
 
@@ -158,7 +158,7 @@ const Login: React.FC = () => {
         {/* Footer */}
         <div className="mt-8 text-center relative z-10">
           <p className="text-xs text-modern-gray-500">
-            1С Поддержка © 2024
+            ООО «Инженер-центр» © 2024
           </p>
         </div>
       </div>

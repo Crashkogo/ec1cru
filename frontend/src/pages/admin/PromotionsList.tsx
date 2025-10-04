@@ -1,10 +1,8 @@
-import React from 'react';
 import {
     List,
     Datagrid,
     TextField,
     DateField,
-    BooleanField,
     EditButton,
     DeleteButton,
     CreateButton,
@@ -19,7 +17,6 @@ import {
 import { Card, Chip, IconButton, Tooltip } from '@mui/material';
 import {
     PlusIcon,
-    FunnelIcon,
     EyeIcon,
     CheckCircleIcon,
     XCircleIcon,
@@ -58,38 +55,49 @@ const PromotionStatusField = () => {
     const record = useRecordContext();
     if (!record) return null;
 
+    // Вычисляем актуальный статус на основе даты окончания
     const endDate = new Date(record.endDate);
     const now = new Date();
     const isExpired = endDate < now;
-    const isActive = record.status && !isExpired;
+
+    // Используем вычисленный статус с сервера, если доступен, иначе вычисляем сами
+    const actualStatus = record.calculatedStatus !== undefined
+        ? record.calculatedStatus
+        : !isExpired;
 
     if (isExpired) {
         return (
-            <Chip
-                icon={<ClockIcon className="h-4 w-4" />}
-                label="Завершена"
-                size="small"
-                className="bg-gray-100 text-gray-800 border-gray-200"
-            />
+            <Tooltip title={`Акция завершилась ${endDate.toLocaleDateString('ru-RU')}`}>
+                <Chip
+                    icon={<ClockIcon className="h-4 w-4" />}
+                    label="Завершена"
+                    size="small"
+                    className="bg-gray-100 text-gray-800 border-gray-200"
+                />
+            </Tooltip>
         );
     }
 
     return (
         <div className="flex items-center">
-            {isActive ? (
-                <Chip
-                    icon={<GiftIcon className="h-4 w-4" />}
-                    label="Активная"
-                    size="small"
-                    className="bg-green-100 text-green-800 border-green-200"
-                />
+            {actualStatus ? (
+                <Tooltip title={`Активна до ${endDate.toLocaleDateString('ru-RU')}`}>
+                    <Chip
+                        icon={<GiftIcon className="h-4 w-4" />}
+                        label="Активная"
+                        size="small"
+                        className="bg-green-100 text-green-800 border-green-200"
+                    />
+                </Tooltip>
             ) : (
-                <Chip
-                    icon={<ClockIcon className="h-4 w-4" />}
-                    label="Неактивная"
-                    size="small"
-                    className="bg-orange-100 text-orange-800 border-orange-200"
-                />
+                <Tooltip title="Акция неактивна (проверьте настройки)">
+                    <Chip
+                        icon={<ClockIcon className="h-4 w-4" />}
+                        label="Неактивная"
+                        size="small"
+                        className="bg-orange-100 text-orange-800 border-orange-200"
+                    />
+                </Tooltip>
             )}
         </div>
     );
@@ -140,6 +148,7 @@ const PromotionFilter = [
         key="search"
         className="w-full max-w-lg"
         sx={{
+            marginLeft: '12px',
             '& .MuiInputBase-root': {
                 backgroundColor: 'background.paper',
                 borderRadius: '12px',
@@ -238,8 +247,8 @@ export const PromotionsList = () => (
                 },
                 '& .RaFilterForm-form': {
                     paddingBottom: '20px',
-                    paddingLeft: '24px',
-                    paddingRight: '24px',
+                    paddingLeft: '32px',
+                    paddingRight: '32px',
                     backgroundColor: '#f8fafc',
                     marginLeft: '-24px',
                     marginRight: '-24px',
@@ -304,7 +313,7 @@ export const PromotionsList = () => (
                     />
                     <FunctionField
                         label="Описание"
-                        render={(record: any) => (
+                        render={(record: { shortDescription?: string }) => (
                             <div className="max-w-md">
                                 <p className="text-sm text-modern-gray-600 line-clamp-2">
                                     {record.shortDescription}

@@ -4,17 +4,29 @@ import axios from 'axios';
 
 const authProvider: AuthProvider = {
   login: async ({ username, password }) => {
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/api/users/login`,
-      {
-        name: username,
-        password,
-      }
-    );
-    const { token, role } = response.data;
-    localStorage.setItem('token', token);
-    localStorage.setItem('role', role);
-    return Promise.resolve();
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/users/login`,
+        {
+          name: username,
+          password,
+        }
+      );
+
+      const { token, role } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', role);
+
+      console.log('✅ Login successful as', username);
+
+      return Promise.resolve();
+    } catch (error: any) {
+      console.error(
+        '❌ Login failed:',
+        error.response?.data?.message || error.message
+      );
+      throw error;
+    }
   },
   logout: () => {
     localStorage.removeItem('token');

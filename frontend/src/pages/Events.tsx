@@ -251,8 +251,8 @@ const Events: React.FC = () => {
         return (
             <>
                 <Helmet>
-                    <title>Мероприятия - 1С Поддержка</title>
-                    <meta name="description" content="Календарь мероприятий 1С Поддержка. Семинары, конференции, обучающие программы и деловые встречи." />
+                    <title>Мероприятия - ООО «Инженер-центр»</title>
+                    <meta name="description" content="Календарь мероприятий ООО «Инженер-центр». Семинары, конференции, обучающие программы и деловые встречи." />
                 </Helmet>
                 <div className="min-h-screen bg-modern-gray-50 flex items-center justify-center">
                     <div className="text-center">
@@ -267,8 +267,8 @@ const Events: React.FC = () => {
     return (
         <>
             <Helmet>
-                <title>Мероприятия - 1С Поддержка</title>
-                <meta name="description" content="Календарь мероприятий 1С Поддержка. Семинары, конференции, обучающие программы и деловые встречи." />
+                <title>Мероприятия - ООО «Инженер-центр»</title>
+                <meta name="description" content="Календарь мероприятий ООО «Инженер-центр». Семинары, конференции, обучающие программы и деловые встречи." />
             </Helmet>
 
             <div className="min-h-screen bg-modern-gray-50">

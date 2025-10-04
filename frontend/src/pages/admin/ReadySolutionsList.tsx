@@ -1,10 +1,7 @@
-import React from 'react';
 import {
     List,
     Datagrid,
-    TextField,
     DateField,
-    BooleanField,
     FunctionField,
     EditButton,
     DeleteButton,
@@ -19,7 +16,6 @@ import {
 import { Card, Box, Chip, IconButton, Tooltip } from '@mui/material';
 import {
     PlusIcon,
-    FunnelIcon,
     EyeIcon,
     CheckCircleIcon,
     XCircleIcon,
@@ -101,10 +97,16 @@ const ProgramsField = () => {
     const record = useRecordContext();
     if (!record) return null;
 
+    interface Program {
+        program: {
+            shortName: string;
+        };
+    }
+
     return (
         <Box className="flex flex-wrap gap-1">
             {record.programs && record.programs.length > 0 ? (
-                record.programs.slice(0, 3).map((program: any, index: number) => (
+                record.programs.slice(0, 3).map((program: Program, index: number) => (
                     <Chip
                         key={index}
                         icon={<CogIcon className="h-3 w-3" />}
@@ -194,6 +196,7 @@ const ReadySolutionsFilter = [
         key="search"
         className="w-full max-w-lg"
         sx={{
+            marginLeft: '12px',
             '& .MuiInputBase-root': {
                 backgroundColor: 'background.paper',
                 borderRadius: '12px',
@@ -292,8 +295,8 @@ export const ReadySolutionsList = () => (
                 },
                 '& .RaFilterForm-form': {
                     paddingBottom: '20px',
-                    paddingLeft: '24px',
-                    paddingRight: '24px',
+                    paddingLeft: '32px',
+                    paddingRight: '32px',
                     backgroundColor: '#f8fafc',
                     marginLeft: '-24px',
                     marginRight: '-24px',

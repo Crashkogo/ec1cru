@@ -141,7 +141,7 @@ const EventsDetail: React.FC = () => {
     return (
       <>
         <Helmet>
-          <title>Загрузка... - 1С Поддержка</title>
+          <title>Загрузка... - ООО «Инженер-центр»</title>
         </Helmet>
         <div className="min-h-screen bg-modern-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -167,7 +167,7 @@ const EventsDetail: React.FC = () => {
     return (
       <>
         <Helmet>
-          <title>Мероприятие не найдено - 1С Поддержка</title>
+          <title>Мероприятие не найдено - ООО «Инженер-центр»</title>
         </Helmet>
         <div className="min-h-screen bg-modern-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -197,7 +197,7 @@ const EventsDetail: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{event.metaTitle || event.title} - 1С Поддержка</title>
+        <title>{event.metaTitle || event.title} - ООО «Инженер-центр»</title>
         <meta name="description" content={event.metaDescription || event.shortDescription} />
       </Helmet>
 

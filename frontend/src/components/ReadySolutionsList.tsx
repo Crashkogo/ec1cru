@@ -33,6 +33,8 @@ interface ReadySolution {
 const ReadySolutionsList: React.FC = () => {
   const [solutions, setSolutions] = useState<ReadySolution[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [programsLoading, setProgramsLoading] = useState(true);
+  const [programsError, setProgramsError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -49,13 +51,19 @@ const ReadySolutionsList: React.FC = () => {
 
   // Загрузка программ
   useEffect(() => {
+    setProgramsLoading(true);
     axios
       .get(`${import.meta.env.VITE_API_URL}/api/posts/programs`)
       .then((response) => {
         setPrograms(response.data);
+        setProgramsError(null);
       })
       .catch((error) => {
         console.error('Error fetching programs:', error);
+        setProgramsError('Не удалось загрузить список программ');
+      })
+      .finally(() => {
+        setProgramsLoading(false);
       });
   }, []);
 
@@ -153,8 +161,20 @@ const ReadySolutionsList: React.FC = () => {
     setMobileFiltersOpen(false);
   };
 
-  // Компонент фильтров
-  const FiltersContent = () => (
+  // Обработчик изменения поиска с сохранением фокуса
+  const handleSearchChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
+
+  // Обработчик изменения чекбоксов программ
+  const handleProgramToggle = React.useCallback((programId: number, checked: boolean) => {
+    setSelectedPrograms((prev) =>
+      checked ? [...prev, programId] : prev.filter((p) => p !== programId)
+    );
+  }, []);
+
+  // Компонент фильтров с использованием useMemo для предотвращения пересоздания
+  const FiltersContent = React.useMemo(() => (
     <>
       {/* Поиск */}
       <div className="mb-6">
@@ -162,12 +182,13 @@ const ReadySolutionsList: React.FC = () => {
           Поиск по названию
         </label>
         <div className="relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-modern-gray-400" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-modern-gray-400 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
             placeholder="Введите название..."
+            autoComplete="off"
             className="w-full pl-10 pr-4 py-3 border border-modern-gray-300 rounded-lg focus:ring-2 focus:ring-modern-primary-500 focus:border-modern-primary-500 transition-all duration-200 text-modern-gray-900 placeholder-modern-gray-500"
           />
         </div>
@@ -235,23 +256,41 @@ const ReadySolutionsList: React.FC = () => {
           Программы 1С
         </label>
         <div className="max-h-40 overflow-y-auto space-y-2 border border-modern-gray-200 rounded-lg p-3">
-          {programs.map((program) => (
-            <label key={program.id} className="flex items-center">
-              <input
-                type="checkbox"
-                value={program.id}
-                checked={selectedPrograms.includes(program.id)}
-                onChange={(e) => {
-                  const id = parseInt(e.target.value);
-                  setSelectedPrograms((prev) =>
-                    e.target.checked ? [...prev, id] : prev.filter((p) => p !== id)
-                  );
-                }}
-                className="mr-2 text-modern-primary-600 focus:ring-modern-primary-500 rounded"
-              />
-              <span className="text-sm text-modern-gray-700">{program.shortName}</span>
-            </label>
-          ))}
+          {programsLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-modern-primary-600"></div>
+              <span className="ml-2 text-sm text-modern-gray-500">Загрузка...</span>
+            </div>
+          ) : programsError ? (
+            <div className="text-center py-4">
+              <p className="text-sm text-red-600 mb-2">{programsError}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-xs text-modern-primary-600 hover:text-modern-primary-700 underline"
+              >
+                Обновить страницу
+              </button>
+            </div>
+          ) : programs.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-sm text-modern-gray-500">Программы не найдены</p>
+            </div>
+          ) : (
+            programs.map((program) => (
+              <label key={program.id} className="flex items-center cursor-pointer hover:bg-modern-gray-50 p-1 rounded transition-colors">
+                <input
+                  type="checkbox"
+                  value={program.id}
+                  checked={selectedPrograms.includes(program.id)}
+                  onChange={(e) => {
+                    handleProgramToggle(program.id, e.target.checked);
+                  }}
+                  className="mr-2 text-modern-primary-600 focus:ring-modern-primary-500 rounded"
+                />
+                <span className="text-sm text-modern-gray-700">{program.shortName}</span>
+              </label>
+            ))
+          )}
         </div>
       </div>
 
@@ -263,13 +302,26 @@ const ReadySolutionsList: React.FC = () => {
         Сбросить фильтры
       </button>
     </>
-  );
+  ), [
+    searchQuery,
+    handleSearchChange,
+    typeFilter,
+    setTypeFilter,
+    freshSupportFilter,
+    setFreshSupportFilter,
+    programsLoading,
+    programsError,
+    programs,
+    selectedPrograms,
+    handleProgramToggle,
+    resetFilters
+  ]);
 
   if (initialLoading) {
     return (
       <>
         <Helmet>
-          <title>Готовые решения 1С - 1С Поддержка</title>
+          <title>Готовые решения 1С - ООО «Инженер-центр»</title>
           <meta name="description" content="Готовые решения 1С для автоматизации бизнеса. Обработки, отчёты, печатные формы." />
         </Helmet>
         <div className="min-h-screen bg-modern-gray-50 flex items-center justify-center">
@@ -285,7 +337,7 @@ const ReadySolutionsList: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Готовые решения 1С - 1С Поддержка</title>
+        <title>Готовые решения 1С - ООО «Инженер-центр»</title>
         <meta name="description" content="Готовые решения 1С для автоматизации бизнеса. Обработки, отчёты, печатные формы для различных конфигураций." />
       </Helmet>
 
@@ -318,7 +370,7 @@ const ReadySolutionsList: React.FC = () => {
                 <XMarkIcon className="h-5 w-5" />
               </button>
               <h2 className="text-xl font-semibold text-modern-gray-900 mb-6">Фильтры</h2>
-              <FiltersContent />
+              {FiltersContent}
             </div>
           )}
 
@@ -327,7 +379,7 @@ const ReadySolutionsList: React.FC = () => {
             {/* Десктопные фильтры */}
             <div className="hidden lg:block w-1/6 bg-modern-white rounded-xl shadow-modern p-6 h-fit">
               <h2 className="text-xl font-semibold text-modern-gray-900 mb-6">Фильтры</h2>
-              <FiltersContent />
+              {FiltersContent}
             </div>
 
             {/* Список решений */}

@@ -1,6 +1,12 @@
 import { RequestHandler } from "express";
 import { prisma } from "./utils";
 
+// Функция для вычисления актуального статуса акции на основе даты
+const calculatePromotionStatus = (endDate: Date): boolean => {
+  const now = new Date();
+  return now <= endDate; // true - активна, false - завершена
+};
+
 export const getPromotionBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;
   try {
@@ -9,7 +15,11 @@ export const getPromotionBySlug: RequestHandler = async (req, res) => {
       res.status(404).json({ message: "Promotion not found" });
       return;
     }
-    res.status(200).json(promotion);
+
+    // Вычисляем актуальный статус на основе даты окончания
+    const actualStatus = calculatePromotionStatus(promotion.endDate);
+
+    res.status(200).json({ ...promotion, status: actualStatus });
   } catch (error) {
     console.error("Error fetching promotion by slug:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -35,7 +45,14 @@ export const getPromotions: RequestHandler = async (req, res) => {
         take: parseInt(take as string),
         where: { isPublished: true },
       });
-      res.status(200).json(promotions);
+
+      // Вычисляем актуальный статус для каждой акции
+      const promotionsWithActualStatus = promotions.map((promotion) => ({
+        ...promotion,
+        status: calculatePromotionStatus(promotion.endDate),
+      }));
+
+      res.status(200).json(promotionsWithActualStatus);
       return;
     }
 
@@ -77,7 +94,13 @@ export const getPromotions: RequestHandler = async (req, res) => {
       take: takeNum,
     });
 
-    res.status(200).json(promotions);
+    // Вычисляем актуальный статус для каждой акции
+    const promotionsWithActualStatus = promotions.map((promotion) => ({
+      ...promotion,
+      status: calculatePromotionStatus(promotion.endDate),
+    }));
+
+    res.status(200).json(promotionsWithActualStatus);
   } catch (error) {
     console.error("Error fetching promotions:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -132,11 +155,17 @@ export const getAllPromotions: RequestHandler = async (req, res) => {
       prisma.promotions.count({ where }),
     ]);
 
+    // Для админки вычисляем актуальный статус и добавляем как отдельное поле
+    const promotionsWithCalculatedStatus = promotions.map((promotion) => ({
+      ...promotion,
+      calculatedStatus: calculatePromotionStatus(promotion.endDate),
+    }));
+
     // Устанавливаем заголовок для React Admin пагинации
     res.set("X-Total-Count", total.toString());
     res.set("Access-Control-Expose-Headers", "X-Total-Count");
 
-    res.status(200).json(promotions);
+    res.status(200).json(promotionsWithCalculatedStatus);
   } catch (error) {
     console.error("Error fetching all promotions:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -247,7 +276,14 @@ export const getPromotionById: RequestHandler = async (req, res) => {
       res.status(404).json({ message: "Promotion not found" });
       return;
     }
-    res.status(200).json(promotion);
+
+    // Для админки добавляем вычисленный статус
+    const promotionWithCalculatedStatus = {
+      ...promotion,
+      calculatedStatus: calculatePromotionStatus(promotion.endDate),
+    };
+
+    res.status(200).json(promotionWithCalculatedStatus);
   } catch (error) {
     console.error("Error fetching promotion by id:", error);
     res.status(500).json({ message: "Internal server error" });

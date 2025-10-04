@@ -159,8 +159,8 @@ const News: React.FC = () => {
     return (
       <>
         <Helmet>
-          <title>Новости - 1С Поддержка</title>
-          <meta name="description" content="Последние новости компании 1С Поддержка. Актуальная информация о продуктах 1С, обновлениях и событиях." />
+          <title>Новости - ООО «Инженер-центр»</title>
+          <meta name="description" content="Последние новости компании ООО «Инженер-центр». Актуальная информация о продуктах 1С, обновлениях и событиях." />
         </Helmet>
         <div className="min-h-screen bg-modern-gray-50 flex items-center justify-center">
           <div className="text-center">
@@ -175,7 +175,7 @@ const News: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Новости - 1С Поддержка</title>
+        <title>Новости - ООО «Инженер-центр»</title>
         <meta
           name="description"
           content="Актуальные новости 1С, изменения в программах, обновления законодательства и другая полезная информация."

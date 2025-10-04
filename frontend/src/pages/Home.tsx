@@ -9,6 +9,8 @@ import {
   PhoneIcon
 } from '@heroicons/react/24/outline';
 import csImage from '../assets/cs.png';
+import { usePreloadOnHover, preloadOnIdle } from '../utils/preloadRoutes';
+import SubscribeForm from '../components/SubscribeForm';
 
 // Типы данных
 interface NewsItem {
@@ -108,7 +110,7 @@ const Home: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>1С Поддержка - Профессиональная автоматизация бизнеса</title>
+        <title>ООО «Инженер-центр» - Профессиональная автоматизация бизнеса</title>
         <meta
           name="description"
           content="Профессиональные услуги 1С: внедрение, сопровождение, техподдержка, обучение. 30 лет опыта, 600+ довольных клиентов."
@@ -465,7 +467,7 @@ const Home: React.FC = () => {
                     <h3 className="text-2xl font-bold text-modern-gray-900">История компании</h3>
                     <div className="space-y-4 text-modern-gray-600">
                       <p>
-                        Компания «1С Поддержка» - ведущий региональный интегратор решений 1С
+                        Компания «ООО «Инженер-центр»» - ведущий региональный интегратор решений 1С
                         с 30-летним опытом работы на рынке автоматизации бизнеса.
                       </p>
                       <p>

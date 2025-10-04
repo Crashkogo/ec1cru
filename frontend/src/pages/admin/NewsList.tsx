@@ -1,29 +1,22 @@
-import React from 'react';
 import {
     List,
     Datagrid,
     TextField,
     DateField,
-    BooleanField,
     EditButton,
     DeleteButton,
     CreateButton,
     TopToolbar,
     FilterButton,
     SearchInput,
-    TextInput,
     BooleanInput,
-    SelectInput,
     Pagination,
     FunctionField,
     useRecordContext
 } from 'react-admin';
-import { Card, Box, Chip, IconButton, Tooltip } from '@mui/material';
+import { Card, Chip, IconButton, Tooltip } from '@mui/material';
 import {
     PlusIcon,
-    FunnelIcon,
-    PencilIcon,
-    TrashIcon,
     EyeIcon,
     CheckCircleIcon,
     XCircleIcon
@@ -100,6 +93,7 @@ const PostFilter = [
         key="search"
         className="w-full max-w-lg"
         sx={{
+            marginLeft: '12px',
             '& .MuiInputBase-root': {
                 backgroundColor: 'background.paper',
                 borderRadius: '12px',
@@ -188,8 +182,8 @@ export const NewsList = () => (
                 },
                 '& .RaFilterForm-form': {
                     paddingBottom: '20px',
-                    paddingLeft: '24px',
-                    paddingRight: '24px',
+                    paddingLeft: '32px',
+                    paddingRight: '32px',
                     backgroundColor: '#f8fafc',
                     marginLeft: '-24px',
                     marginRight: '-24px',
@@ -254,7 +248,7 @@ export const NewsList = () => (
                     />
                     <FunctionField
                         label="Описание"
-                        render={(record: any) => (
+                        render={(record: { shortDescription?: string }) => (
                             <div className="max-w-md">
                                 <p className="text-sm text-modern-gray-600 line-clamp-2">
                                     {record.shortDescription}

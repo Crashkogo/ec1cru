@@ -88,7 +88,7 @@ const Footer: React.FC = () => {
                 <div className="border-t border-modern-gray-800 mt-8 pt-8">
                     <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                         <div className="text-modern-gray-400 text-sm">
-                            © 2025 1С Поддержка. Все права защищены.
+                            © 2025 ООО «Инженер-центр». Все права защищены.
                         </div>
 
                         {/* Технические страницы */}

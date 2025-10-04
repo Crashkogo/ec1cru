@@ -261,27 +261,11 @@ export const getReadySolutions: RequestHandler = async (req, res) => {
 export const getReadySolutionBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;
   try {
-    const solution = await prisma.readySolution.findUnique({
-      where: { slug, isPublished: true },
-      include: { programs: { include: { program: true } } },
-    });
-    if (!solution) {
-      res.status(404).json({ message: "Solution not found" });
-      return;
-    }
-    res.json(solution);
-  } catch (error) {
-    console.error("Error fetching ready solution by slug:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-};
-
-// Методы для админки (работа с ID)
-export const getReadySolutionById: RequestHandler = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const solution = await prisma.readySolution.findUnique({
-      where: { id: parseInt(id) },
+    const solution = await prisma.readySolution.findFirst({
+      where: {
+        slug,
+        isPublished: true,
+      },
       include: {
         programs: {
           include: {
@@ -298,7 +282,61 @@ export const getReadySolutionById: RequestHandler = async (req, res) => {
     }
     res.json(solution);
   } catch (error) {
-    console.error("Error fetching ready solution by id:", error);
+    console.error("Error fetching ready solution by slug:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Методы для админки (работа с ID)
+export const getReadySolutionById: RequestHandler = async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Пытаемся определить, это ID или slug
+    const parsedId = parseInt(id);
+    const isNumericId = !isNaN(parsedId) && parsedId.toString() === id;
+
+    let solution;
+
+    if (isNumericId) {
+      // Если это числовой ID, ищем по ID
+      solution = await prisma.readySolution.findUnique({
+        where: { id: parsedId },
+        include: {
+          programs: {
+            include: {
+              program: {
+                select: { id: true, fullName: true, shortName: true },
+              },
+            },
+          },
+        },
+      });
+    } else {
+      // Если это slug, ищем по slug
+      solution = await prisma.readySolution.findFirst({
+        where: {
+          slug: id,
+          isPublished: true, // Для публичного доступа по slug фильтруем опубликованные
+        },
+        include: {
+          programs: {
+            include: {
+              program: {
+                select: { id: true, fullName: true, shortName: true },
+              },
+            },
+          },
+        },
+      });
+    }
+
+    if (!solution) {
+      res.status(404).json({ message: "Solution not found" });
+      return;
+    }
+    res.json(solution);
+  } catch (error) {
+    console.error("Error fetching ready solution by id/slug:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

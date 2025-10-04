@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   List,
   Datagrid,
@@ -7,12 +6,9 @@ import {
   CreateButton,
   TopToolbar,
   SearchInput,
-  FilterForm,
   EditButton,
   DeleteButton,
   ShowButton,
-  BulkDeleteButton,
-  BulkExportButton,
   Pagination,
   useRecordContext,
   SelectInput,
@@ -22,8 +18,6 @@ import {
 import { Card, Chip, Box, IconButton, Tooltip } from '@mui/material';
 import {
   PlusIcon,
-  FunnelIcon,
-  EyeIcon,
   UserIcon,
   ShieldCheckIcon,
   CogIcon,
@@ -131,6 +125,7 @@ const UsersFilter = [
     key="search"
     className="w-full max-w-lg"
     sx={{
+      marginLeft: '12px',
       '& .MuiInputBase-root': {
         backgroundColor: 'background.paper',
         borderRadius: '12px',
@@ -228,8 +223,8 @@ export const UserList = () => (
         },
         '& .RaFilterForm-form': {
           paddingBottom: '20px',
-          paddingLeft: '24px',
-          paddingRight: '24px',
+          paddingLeft: '32px',
+          paddingRight: '32px',
           backgroundColor: '#f8fafc',
           marginLeft: '-24px',
           marginRight: '-24px',

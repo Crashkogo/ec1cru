@@ -78,12 +78,14 @@ export const loginUser: RequestHandler = async (req, res) => {
 
     const user = await prisma.user.findUnique({ where: { name } });
     if (!user) {
+      console.log("⚠️  Login failed: User not found -", name);
       res.status(400).json({ message: "Invalid credentials" });
       return;
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      console.log("⚠️  Login failed: Invalid password for user -", name);
       res.status(400).json({ message: "Invalid credentials" });
       return;
     }
@@ -91,16 +93,23 @@ export const loginUser: RequestHandler = async (req, res) => {
     const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
       expiresIn: "30d",
     });
+
+    console.log("✅ Login successful:", name, "- Role:", user.role);
+
     res
       .status(200)
       .json({ message: "Login successful", token, role: user.role });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.log(
+        "⚠️  Login validation error:",
+        error.errors.map((e) => `${e.path}: ${e.message}`).join(", ")
+      );
       res
         .status(400)
         .json({ message: "Validation error", errors: error.errors });
     } else {
-      console.error("Error during login:", error);
+      console.error("❌ Error during login:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   }

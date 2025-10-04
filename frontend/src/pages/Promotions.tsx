@@ -204,8 +204,8 @@ const Promotions: React.FC = () => {
         return (
             <>
                 <Helmet>
-                    <title>Акции - 1С Поддержка</title>
-                    <meta name="description" content="Актуальные акции и специальные предложения от 1С Поддержка. Скидки на программы, услуги и обучение." />
+                    <title>Акции - ООО «Инженер-центр»</title>
+                    <meta name="description" content="Актуальные акции и специальные предложения от ООО «Инженер-центр». Скидки на программы, услуги и обучение." />
                 </Helmet>
                 <div className="min-h-screen bg-modern-gray-50 flex items-center justify-center">
                     <div className="text-center">
@@ -220,8 +220,8 @@ const Promotions: React.FC = () => {
     return (
         <>
             <Helmet>
-                <title>Акции - 1С Поддержка</title>
-                <meta name="description" content="Актуальные акции и специальные предложения от 1С Поддержка. Скидки на программы, услуги и обучение." />
+                <title>Акции - ООО «Инженер-центр»</title>
+                <meta name="description" content="Актуальные акции и специальные предложения от ООО «Инженер-центр». Скидки на программы, услуги и обучение." />
             </Helmet>
 
             <div className="min-h-screen bg-modern-gray-50">

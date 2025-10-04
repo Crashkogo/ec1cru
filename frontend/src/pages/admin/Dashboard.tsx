@@ -135,11 +135,11 @@ const DashboardContent: React.FC = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-modern-gray-900 mb-2">Dashboard</h1>
-        <p className="text-modern-gray-600">Добро пожаловать в панель администратора 1С Поддержка</p>
+        <p className="text-modern-gray-600">Добро пожаловать в панель администратора ООО «Инженер-центр»</p>
       </div>
 
       {/* Quick Actions */}
@@ -184,9 +184,11 @@ const CustomLayout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-modern-gray-50">
       <AdminMenu role={permissions || 'USER'} />
-      <div className="ml-64">
-        <main className="flex-1">
-          {children}
+      <div className="lg:ml-64">
+        <main className="flex-1 p-6 md:p-8 lg:p-10">
+          <div className="max-w-[1600px] mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

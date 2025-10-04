@@ -1,4 +1,3 @@
-import React from 'react';
 import {
     List,
     Datagrid,
@@ -16,11 +15,7 @@ import {
 } from 'react-admin';
 import { Card, IconButton, Tooltip } from '@mui/material';
 import {
-    PlusIcon,
-    FunnelIcon,
-    PencilIcon,
-    TrashIcon,
-    EnvelopeIcon
+    PlusIcon
 } from '@heroicons/react/24/outline';
 
 // Кастомный компонент для действий
@@ -59,6 +54,7 @@ const NewsletterFilter = [
         key="search"
         className="w-full max-w-lg"
         sx={{
+            marginLeft: '12px',
             '& .MuiInputBase-root': {
                 backgroundColor: 'background.paper',
                 borderRadius: '12px',
@@ -137,8 +133,8 @@ export const NewslettersList = () => (
                 },
                 '& .RaFilterForm-form': {
                     paddingBottom: '20px',
-                    paddingLeft: '24px',
-                    paddingRight: '24px',
+                    paddingLeft: '32px',
+                    paddingRight: '32px',
                     backgroundColor: '#f8fafc',
                     marginLeft: '-24px',
                     marginRight: '-24px',

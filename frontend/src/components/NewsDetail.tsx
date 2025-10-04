@@ -63,7 +63,7 @@ const NewsDetail: React.FC = () => {
     return (
       <>
         <Helmet>
-          <title>Загрузка... - 1С Поддержка</title>
+          <title>Загрузка... - ООО «Инженер-центр»</title>
         </Helmet>
         <div className="min-h-screen bg-modern-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -89,7 +89,7 @@ const NewsDetail: React.FC = () => {
     return (
       <>
         <Helmet>
-          <title>Новость не найдена - 1С Поддержка</title>
+          <title>Новость не найдена - ООО «Инженер-центр»</title>
         </Helmet>
         <div className="min-h-screen bg-modern-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -119,7 +119,7 @@ const NewsDetail: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{news.metaTitle || news.title} - 1С Поддержка</title>
+        <title>{news.metaTitle || news.title} - ООО «Инженер-центр»</title>
         <meta name="description" content={news.metaDescription || news.shortDescription} />
       </Helmet>
 

@@ -237,11 +237,10 @@ router.delete(
 // =============================================================================
 // ПРОГРАММЫ
 // =============================================================================
-router.get(
-  "/programs",
-  authMiddleware,
-  readySolutionsController.getPrograms as RequestHandler
-);
+// Публичный эндпоинт для получения списка программ (без авторизации)
+router.get("/programs", readySolutionsController.getPrograms as RequestHandler);
+
+// Админские эндпоинты для программ (с авторизацией)
 router.get(
   "/admin/programs",
   authMiddleware,
@@ -253,7 +252,7 @@ router.get(
   readySolutionsController.getProgramById as RequestHandler
 );
 router.post(
-  "/programs",
+  "/admin/programs",
   authMiddleware,
   readySolutionsController.createProgram as RequestHandler
 );

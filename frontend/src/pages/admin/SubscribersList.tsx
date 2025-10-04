@@ -1,11 +1,8 @@
-import React from 'react';
 import {
     List,
     Datagrid,
-    TextField,
     EmailField,
     DateField,
-    BooleanField,
     EditButton,
     DeleteButton,
     TopToolbar,
@@ -18,9 +15,6 @@ import {
 } from 'react-admin';
 import { Card, Chip, IconButton, Tooltip } from '@mui/material';
 import {
-    FunnelIcon,
-    PencilIcon,
-    TrashIcon,
     CheckCircleIcon,
     XCircleIcon
 } from '@heroicons/react/24/outline';
@@ -87,6 +81,7 @@ const SubscriberFilter = [
         key="search"
         className="w-full max-w-lg"
         sx={{
+            marginLeft: '12px',
             '& .MuiInputBase-root': {
                 backgroundColor: 'background.paper',
                 borderRadius: '12px',
@@ -170,8 +165,8 @@ export const SubscribersList = () => (
                 },
                 '& .RaFilterForm-form': {
                     paddingBottom: '20px',
-                    paddingLeft: '24px',
-                    paddingRight: '24px',
+                    paddingLeft: '32px',
+                    paddingRight: '32px',
                     backgroundColor: '#f8fafc',
                     marginLeft: '-24px',
                     marginRight: '-24px',

@@ -90,8 +90,8 @@ const Unsubscribe: React.FC = () => {
     return (
         <>
             <Helmet>
-                <title>Отписка от рассылки - 1С Поддержка</title>
-                <meta name="description" content="Отписка от email-рассылки 1С Поддержка" />
+                <title>Отписка от рассылки - ООО «Инженер-центр»</title>
+                <meta name="description" content="Отписка от email-рассылки ООО «Инженер-центр»" />
                 <meta name="robots" content="noindex, nofollow" />
             </Helmet>
 
@@ -165,7 +165,7 @@ const Unsubscribe: React.FC = () => {
                             )}
 
                             <footer className="text-xs text-modern-gray-400 border-t border-modern-gray-200 pt-4">
-                                © 2024 1С Поддержка. Все права защищены.
+                                © 2024 ООО «Инженер-центр». Все права защищены.
                             </footer>
                         </div>
                     </Card>
