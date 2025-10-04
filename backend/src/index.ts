@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { PORT } from './config';
+import { PORT, FRONTEND_URL } from './config';
 import userRoutes from './routes/userRoutes';
 import postRoutes from './routes/postRoutes';
 import fileUpload from 'express-fileupload';
@@ -14,7 +14,7 @@ const app = express();
 
 // Настройка CORS
 const corsOptions = {
-  origin: 'http://localhost:5173', // Укажи точный origin фронтенда (Vite работает на 5173)
+  origin: FRONTEND_URL, // Укажи точный origin фронтенда (Vite работает на 5173)
   credentials: true, // Разрешаем отправку credentials (токенов)
   methods: ['GET', 'POST','PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Разрешённые методы
   allowedHeaders: ['Content-Type', 'Authorization'], // Разрешённые заголовки

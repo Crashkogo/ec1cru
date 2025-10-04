@@ -9,3 +9,4 @@ export const DATABASE_URL =
 export const CAPTCHA_SECRET = process.env.CAPTCHA_SECRET || "captcha-secret";
 export const EMAIL_USER = process.env.EMAIL_USER || "email";
 export const EMAIL_PASS = process.env.EMAIL_PASS || "password";
+export const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
