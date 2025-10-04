@@ -4,8 +4,10 @@ import {
   Resource,
   LayoutProps,
   usePermissions,
-  useRedirect
+  useRedirect,
+  CustomRoutes
 } from 'react-admin';
+import { Route } from 'react-router-dom';
 import { dataProvider } from '../../admin/dataProvider';
 import { authProvider } from '../../admin/authProvider';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -41,6 +43,7 @@ import { NewslettersEdit } from './NewslettersEdit';
 import NewslettersSend from './NewslettersSend';
 import { SubscribersList } from './SubscribersList';
 import { SubscribersEdit } from './SubscribersEdit';
+import { EventRegistrationsList } from './EventRegistrationsList';
 import { i18nProvider } from '../../admin/i18nProvider';
 import LoginPage from './Login';
 
@@ -225,6 +228,9 @@ const Dashboard: React.FC = () => (
         show={UserShow}
         recordRepresentation="name"
       />
+      <CustomRoutes>
+        <Route path="/events/:id/registrations" element={<EventRegistrationsList />} />
+      </CustomRoutes>
     </Admin>
   </ThemeProvider>
 );

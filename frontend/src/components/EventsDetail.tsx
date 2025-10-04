@@ -32,11 +32,12 @@ interface Event {
   isPublished: boolean;
   status: boolean;
   ours: boolean;
+  registrationEnabled: boolean;
   slug: string;
   metaTitle?: string;
   metaDescription?: string;
   eventLink?: string;
-  registrations?: { id: number; name: string; phone: string; email: string; createdAt: string }[];
+  registrations?: { id: number; name: string; phone: string; email: string; organization: string; privacyConsent: boolean; createdAt: string }[];
 }
 
 // Схема валидации для формы регистрации
@@ -44,6 +45,10 @@ const registrationSchema = z.object({
   name: z.string().min(1, 'Имя обязательно'),
   phone: z.string().min(1, 'Телефон обязателен'),
   email: z.string().email('Неверный формат email').min(1, 'Email обязателен'),
+  organization: z.string().min(1, 'Организация обязательна'),
+  privacyConsent: z.boolean().refine((val) => val === true, {
+    message: 'Необходимо согласие на обработку персональных данных',
+  }),
 });
 
 type RegistrationFormInputs = z.infer<typeof registrationSchema>;
@@ -134,7 +139,7 @@ const EventsDetail: React.FC = () => {
     }
   };
 
-  const canRegister = event && event.ours && new Date() < new Date(event.startDate);
+  const canRegister = event && event.registrationEnabled && new Date() < new Date(event.startDate);
   const isPastEvent = event && new Date() > new Date(event.startDate);
 
   if (loading) {
@@ -386,6 +391,36 @@ const EventsDetail: React.FC = () => {
                         />
                         {errors.email && (
                           <p className="text-red-600 text-sm mt-1">{errors.email.message}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-modern-gray-900 mb-2">
+                          Организация *
+                        </label>
+                        <input
+                          {...register('organization')}
+                          className="w-full px-4 py-3 border border-modern-gray-300 rounded-lg focus:ring-2 focus:ring-modern-primary-500 focus:border-modern-primary-500 transition-colors duration-200"
+                          placeholder="Название вашей организации"
+                        />
+                        {errors.organization && (
+                          <p className="text-red-600 text-sm mt-1">{errors.organization.message}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="flex items-start cursor-pointer">
+                          <input
+                            type="checkbox"
+                            {...register('privacyConsent')}
+                            className="mt-1 mr-3 h-5 w-5 text-modern-primary-600 border-modern-gray-300 rounded focus:ring-2 focus:ring-modern-primary-500"
+                          />
+                          <span className="text-sm text-modern-gray-700">
+                            Я согласен на обработку персональных данных *
+                          </span>
+                        </label>
+                        {errors.privacyConsent && (
+                          <p className="text-red-600 text-sm mt-1">{errors.privacyConsent.message}</p>
                         )}
                       </div>
 

@@ -249,6 +249,13 @@ export const EventsCreate = () => (
                     defaultValue={false}
                 />
 
+                <BooleanInput
+                    source="registrationEnabled"
+                    label="Включить регистрацию"
+                    defaultValue={false}
+                    helperText="Независимо от того, наше это мероприятие или нет"
+                />
+
                 <EventLinkInput />
 
                 <SlugInput

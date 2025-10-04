@@ -3,7 +3,8 @@ import { prisma, transporter, axios } from "./utils";
 
 export const registerForEvent: RequestHandler = async (req, res) => {
   const { slug } = req.params;
-  const { name, phone, email, recaptchaToken } = req.body;
+  const { name, phone, email, organization, privacyConsent, recaptchaToken } =
+    req.body;
 
   try {
     const recaptchaResponse = await axios.post(
@@ -31,13 +32,24 @@ export const registerForEvent: RequestHandler = async (req, res) => {
 
   try {
     const event = await prisma.events.findUnique({ where: { slug } });
-    if (!event || !event.ours || new Date() >= new Date(event.startDate)) {
+    if (
+      !event ||
+      !event.registrationEnabled ||
+      new Date() >= new Date(event.startDate)
+    ) {
       res.status(400).json({ message: "Регистрация недоступна" });
       return;
     }
 
     const registration = await prisma.eventsRegistration.create({
-      data: { eventId: event.id, name, phone, email },
+      data: {
+        eventId: event.id,
+        name,
+        phone,
+        email,
+        organization,
+        privacyConsent,
+      },
     });
 
     const eventDateTime = new Date(event.startDate).toLocaleString("ru-RU", {
@@ -49,12 +61,18 @@ export const registerForEvent: RequestHandler = async (req, res) => {
       timeZone: "UTC",
     });
 
+    const siteUrl = process.env.SITE_URL || "http://localhost:5173";
+    const eventUrl = `${siteUrl}/events/${event.slug}`;
+
     const emailText =
-      `Здравствуйте, ${name}! Вы успешно зарегистрировались на мероприятие "${event.title}".\n` +
+      `Здравствуйте, ${name}!\n\n` +
+      `Ваша регистрация на мероприятие "${event.title}" принята!\n\n` +
       `Дата и время проведения: ${eventDateTime}.\n` +
+      `Ссылка на мероприятие: ${eventUrl}\n\n` +
       (event.eventLink
-        ? `Ссылка на мероприятие: ${event.eventLink}`
-        : "Ссылку на мероприятие пришлём за день до его начала.");
+        ? `Ссылка на трансляцию: ${event.eventLink}\n\n`
+        : "Ссылку на трансляцию пришлём за день до начала мероприятия.\n\n") +
+      `С уважением,\nКоманда ООО «Инженер-центр»`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
@@ -77,7 +95,7 @@ export const getEventRegistrations: RequestHandler = async (req, res) => {
       where: { slug },
       include: { registrations: true },
     });
-    if (!event || !event.ours) {
+    if (!event || !event.registrationEnabled) {
       res
         .status(404)
         .json({ message: "Мероприятие не найдено или регистрация недоступна" });
@@ -92,6 +110,56 @@ export const getEventRegistrations: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Error fetching registrations:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getEventRegistrationsByEventId: RequestHandler = async (
+  req,
+  res
+) => {
+  try {
+    const { eventId } = req.query;
+
+    console.log("getEventRegistrationsByEventId called");
+    console.log("Query params:", req.query);
+    console.log("eventId:", eventId);
+    console.log("eventId type:", typeof eventId);
+
+    if (!eventId) {
+      console.log("No eventId provided");
+      res.status(400).json({ message: "EventId is required" });
+      return;
+    }
+
+    const parsedEventId = parseInt(eventId as string, 10);
+    console.log("Parsed eventId:", parsedEventId);
+
+    if (isNaN(parsedEventId)) {
+      console.log("Invalid eventId - not a number");
+      res.status(400).json({ message: "EventId must be a valid number" });
+      return;
+    }
+
+    const registrations = await prisma.eventsRegistration.findMany({
+      where: { eventId: parsedEventId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    console.log(
+      `Found ${registrations.length} registrations for event ${parsedEventId}`
+    );
+
+    res.json(registrations);
+  } catch (error) {
+    console.error("Error fetching registrations by eventId:", error);
+    console.error(
+      "Error details:",
+      error instanceof Error ? error.message : error
+    );
+    res.status(500).json({
+      message: "Internal server error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
 
@@ -329,6 +397,7 @@ export const updateEventById: RequestHandler = async (req, res) => {
     isPublished,
     status,
     ours,
+    registrationEnabled,
     slug,
     metaTitle,
     metaDescription,
@@ -373,6 +442,8 @@ export const updateEventById: RequestHandler = async (req, res) => {
         isPublished: isPublished === "true" || isPublished === true,
         status: status === "true" || status === true,
         ours: ours === "true" || ours === true,
+        registrationEnabled:
+          registrationEnabled === "true" || registrationEnabled === true,
         slug: slug || existingEvent.slug,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
@@ -413,6 +484,7 @@ export const createEvent: RequestHandler = async (req, res) => {
     isPublished,
     status,
     ours,
+    registrationEnabled,
     slug,
     metaTitle,
     metaDescription,
@@ -446,6 +518,8 @@ export const createEvent: RequestHandler = async (req, res) => {
         isPublished: isPublished === "true" || isPublished === true,
         status: status === "true" || status === true,
         ours: ours === "true" || ours === true,
+        registrationEnabled:
+          registrationEnabled === "true" || registrationEnabled === true,
         slug,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
@@ -472,6 +546,7 @@ export const updateEvent: RequestHandler = async (req, res) => {
     isPublished,
     status,
     ours,
+    registrationEnabled,
     slug: newSlug,
     metaTitle,
     metaDescription,
@@ -513,6 +588,8 @@ export const updateEvent: RequestHandler = async (req, res) => {
         isPublished: isPublished === "true" || isPublished === true,
         status: status === "true" || status === true,
         ours: ours === "true" || ours === true,
+        registrationEnabled:
+          registrationEnabled === "true" || registrationEnabled === true,
         slug: newSlug || slug,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,

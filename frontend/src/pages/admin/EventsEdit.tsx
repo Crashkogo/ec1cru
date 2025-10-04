@@ -202,6 +202,12 @@ export const EventsEdit = () => (
                     label="Наше мероприятие"
                 />
 
+                <BooleanInput
+                    source="registrationEnabled"
+                    label="Включить регистрацию"
+                    helperText="Независимо от того, наше это мероприятие или нет"
+                />
+
                 <EventLinkInput />
 
                 <SlugInput

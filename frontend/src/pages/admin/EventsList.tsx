@@ -21,7 +21,8 @@ import {
     CheckCircleIcon,
     XCircleIcon,
     ClockIcon,
-    CalendarDaysIcon
+    CalendarDaysIcon,
+    UserGroupIcon
 } from '@heroicons/react/24/outline';
 
 // Кастомный компонент для статуса публикации
@@ -107,7 +108,14 @@ const OurEventField = () => {
 // Кастомный компонент для действий
 const ActionButtons = () => {
     const record = useRecordContext();
+
     if (!record) return null;
+
+    const handleViewRegistrations = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        // Используем полный путь для навигации
+        window.location.href = `/admin/events/${record.id}/registrations`;
+    };
 
     return (
         <div className="flex items-center space-x-2">
@@ -120,6 +128,17 @@ const ActionButtons = () => {
                     <EyeIcon className="h-4 w-4" />
                 </IconButton>
             </Tooltip>
+            {record.registrationEnabled && (
+                <Tooltip title="Регистрации">
+                    <IconButton
+                        size="small"
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        onClick={handleViewRegistrations}
+                    >
+                        <UserGroupIcon className="h-4 w-4" />
+                    </IconButton>
+                </Tooltip>
+            )}
             <Tooltip title="Редактировать">
                 <IconButton size="small" className="text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50">
                     <EditButton

@@ -91,6 +91,12 @@ router.get(
   authMiddleware,
   eventsController.getAllEvents as RequestHandler
 );
+// ВАЖНО: этот роут должен быть ПЕРЕД /admin/events/:id
+router.get(
+  "/admin/events/registrations",
+  authMiddleware,
+  eventsController.getEventRegistrationsByEventId as RequestHandler
+);
 router.get(
   "/admin/events/:id",
   authMiddleware,

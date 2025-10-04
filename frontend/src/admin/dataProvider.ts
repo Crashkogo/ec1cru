@@ -224,6 +224,69 @@ export const dataProvider: DataProvider = {
       };
     }
 
+    if (resource === 'event-registrations') {
+      let eventId = params.filter?.eventId;
+      console.log(
+        'event-registrations getList called with filter:',
+        params.filter
+      );
+      console.log('eventId from filter:', eventId);
+      console.log('Full URL:', window.location.href);
+      console.log('Hash:', window.location.hash);
+
+      // Если eventId нет в фильтре, пробуем получить из URL (после хеша)
+      if (!eventId) {
+        // React Admin использует хеш-роутинг, поэтому параметры после #
+        const hash = window.location.hash;
+        console.log('Parsing hash:', hash);
+
+        // Извлекаем часть после ? в хеше
+        const hashQueryIndex = hash.indexOf('?');
+        if (hashQueryIndex !== -1) {
+          const hashQuery = hash.substring(hashQueryIndex + 1);
+          console.log('Hash query string:', hashQuery);
+
+          const urlParams = new URLSearchParams(hashQuery);
+          const filterParam = urlParams.get('filter');
+          console.log('filterParam from hash:', filterParam);
+
+          if (filterParam) {
+            try {
+              const parsedFilter = JSON.parse(decodeURIComponent(filterParam));
+              eventId = parsedFilter.eventId;
+              console.log('eventId from hash URL:', eventId);
+            } catch (e) {
+              console.error('Error parsing filter from hash URL:', e);
+            }
+          }
+        }
+      }
+
+      if (!eventId) {
+        console.log('No eventId found, returning empty array');
+        return { data: [], total: 0 };
+      }
+
+      const query = { eventId };
+      const url = `${apiUrl}/api/posts/admin/events/registrations?${stringify(query)}`;
+      console.log('Fetching from URL:', url);
+
+      try {
+        const { json } = await fetchUtils.fetchJson(url, { headers });
+        console.log('Received data:', json);
+
+        const data = Array.isArray(json) ? json : [json];
+
+        return {
+          data,
+          total: data.length,
+        };
+      } catch (error) {
+        console.error('Error fetching event registrations:', error);
+        return { data: [], total: 0 };
+      }
+    }
+
     return Promise.reject('Resource not supported');
   },
 
