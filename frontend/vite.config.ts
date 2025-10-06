@@ -65,20 +65,20 @@ export default defineConfig({
   },
 
   server: {
-    port: 5173, // Явно указываем порт
-    host: 'localhost', // Явно указываем хост
+    port: 5173,
+    host: '0.0.0.0', // ИЗМЕНЕНО: Слушаем на всех интерфейсах для доступа из сети
     fs: {
       allow: ['..'],
     },
     hmr: {
-      port: 5174, // Используем отдельный порт для HMR
+      port: 5174,
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:5000', // Исправлено: Бэкенд работает на порту 5000
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:5000', // Можно задать через переменную окружения
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api'), // Сохраняем /api
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
     },
   },

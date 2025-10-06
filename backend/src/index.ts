@@ -16,7 +16,7 @@ const app = express();
 const corsOptions = {
   origin: FRONTEND_URL, // Укажи точный origin фронтенда (Vite работает на 5173)
   credentials: true, // Разрешаем отправку credentials (токенов)
-  methods: ['GET', 'POST','PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Разрешённые методы
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Разрешённые методы
   allowedHeaders: ['Content-Type', 'Authorization'], // Разрешённые заголовки
 };
 
@@ -34,6 +34,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on http://0.0.0.0:${PORT}`);
+  console.log(`Access from network: http://<your-server-ip>:${PORT}`);
 });
