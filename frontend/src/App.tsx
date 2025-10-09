@@ -3,6 +3,7 @@ import React, { Suspense, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
+import ScrollToTop from './components/ScrollToTop';
 import './App.css';
 
 // Компоненты, которые нужны сразу (не делаем lazy)
@@ -50,6 +51,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
         <Router>
+          <ScrollToTop /> {/* ✅ Добавь эту строку здесь! */}
           <div className="App">
             <Routes>
               {/* Админка - react-admin управляет всеми внутренними маршрутами */}

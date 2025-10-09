@@ -142,11 +142,11 @@ export const dataProvider: DataProvider = {
         { headers }
       );
 
-      // Используем slug как ID для React Admin
+      // Используем числовой ID для React Admin
       const data = Array.isArray(json)
         ? json.map((item) => ({
             ...item,
-            id: item.slug, // используем slug как ID
+            id: item.id, // используем числовой ID
           }))
         : [json];
 
@@ -345,10 +345,10 @@ export const dataProvider: DataProvider = {
     }
 
     if (resource === 'ready-solutions') {
-      const url = `${apiUrl}/api/posts/ready-solutions/${params.id}`;
+      const url = `${apiUrl}/api/posts/admin/ready-solutions/${params.id}`;
       try {
         const { json } = await fetchUtils.fetchJson(url, { headers });
-        return { data: { ...json, id: json.slug } }; // используем slug как ID
+        return { data: { ...json, id: json.id } }; // используем числовой ID
       } catch (error) {
         console.error('GetOne ready solution error:', error);
         throw new Error(
@@ -460,16 +460,19 @@ export const dataProvider: DataProvider = {
     }
 
     if (resource === 'ready-solutions') {
-      // Для готовых решений получаем каждое по отдельности через публичный маршрут
+      // Для готовых решений получаем каждое по отдельности через админский маршрут
       const promises = params.ids.map((id) =>
-        fetchUtils.fetchJson(`${apiUrl}/api/posts/ready-solutions/${id}`, {
-          headers,
-        })
+        fetchUtils.fetchJson(
+          `${apiUrl}/api/posts/admin/ready-solutions/${id}`,
+          {
+            headers,
+          }
+        )
       );
       const results = await Promise.all(promises);
       const data = results.map(({ json }) => ({
         ...json,
-        id: json.slug, // используем slug как ID
+        id: json.id, // используем числовой ID
       }));
       return { data };
     }
@@ -561,7 +564,7 @@ export const dataProvider: DataProvider = {
         body: JSON.stringify(params.data),
         headers,
       });
-      return { data: { ...json, id: json.slug } }; // используем slug как ID
+      return { data: { ...json, id: json.id } }; // используем числовой ID
     }
 
     if (resource === 'programs') {
@@ -672,15 +675,15 @@ export const dataProvider: DataProvider = {
     }
 
     if (resource === 'ready-solutions') {
-      // Используем админский маршрут со slug
-      const url = `${apiUrl}/api/posts/ready-solutions/${params.id}`;
+      // Используем админский маршрут с ID
+      const url = `${apiUrl}/api/posts/admin/ready-solutions/${params.id}`;
       try {
         const { json } = await fetchUtils.fetchJson(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
           headers,
         });
-        return { data: { ...json, id: json.slug } }; // используем slug как ID
+        return { data: { ...json, id: json.id } }; // используем числовой ID
       } catch (error) {
         console.error('Update ready solution error:', error);
         throw new Error(
@@ -813,17 +816,20 @@ export const dataProvider: DataProvider = {
     }
 
     if (resource === 'ready-solutions') {
-      // Используем маршруты со slug
+      // Используем админские маршруты с ID
       const results = await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/posts/ready-solutions/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(params.data),
-            headers,
-          })
+          fetchUtils.fetchJson(
+            `${apiUrl}/api/posts/admin/ready-solutions/${id}`,
+            {
+              method: 'PATCH',
+              body: JSON.stringify(params.data),
+              headers,
+            }
+          )
         )
       );
-      return { data: results.map(({ json }) => json.slug) };
+      return { data: results.map(({ json }) => json.id) };
     }
 
     return Promise.reject('Resource not supported');
@@ -915,8 +921,8 @@ export const dataProvider: DataProvider = {
     }
 
     if (resource === 'ready-solutions') {
-      // Используем маршрут со slug
-      const url = `${apiUrl}/api/posts/ready-solutions/${params.id}`;
+      // Используем админский маршрут с ID
+      const url = `${apiUrl}/api/posts/admin/ready-solutions/${params.id}`;
       try {
         await fetchUtils.fetchJson(url, {
           method: 'DELETE',
@@ -1043,13 +1049,16 @@ export const dataProvider: DataProvider = {
     }
 
     if (resource === 'ready-solutions') {
-      // Используем маршруты со slug
+      // Используем админские маршруты с ID
       await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/posts/ready-solutions/${id}`, {
-            method: 'DELETE',
-            headers,
-          })
+          fetchUtils.fetchJson(
+            `${apiUrl}/api/posts/admin/ready-solutions/${id}`,
+            {
+              method: 'DELETE',
+              headers,
+            }
+          )
         )
       );
       return { data: params.ids };

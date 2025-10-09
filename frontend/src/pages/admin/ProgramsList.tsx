@@ -8,6 +8,7 @@ import {
     SearchInput,
     EditButton,
     DeleteButton,
+    ShowButton,
     Pagination,
     useRecordContext,
     FunctionField,

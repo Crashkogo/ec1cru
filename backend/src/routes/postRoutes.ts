@@ -14,6 +14,14 @@ const router = express.Router();
 // Маршруты для картинок в постах
 router.post("/upload-image", uploadController.uploadImage as RequestHandler);
 router.post("/move-images", uploadController.moveImagesAfterCreate);
+router.post(
+  "/upload-gallery-image",
+  uploadController.uploadGalleryImage as RequestHandler
+);
+router.post(
+  "/move-gallery-images",
+  uploadController.moveGalleryImagesAfterCreate
+);
 
 // =============================================================================
 // НОВОСТИ
@@ -219,6 +227,11 @@ router.post(
   authMiddleware,
   readySolutionsController.createReadySolution as RequestHandler
 );
+router.post(
+  "/admin/ready-solutions",
+  authMiddleware,
+  readySolutionsController.createReadySolution as RequestHandler
+);
 router.put(
   "/ready-solutions/:id",
   authMiddleware,
@@ -227,7 +240,7 @@ router.put(
 router.patch(
   "/admin/ready-solutions/:id",
   authMiddleware,
-  readySolutionsController.updateReadySolution as RequestHandler
+  readySolutionsController.updateReadySolutionById as RequestHandler
 );
 router.delete(
   "/ready-solutions/:id",
@@ -237,7 +250,7 @@ router.delete(
 router.delete(
   "/admin/ready-solutions/:id",
   authMiddleware,
-  readySolutionsController.deleteReadySolution as RequestHandler
+  readySolutionsController.deleteReadySolutionById as RequestHandler
 );
 
 // =============================================================================

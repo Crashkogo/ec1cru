@@ -295,6 +295,9 @@ export const getReadySolutionById: RequestHandler = async (req, res) => {
     const parsedId = parseInt(id);
     const isNumericId = !isNaN(parsedId) && parsedId.toString() === id;
 
+    // Проверяем, есть ли аутентификация (для админки)
+    const isAuthenticated = !!(req as any).user;
+
     let solution;
 
     if (isNumericId) {
@@ -313,11 +316,15 @@ export const getReadySolutionById: RequestHandler = async (req, res) => {
       });
     } else {
       // Если это slug, ищем по slug
+      const whereClause: any = { slug: id };
+
+      // Для публичного доступа фильтруем только опубликованные
+      if (!isAuthenticated) {
+        whereClause.isPublished = true;
+      }
+
       solution = await prisma.readySolution.findFirst({
-        where: {
-          slug: id,
-          isPublished: true, // Для публичного доступа по slug фильтруем опубликованные
-        },
+        where: whereClause,
         include: {
           programs: {
             include: {
