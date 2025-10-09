@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { prisma } from "./utils";
+import { prisma } from "../utils";
 
 export const getNewsBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;

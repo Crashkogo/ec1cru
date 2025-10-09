@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { prisma, slugify } from "./utils";
+import { prisma, slugify } from "../utils";
 
 export const getPrograms: RequestHandler = async (req, res) => {
   try {

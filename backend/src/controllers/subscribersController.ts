@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { prisma } from "./utils";
+import { prisma } from "../utils";
 
 export const getSubscribers: RequestHandler = async (req, res) => {
   try {

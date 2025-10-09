@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { prisma } from "./utils";
+import { prisma } from "../utils";
 
 // Функция для вычисления актуального статуса акции на основе даты
 const calculatePromotionStatus = (endDate: Date): boolean => {

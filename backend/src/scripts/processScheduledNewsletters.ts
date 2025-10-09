@@ -9,7 +9,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { transporter } from '../controllers/utils.js';
+import { transporter } from '../utils/index.js';
 import crypto from 'crypto';
 import 'dotenv/config';
 

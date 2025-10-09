@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     Create,
     SimpleForm,
@@ -19,7 +19,12 @@ import { Card, Box, Typography } from '@mui/material';
 import axios from 'axios';
 import { transliterate } from '../../utils/transliterate';
 
-const ContentInput = ({ source, label, ...props }: any) => {
+interface ContentInputProps {
+    source: string;
+    label: string;
+}
+
+const ContentInput = ({ source, label }: ContentInputProps) => {
     const { setValue, watch } = useFormContext();
     const content = watch(source);
     const [tempImages, setTempImages] = useState<string[]>([]);
@@ -49,7 +54,6 @@ const ContentInput = ({ source, label, ...props }: any) => {
         [setValue, source]
     );
 
-    // Сохраняем временные изображения в контексте формы
     useEffect(() => {
         setValue('tempImages', tempImages);
     }, [tempImages, setValue]);
@@ -103,19 +107,24 @@ const ContentInput = ({ source, label, ...props }: any) => {
     );
 };
 
-const SlugInput = ({ source, label, ...props }: any) => {
+interface SlugInputProps {
+    source: string;
+    label: string;
+    fullWidth?: boolean;
+}
+
+const SlugInput = ({ source, label, ...rest }: SlugInputProps) => {
     const { setValue, watch } = useFormContext();
     const title = watch('title');
     const slug = watch(source);
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
 
     useEffect(() => {
-        // Обновляем slug только если есть title и slug не был вручную отредактирован
-        if (title && !isSlugManuallyEdited) {
+        if (title && !isSlugManuallyEdited ) {
             const generatedSlug = transliterate(title);
             setValue(source, generatedSlug);
         }
-    }, [title, setValue, source, isSlugManuallyEdited]);
+    }, [title, slug, setValue, source, isSlugManuallyEdited]);
 
     const handleSlugChange = (value: string) => {
         setIsSlugManuallyEdited(true);
@@ -128,7 +137,7 @@ const SlugInput = ({ source, label, ...props }: any) => {
             label={label}
             helperText="Автоматически генерируется из заголовка, но можно изменить"
             onChange={handleSlugChange}
-            {...props}
+            {...rest}
         />
     );
 };
@@ -143,24 +152,21 @@ const NewsCreateToolbar = () => {
     const [create] = useCreate();
     const notify = useNotify();
     const redirect = useRedirect();
-    const { handleSubmit, watch } = useFormContext();
+    const { handleSubmit } = useFormContext();
 
     const handleSave = handleSubmit(async (data) => {
         try {
-            const tempImages = data.tempImages || [];
+            const tempImagesList = data.tempImages || [];
             let updatedContent = data.content;
 
-            // Если есть временные изображения, перемещаем их
-            if (tempImages.length > 0) {
+            if (tempImagesList.length > 0) {
                 const token = localStorage.getItem('token');
 
-                // Обновляем контент, заменяя пути к изображениям
-                tempImages.forEach((tempUrl: string) => {
+                tempImagesList.forEach((tempUrl: string) => {
                     const newUrl = tempUrl.replace('/uploads/news/temp/', `/uploads/news/${data.slug}/`);
                     updatedContent = updatedContent.replace(tempUrl, newUrl);
                 });
 
-                // Перемещаем изображения на сервере
                 await axios.post(
                     `${import.meta.env.VITE_API_URL}/api/posts/move-images`,
                     {
@@ -174,8 +180,8 @@ const NewsCreateToolbar = () => {
                 data.content = updatedContent;
             }
 
-            // Удаляем tempImages из данных перед отправкой
-            const { tempImages: _, ...newsData } = data;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { tempImages: _tempImages, ...newsData } = data;
 
             await create('news', { data: newsData });
             notify('Новость успешно создана');
@@ -216,13 +222,11 @@ export const NewsCreate = () => (
                 <ContentInput
                     source="content"
                     label="Основное содержание"
-                    validate={required()}
                 />
 
                 <SlugInput
                     source="slug"
                     label="Slug"
-                    validate={required()}
                     fullWidth
                 />
 
@@ -248,4 +252,4 @@ export const NewsCreate = () => (
             </SimpleForm>
         </Card>
     </Create>
-); 
+);

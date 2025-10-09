@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { prisma, transporter, axios } from "./utils";
+import { prisma, transporter, axios } from "../utils";
 
 export const registerForEvent: RequestHandler = async (req, res) => {
   const { slug } = req.params;

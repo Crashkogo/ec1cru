@@ -71,8 +71,7 @@ const Home: React.FC = () => {
   // Загрузка данных
   useEffect(() => {
     const fetchData = async () => {
-      console.log('🔍 API URL from env:', import.meta.env.VITE_API_URL);
-      console.log('🔍 Full news URL:', `${import.meta.env.VITE_API_URL}/api/posts/news?take=3`);
+
       try {
         const [newsRes, promotionsRes, eventsRes, solutionsRes] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/news?take=3`),

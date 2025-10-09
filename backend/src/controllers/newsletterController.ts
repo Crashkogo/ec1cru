@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { prisma, transporter } from "./utils";
+import { prisma, transporter } from "../utils";
 import { z } from "zod";
 import crypto from "crypto";
 

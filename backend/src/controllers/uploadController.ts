@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { UploadedFile } from "express-fileupload";
-import { path, fs, __dirname } from "./utils";
+import { path, fs, __dirname } from "../utils";
 
 // Функция для создания безопасного имени файла
 const createSafeFileName = (originalName: string): string => {
