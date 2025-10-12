@@ -71,12 +71,11 @@ const Home: React.FC = () => {
   // Загрузка данных
   useEffect(() => {
     const fetchData = async () => {
-
       try {
         const [newsRes, promotionsRes, eventsRes, solutionsRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/news?take=3`),
-          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/promotions?take=3`),
-          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/events?take=3`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/news?take=4`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/promotions?take=4`), 
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/events?take=4`),
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/ready-solutions?limit=4`)
         ]);
 
@@ -114,12 +113,12 @@ const Home: React.FC = () => {
         <title>ООО «Инженер-центр» - Профессиональная автоматизация бизнеса</title>
         <meta
           name="description"
-          content="Профессиональные услуги 1С: внедрение, сопровождение, техподдержка, обучение. 30 лет опыта, 600+ довольных клиентов."
+          content="Профессиональные услуги 1С: внедрение, сопровождение, техподдержка, обучение, IT-аутсорсинг. 30 лет опыта, 600+ довольных клиентов."
         />
       </Helmet>
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-modern-primary-50 via-modern-white to-modern-accent-50 pt-20 pb-16 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-modern-primary-100 via-modern-white to-modern-accent-100 pt-20 pb-16 overflow-hidden">
         <div className="absolute inset-0 opacity-50">
           <div className="absolute inset-0" style={{
             backgroundImage: `radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.03) 2px, transparent 2px)`,
@@ -129,7 +128,6 @@ const Home: React.FC = () => {
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-
             {/* Левая часть - УТП и статистика */}
             <div className="space-y-8">
               {/* УТП */}
@@ -159,6 +157,11 @@ const Home: React.FC = () => {
                 </div>
                 <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
                   <img src={csImage} alt="1С" className="h-16 w-auto mx-auto" />
+                </div>
+                {/* Новый блок IT-аутсорсинг */}
+                <div className="col-span-2 bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                  <div className="text-xl font-bold text-modern-primary-600 mb-2">IT-аутсорсинг</div>
+                  <div className="text-sm font-medium text-modern-gray-700">Комплексное сопровождение бизнеса в сфере IT</div>
                 </div>
               </div>
 
@@ -249,7 +252,6 @@ const Home: React.FC = () => {
 
             {/* Правая часть - Новости, Акции, Мероприятия */}
             <div className="space-y-3">
-
               {/* Новости */}
               <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern">
                 <Link
@@ -289,21 +291,27 @@ const Home: React.FC = () => {
                   <h3 className="text-lg font-bold text-modern-accent-600 transition-transform duration-200 hover:scale-110">Акции</h3>
                 </Link>
                 <div className="grid grid-cols-2 gap-2">
-                  {promotions.slice(0, 4).map((item) => (
-                    <Link
-                      key={item.id}
-                      to={`/promotions/${item.slug}`}
-                      onMouseEnter={() => handleMouseEnter(`/promotions/${item.slug}`)}
-                      className="block hover:bg-modern-accent-100/50 rounded-lg p-2 transition-colors duration-200 group"
-                    >
-                      <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-accent-700 transition-colors duration-200 line-clamp-2 mb-1">
-                        {item.title}
-                      </h4>
-                      <div className="text-xs text-modern-gray-500">
-                        До {new Date(item.endDate).toLocaleDateString('ru-RU')}
-                      </div>
-                    </Link>
-                  ))}
+                  {promotions.length > 0 ? (
+                    promotions.slice(0, 4).map((item) => (
+                      <Link
+                        key={item.id}
+                        to={`/promotions/${item.slug}`}
+                        onMouseEnter={() => handleMouseEnter(`/promotions/${item.slug}`)}
+                        className="block hover:bg-modern-accent-100/50 rounded-lg p-2 transition-colors duration-200 group"
+                      >
+                        <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-accent-700 transition-colors duration-200 line-clamp-2 mb-1">
+                          {item.title}
+                        </h4>
+                        <div className="text-xs text-modern-gray-500">
+                          До {new Date(item.endDate).toLocaleDateString('ru-RU')}
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center text-modern-gray-500 text-sm">
+                      Акции скоро появятся!
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -462,7 +470,6 @@ const Home: React.FC = () => {
 
             {/* Контент */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-
               {/* Левая часть - текст */}
               <div className="space-y-6">
                 {activeAboutTab === 'history' && (
