@@ -139,6 +139,16 @@ export const createReadySolution: RequestHandler = async (req, res) => {
         .json({ message: "Solution with this title already exists" });
       return;
     }
+
+    // Правильная обработка price - проверяем на пустую строку, null, undefined
+    let priceValue = null;
+    if (price !== null && price !== undefined && price !== "") {
+      const parsedPrice = parseFloat(price);
+      if (!isNaN(parsedPrice)) {
+        priceValue = parsedPrice;
+      }
+    }
+
     const solution = await prisma.readySolution.create({
       data: {
         type,
@@ -146,7 +156,7 @@ export const createReadySolution: RequestHandler = async (req, res) => {
         title,
         shortDescription,
         fullDescription,
-        price: price ? parseFloat(price) : null,
+        price: priceValue,
         images,
         isPublished,
         slug,
@@ -187,6 +197,16 @@ export const updateReadySolution: RequestHandler = async (req, res) => {
   } = req.body;
   try {
     const newSlug = slugify(title, { lower: true, strict: true });
+
+    // Правильная обработка price - проверяем на пустую строку, null, undefined
+    let priceValue = null;
+    if (price !== null && price !== undefined && price !== "") {
+      const parsedPrice = parseFloat(price);
+      if (!isNaN(parsedPrice)) {
+        priceValue = parsedPrice;
+      }
+    }
+
     const solution = await prisma.readySolution.update({
       where: { slug },
       data: {
@@ -195,7 +215,7 @@ export const updateReadySolution: RequestHandler = async (req, res) => {
         title,
         shortDescription,
         fullDescription,
-        price: price ? parseFloat(price) : null,
+        price: priceValue,
         images,
         isPublished,
         slug: newSlug,
@@ -365,6 +385,16 @@ export const updateReadySolutionById: RequestHandler = async (req, res) => {
   } = req.body;
   try {
     const slug = slugify(title, { lower: true, strict: true });
+
+    // Правильная обработка price - проверяем на пустую строку, null, undefined
+    let priceValue = null;
+    if (price !== null && price !== undefined && price !== "") {
+      const parsedPrice = parseFloat(price);
+      if (!isNaN(parsedPrice)) {
+        priceValue = parsedPrice;
+      }
+    }
+
     const solution = await prisma.readySolution.update({
       where: { id: parseInt(id) },
       data: {
@@ -373,7 +403,7 @@ export const updateReadySolutionById: RequestHandler = async (req, res) => {
         title,
         shortDescription,
         fullDescription,
-        price: price ? parseFloat(price) : null,
+        price: priceValue,
         images,
         isPublished,
         slug,
