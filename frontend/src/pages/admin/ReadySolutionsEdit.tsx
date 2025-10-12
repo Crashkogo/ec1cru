@@ -392,8 +392,7 @@ export const ReadySolutionsEdit = () => (
 
                 <NumberInput
                     source="price"
-                    label="Цена"
-                    validate={required()}
+                    label="Цена (оставьте пустым для 'Цена по запросу')"
                     min={0}
                     step={0.01}
                 />

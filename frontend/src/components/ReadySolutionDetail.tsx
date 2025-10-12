@@ -29,7 +29,7 @@ interface ReadySolution {
   title: string;
   shortDescription: string;
   fullDescription: string;
-  price: number;
+  price: number | null;
   type: 'PROCESSING' | 'PRINT_FORM' | 'REPORT';
   freshSupport: boolean;
   programs: { program: Program }[];
@@ -394,9 +394,15 @@ const ReadySolutionDetail: React.FC = () => {
                     {/* Цена */}
                     <div className="text-center mb-8">
                       <div className="text-4xl font-bold text-modern-primary-600 mb-2">
-                        {solution.price.toLocaleString('ru-RU')} ₽
+                        {solution.price !== null && solution.price !== undefined
+                          ? `${solution.price.toLocaleString('ru-RU')} ₽`
+                          : 'Цена по запросу'}
                       </div>
-                      <p className="text-modern-gray-600">за готовое решение</p>
+                      <p className="text-modern-gray-600">
+                        {solution.price !== null && solution.price !== undefined
+                          ? 'за готовое решение'
+                          : 'Свяжитесь с нами для уточнения стоимости'}
+                      </p>
                     </div>
 
                     {/* Характеристики */}

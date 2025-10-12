@@ -369,7 +369,7 @@ const ReadySolutionsCreateToolbar = () => {
             // Удаляем временные поля и подготавливаем данные для отправки
             const { tempImages: _, galleryImages: __, ...solutionData } = data;
             solutionData.images = movedGalleryImages;
-            solutionData.price = parseFloat(solutionData.price);
+            solutionData.price = solutionData.price ? parseFloat(solutionData.price) : null;
 
             await create('ready-solutions', { data: solutionData });
             notify('Готовое решение успешно создано');
@@ -437,8 +437,7 @@ export const ReadySolutionsCreate = () => (
 
                 <NumberInput
                     source="price"
-                    label="Цена"
-                    validate={required()}
+                    label="Цена (оставьте пустым для 'Цена по запросу')"
                     min={0}
                     step={0.01}
                 />

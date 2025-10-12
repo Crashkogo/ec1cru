@@ -23,7 +23,7 @@ interface ReadySolution {
   id: number;
   title: string;
   shortDescription: string;
-  price: number;
+  price: number | null;
   type: 'PROCESSING' | 'PRINT_FORM' | 'REPORT';
   freshSupport: boolean;
   programs: { program: Program }[];
@@ -426,7 +426,9 @@ const ReadySolutionsList: React.FC = () => {
                       <div className="flex items-center space-x-4">
                         <div className="text-right">
                           <span className="text-2xl font-bold text-modern-primary-600">
-                            {solution.price.toLocaleString('ru-RU')} ₽
+                            {solution.price !== null && solution.price !== undefined
+                              ? `${solution.price.toLocaleString('ru-RU')} ₽`
+                              : 'Цена по запросу'}
                           </span>
                         </div>
                         <ArrowRightIcon className="h-5 w-5 text-modern-gray-400 group-hover:text-modern-primary-600 group-hover:translate-x-1 transition-all duration-200" />

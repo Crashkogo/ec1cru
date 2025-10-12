@@ -54,7 +54,7 @@ interface ReadySolutionItem {
   title: string;
   shortDescription: string;
   type: string;
-  price: number;
+  price: number | null;
   freshSupport: boolean;
   programs: { program: Program }[];
 }
@@ -396,7 +396,9 @@ const Home: React.FC = () => {
 
                     <div className="flex items-center justify-between mt-auto">
                       <span className="text-lg font-bold text-modern-primary-600">
-                        {solution.price.toLocaleString('ru-RU')} ₽
+                        {solution.price !== null && solution.price !== undefined
+                          ? `${solution.price.toLocaleString('ru-RU')} ₽`
+                          : 'Цена по запросу'}
                       </span>
                       <ArrowRightIcon className="h-5 w-5 text-modern-gray-400 group-hover:text-modern-primary-600 group-hover:translate-x-1 transition-all duration-200" />
                     </div>
