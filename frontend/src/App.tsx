@@ -1,4 +1,3 @@
-// src/App.tsx
 import React, { Suspense, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -27,6 +26,9 @@ const ReadySolutionsList = React.lazy(() => import('./components/ReadySolutionsL
 
 // Специальные страницы
 const Unsubscribe = React.lazy(() => import('./pages/Unsubscribe'));
+const PersonalDataConsent = React.lazy(() => import('./pages/PersonalDataConsent'));
+const MetricsConsent = React.lazy(() => import('./pages/MetricsConsent'));
+const UserAgreement = React.lazy(() => import('./pages/UserAgreement'));
 
 // Админка
 const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
@@ -188,6 +190,36 @@ function App() {
                   </Suspense>
                 }
               />
+              <Route
+                path="/personal-data-consent"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка согласия на обработку ПД..." />}>
+                      <PersonalDataConsent />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/metrics-consent"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка согласия на метрику..." />}>
+                      <MetricsConsent />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/user-agreement"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка пользовательского соглашения..." />}>
+                      <UserAgreement />
+                    </Suspense>
+                  </Layout>
+                }
+              />
             </Routes>
 
             {/* Модальное окно входа для основного сайта */}
@@ -199,4 +231,6 @@ function App() {
   );
 }
 
-export default App;
+export default App; 
+ 
+ 

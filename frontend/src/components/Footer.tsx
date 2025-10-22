@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 
 const Footer: React.FC = () => {
+    const [isExpanded, setIsExpanded] = useState(false);
     return (
         <footer className="bg-modern-gray-900 text-white">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -89,6 +90,31 @@ const Footer: React.FC = () => {
                     <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                         <div className="text-modern-gray-400 text-sm">
                             © 2025 ООО «Инженер-центр». Все права защищены.
+                        </div>
+
+                        <div className="text-center mt-4">
+                            <button
+                                onClick={() => {
+                                    setIsExpanded(!isExpanded);
+                                    if (!isExpanded) {
+                                        setTimeout(() => {
+                                            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                                        }, 0);
+                                    }
+                                }}
+                                className="bg-modern-gray-900 text-modern-gray-500 text-xs hover:text-modern-gray-300 transition-colors duration-200 focus:outline-none"
+                            >
+                                Настоящий сайт является официальным сайтом Общества с ограниченной ответственностью "Инженер-Центр".
+                            </button>
+                            {isExpanded && (
+                                <div className="mt-2 text-modern-gray-500 text-xs leading-relaxed max-w-3xl mx-auto">
+                                    Наша компания осуществляет деятельность в области информационных технологий, включена в Реестр аккредитованных организаций, осуществляющих деятельность в области информационных технологий (номер в Реестре № № 568, дата решения об аккредитации от 14 декабря 2010 года).
+                                    Основной вид деятельности компании: адаптация, модификация и сопровождение систем 1С (ОКВЭД 62.01 Разработка компьютерного программного обеспечения). Решения 1С зарегистрированы в едином реестре российских программ для электронных вычислительных машин и баз данных. Запись в реестре №7884 от 28.12.2020 произведена на основании приказа Министерства цифрового развития, связи и массовых коммуникаций Российской Федерации от 25.12.2020 №755 и другие решения.
+                                    Компания осуществляет также и другие виды деятельности в области информационных технологий.
+                                    Компания является правообладателем расширения конфигурации «ИЦ: Автоформирование актов сверки». Запись в реестре №27561 произведена на основании поручения Министерства цифрового развития, связи и массовых коммуникаций Российской Федерации от 11.04.2025 по протоколу заседания экспертного совета от 31.03.2025 №216пр
+                                    Компания в рамках осуществления деятельности в области информационных технологий (адаптация, модификация и сопровождение систем 1С) использует программное обеспечение 1С, язык программирования 1С, javascript,C++.
+                                </div>
+                            )}
                         </div>
 
                         {/* Технические страницы */}
