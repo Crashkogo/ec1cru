@@ -29,6 +29,7 @@ const Unsubscribe = React.lazy(() => import('./pages/Unsubscribe'));
 const PersonalDataConsent = React.lazy(() => import('./pages/PersonalDataConsent'));
 const MetricsConsent = React.lazy(() => import('./pages/MetricsConsent'));
 const UserAgreement = React.lazy(() => import('./pages/UserAgreement'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 
 // Админка
 const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
@@ -216,6 +217,16 @@ function App() {
                   <Layout setShowLogin={setShowLogin}>
                     <Suspense fallback={<PageLoading message="Загрузка пользовательского соглашения..." />}>
                       <UserAgreement />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/privacy-policy"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка политики конфиденциальности..." />}>
+                      <PrivacyPolicy />
                     </Suspense>
                   </Layout>
                 }
