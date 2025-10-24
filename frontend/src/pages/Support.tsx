@@ -1,12 +1,72 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 
-// Определяем тип для вкладок
 interface Tab {
     id: string;
     label: string;
-    content: React.ReactNode; // Изменено на React.ReactNode
+    content: React.ReactNode;
 }
+
+const supportMainContent = (
+    <div> 
+        <p className="text-center text-2xl font-bold mb-4 text-modern-gray-700  leading-relaxed max-w-5xl mx-auto">
+            Заключив договор ИТС, вы не просто получаете абонентское обслуживание, а приобретаете «страховой полис» для стабильной, легальной и эффективной работы вашей программы 1С.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 px-4">
+            {/* Блок 1 - Светло-голубой */}
+            <div className="bg-blue-100 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="text-modern-gray-900">
+                    <h3 className="font-bold text-lg mb-3">Программа всегда актуальна и легальна.</h3>
+                    <p className="text-sm leading-relaxed">
+                        Своевременные обновления: Вы получаете официальные обновления от фирмы «1С», которые автоматически вносят все изменения в налоговое законодательство, формы отчетности (НДС, Налог на прибыль, НДФЛ, РСВ) и кадровые документы.
+                        Легальность ПО: Гарантия использования только лицензионных и официально обновляемых версий программных продуктов «1С».
+                        Нулевые ошибки по незнанию закона: Ваши бухгалтеры всегда работают в актуальной программе, что сводит к нулю риски технических ошибок из-за устаревших форм или расчетов.
+                    </p>
+                </div>
+            </div>
+
+            {/* Блок 2 - Фиолетовый */}
+            <div className="bg-purple-100 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="text-modern-gray-900">
+                    <h3 className="font-bold text-lg mb-3">Профессиональная техническая поддержка.</h3>
+                    <p className="text-sm leading-relaxed">
+                        Консультации экспертов: Наши сертифицированные специалисты отвечают на любые ваши вопросы по работе с программой — от сложных проводок до настройки нестандартных отчетов.
+                        «Скорая помощь» для 1С: Мы оперативно диагностируем и устраняем любые сбои: «вылеты» программы, ошибки при проведении документов, проблемы с обменом данными и многое другое.
+                        Удаленный доступ: Большинство проблем решаются удаленно в кратчайшие сроки, без необходимости визита специалиста в ваш офис.
+                    </p>
+                </div>
+            </div>
+
+            {/* Блок 3 - Зеленый-изумрудный темный */}
+            <div className="bg-emerald-300 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="text-modern-gray-900">
+                    <h3 className="font-bold text-lg mb-3">Доступ к эксклюзивным знаниям.</h3>
+                    <p className="text-sm leading-relaxed">
+                        База знаний 1С:ИТС: Это ваша онлайн-библиотека с постоянным доступом к актуальным методическим материалам и рекомендациям по сложным вопросам учета.
+                    </p>
+                </div>
+            </div>
+
+            {/* Блок 4 - Зеленый-изумрудный светлый */}
+            <div className="bg-emerald-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <div className="text-modern-gray-900">
+                    <h3 className="font-bold text-lg mb-3">Сохранность данных.</h3>
+                    <p className="text-sm leading-relaxed">
+                        Помощь в настройке резервного копирования: Мы поможем правильно организовать автоматическое ежедневное резервное копирование вашей информационной базы.
+                        Защита от потери информации: В случае серьезного сбоя, вирусной атаки или поломки оборудования вы всегда сможете восстановить работоспособность системы из последней резервной копии.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <p className="text-center text-xl text-modern-gray-700 leading-relaxed max-w-5xl mx-auto px-4">
+            Сопровождение 1С по договору ИТС — это не статья расходов, а стратегическая инвестиция
+            в стабильность и безопасность вашего бизнеса. Вы платите за уверенность в том, что ваш
+            финансовый учет в полном порядке, а ваша команда работает с максимальной эффективностью.
+        </p>
+    </div>
+);
 
 const consultationRegulationsContent = (
     <div className="prose max-w-none">
@@ -211,8 +271,12 @@ const consultationRegulationsContent = (
     </div>
 );
 
-// Данные для вкладок
 const tabs: Tab[] = [
+    {
+        id: 'support',
+        label: 'Сопровождение',
+        content: supportMainContent,
+    },
     {
         id: 'tariffs',
         label: 'Тарифные планы',
@@ -222,7 +286,7 @@ const tabs: Tab[] = [
     {
         id: 'consultation-regulations',
         label: 'Регламент линии консультации',
-        content: consultationRegulationsContent, // Используем JSX компонент
+        content: consultationRegulationsContent,
     },
     {
         id: 'support-conditions',
@@ -233,12 +297,10 @@ const tabs: Tab[] = [
 ];
 
 const Support: React.FC = () => {
-    // Состояние для активной вкладки (по умолчанию — первая, "Тарифные планы")
     const [activeTab, setActiveTab] = useState<string>(tabs[0].id);
 
     return (
         <>
-            {/* SEO-оптимизация */}
             <Helmet>
                 <title>Поддержка и сопровождение - ООО «Инженер-центр»</title>
                 <meta
@@ -247,25 +309,22 @@ const Support: React.FC = () => {
                 />
             </Helmet>
 
-            {/* Основной контейнер */}
             <div className="min-h-screen bg-modern-gray-50">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    {/* Заголовок */}
                     <div className="text-center mb-12">
                         <h1 className="text-4xl font-bold text-modern-gray-900">
                             Поддержка и сопровождение
                         </h1>
                     </div>
 
-                    {/* Кнопки вкладок */}
                     <div className="flex flex-wrap justify-center gap-4 mb-12">
                         {tabs.map((tab) => (
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${activeTab === tab.id
-                                        ? 'bg-modern-primary-600 text-white shadow-modern-md'
-                                        : 'bg-modern-white text-modern-gray-700 hover:bg-modern-gray-100 border border-modern-gray-200'
+                                    ? 'bg-modern-primary-600 text-white shadow-modern-md'
+                                    : 'bg-modern-white text-modern-gray-700 hover:bg-modern-gray-100 border border-modern-gray-200'
                                     }`}
                                 aria-selected={activeTab === tab.id}
                                 role="tab"
@@ -275,13 +334,12 @@ const Support: React.FC = () => {
                         ))}
                     </div>
 
-                    {/* Контент активной вкладки */}
                     <div className="bg-modern-white rounded-xl shadow-modern p-8 mx-auto">
                         <div className="text-modern-gray-600 text-lg leading-relaxed">
                             {tabs.find((tab) => tab.id === activeTab)?.content}
                         </div>
                     </div>
-                    {/* Дополнительная информация */}
+
                     <div className="mt-16 text-center">
                         <div className="bg-modern-primary-50 rounded-xl p-8">
                             <h2 className="text-2xl font-bold text-modern-primary-900 mb-4">

@@ -53,12 +53,11 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
-    title: 'Компания',
+    title: 'О нас',
     items: [
-      { name: 'Информация', path: '/about' },
-      { name: 'Наша команда', path: '/team' },
-      { name: 'Мероприятия', path: '/events' },
-      { name: 'Вакансии', path: '/careers' },
+      { name: 'О компании', path: '/about' },
+      { name: 'Супер команда', path: '/team' },
+      { name: 'Работа у нас', path: 'https://career-ec.ru/' },
       { name: 'Наша жизнь', path: '/life' },
     ],
   },
@@ -191,15 +190,28 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
                         <div className="absolute left-0 mt-2 bg-white border border-modern-gray-200 shadow-modern-lg rounded-xl z-10 transition-all duration-200 ease-out animate-in slide-in-from-top-2">
                           <div className="py-2 w-56">
                             {item.items.map((subItem) => (
-                              <Link
-                                key={subItem.name}
-                                to={subItem.path}
-                                onMouseEnter={() => handleMouseEnter(subItem.path)}
-                                className="block px-4 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg mx-2 transition-all duration-150 text-sm"
-                                onClick={closeMenus}
-                              >
-                                {subItem.name}
-                              </Link>
+                              subItem.path.startsWith('http') ? (
+                                <a
+                                  key={subItem.name}
+                                  href={subItem.path}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block px-4 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg mx-2 transition-all duration-150 text-sm"
+                                  onClick={closeMenus}
+                                >
+                                  {subItem.name}
+                                </a>
+                              ) : (
+                                <Link
+                                  key={subItem.name}
+                                  to={subItem.path}
+                                  onMouseEnter={() => handleMouseEnter(subItem.path)}
+                                  className="block px-4 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg mx-2 transition-all duration-150 text-sm"
+                                  onClick={closeMenus}
+                                >
+                                  {subItem.name}
+                                </Link>
+                              )
                             ))}
                           </div>
                         </div>
@@ -327,15 +339,28 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
                     {openDropdown === item.title && (
                       <div className="pl-4 pt-2 pb-3 space-y-1">
                         {item.items.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            to={subItem.path}
-                            onMouseEnter={() => handleMouseEnter(subItem.path)}
-                            className="block px-6 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg transition-all duration-150 text-sm"
-                            onClick={closeMenus}
-                          >
-                            {subItem.name}
-                          </Link>
+                          subItem.path.startsWith('http') ? (
+                            <a
+                              key={subItem.name}
+                              href={subItem.path}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block px-6 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg transition-all duration-150 text-sm"
+                              onClick={closeMenus}
+                            >
+                              {subItem.name}
+                            </a>
+                          ) : (
+                            <Link
+                              key={subItem.name}
+                              to={subItem.path}
+                              onMouseEnter={() => handleMouseEnter(subItem.path)}
+                              className="block px-6 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg transition-all duration-150 text-sm"
+                              onClick={closeMenus}
+                            >
+                              {subItem.name}
+                            </Link>
+                          )
                         ))}
                       </div>
                     )}
