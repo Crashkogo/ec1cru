@@ -7,4 +7,11 @@ backend/dist
 frontend/dist
 backend/prisma
 referens
+plans/
 .gemini/settings.json
+bugs.txt
+GEMINI.md
+*.md
+.gemini/
+.genkit/
+.cursor/

@@ -15,6 +15,7 @@ const News = React.lazy(() => import('./pages/News'));
 const Events = React.lazy(() => import('./pages/Events'));
 const Promotions = React.lazy(() => import('./pages/Promotions'));
 const Services = React.lazy(() => import('./pages/1CServices'));
+const Programs1C = React.lazy(() => import('./pages/1CPrograms'));
 const Support = React.lazy(() => import('./pages/Support'));
 const About = React.lazy(() => import('./pages/About'));
 
@@ -126,6 +127,16 @@ function App() {
                   <Layout setShowLogin={setShowLogin}>
                     <Suspense fallback={<PageLoading message="Загрузка сервисов..." />}>
                       <Services />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/1c-programs"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка программ..." />}>
+                      <Programs1C />
                     </Suspense>
                   </Layout>
                 }

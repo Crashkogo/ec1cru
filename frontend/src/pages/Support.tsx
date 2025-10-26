@@ -312,7 +312,7 @@ const Support: React.FC = () => {
             <div className="min-h-screen bg-modern-gray-50">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="text-center mb-12">
-                        <h1 className="text-4xl font-bold text-modern-gray-900">
+                        <h1 className="text-4xl font-bold text-modern-primary-700">
                             Поддержка и сопровождение
                         </h1>
                     </div>
