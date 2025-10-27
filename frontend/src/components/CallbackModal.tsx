@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { XMarkIcon, PhoneIcon, UserIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
+import { useCallbackForm } from '../hooks/useCallbackForm';
 
 // Схема валидации Zod
 const callbackSchema = z.object({
@@ -23,10 +24,11 @@ interface CallbackModalProps {
 }
 
 const CallbackModal: React.FC<CallbackModalProps> = ({ isOpen, onClose }) => {
+  const { isSubmitting, submitCallback } = useCallbackForm();
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
     setValue,
   } = useForm<CallbackFormInputs>({
@@ -84,10 +86,10 @@ const CallbackModal: React.FC<CallbackModalProps> = ({ isOpen, onClose }) => {
   };
 
   const onSubmit: SubmitHandler<CallbackFormInputs> = async (data) => {
-    // TODO: Добавить логику отправки данных на бэкенд
-    console.log('Отправка данных:', data);
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Имитация запроса
-    onClose();
+    const success = await submitCallback(data);
+    if (success) {
+      onClose();
+    }
   };
 
   if (!isOpen) return null;

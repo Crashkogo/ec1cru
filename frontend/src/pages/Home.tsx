@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallbackForm } from '../hooks/useCallbackForm';
 import {
   ClockIcon,
   ArrowRightIcon,
@@ -11,6 +15,17 @@ import {
 import csImage from '../assets/cs.png';
 import { usePreloadOnHover, preloadOnIdle } from '../utils/preloadRoutes';
 import SubscribeForm from '../components/SubscribeForm';
+
+// Схема валидации Zod
+const callbackSchema = z.object({
+  name: z.string().min(2, 'Имя должно содержать не менее 2 символов'),
+  phone: z.string().regex(/^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/, 'Неверный формат номера'),
+  consent: z.boolean().refine((val) => val === true, {
+    message: 'Необходимо дать согласие',
+  }),
+});
+
+type CallbackFormInputs = z.infer<typeof callbackSchema>;
 
 // Типы данных
 interface NewsItem {
@@ -67,6 +82,47 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeAboutTab, setActiveAboutTab] = useState('history');
   const { handleMouseEnter } = usePreloadOnHover();
+
+  const { isSubmitting, submitCallback } = useCallbackForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+  } = useForm<CallbackFormInputs>({
+    resolver: zodResolver(callbackSchema),
+    defaultValues: { phone: '+7 ', consent: false },
+  });
+
+  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    let value = input.value.replace(/\D/g, '');
+    if (value.startsWith('7') || value.startsWith('8')) value = value.substring(1);
+    let formatted = '+7';
+    if (value.length > 0) {
+      formatted += ' (' + value.substring(0, 3);
+      if (value.length >= 3) {
+        formatted += ') ' + value.substring(3, 6);
+        if (value.length >= 6) {
+          formatted += '-' + value.substring(6, 8);
+          if (value.length >= 8) {
+            formatted += '-' + value.substring(8, 10);
+          }
+        }
+      }
+    }
+    input.value = formatted;
+    setValue('phone', formatted, { shouldValidate: true });
+  };
+
+  const onSubmit: SubmitHandler<CallbackFormInputs> = async (data) => {
+    const success = await submitCallback(data);
+    if (success) {
+      reset();
+      setValue('phone', '+7 ');
+    }
+  };
 
   // Загрузка данных
   useEffect(() => {
@@ -166,61 +222,37 @@ const Home: React.FC = () => {
               </div>
 
               {/* Форма обратной связи */}
-              <div className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Поле имени */}
-                  <input
-                    type="text"
-                    placeholder="Ваше имя"
-                    className="w-full px-4 py-3 bg-modern-white/80 backdrop-blur-sm border border-modern-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-modern-primary-500 focus:border-transparent transition-all duration-200 placeholder-modern-gray-400"
-                  />
-
-                  {/* Поле телефона */}
-                  <input
-                    type="tel"
-                    placeholder="+7 (___) ___-__-__"
-                    defaultValue="+7 "
-                    className="w-full px-4 py-3 bg-modern-white/80 backdrop-blur-sm border border-modern-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-modern-primary-500 focus:border-transparent transition-all duration-200 placeholder-modern-gray-400"
-                    onInput={(e) => {
-                      const input = e.target as HTMLInputElement;
-                      let value = input.value.replace(/\D/g, '');
-
-                      if (value.startsWith('7')) {
-                        value = value.substring(1);
-                      }
-
-                      let formatted = '+7';
-                      if (value.length > 0) {
-                        formatted += ' (' + value.substring(0, 3);
-                        if (value.length >= 3) {
-                          formatted += ') ' + value.substring(3, 6);
-                          if (value.length >= 6) {
-                            formatted += '-' + value.substring(6, 8);
-                            if (value.length >= 8) {
-                              formatted += '-' + value.substring(8, 10);
-                            }
-                          }
-                        }
-                      }
-
-                      input.value = formatted;
-                    }}
-                    onFocus={(e) => {
-                      if (e.target.value === '') {
-                        e.target.value = '+7 ';
-                      }
-                    }}
-                  />
+                  <div>
+                    <input
+                      {...register('name')}
+                      type="text"
+                      placeholder="Ваше имя"
+                      className={`w-full px-4 py-3 bg-modern-white/80 backdrop-blur-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-modern-primary-500 focus:border-transparent transition-all duration-200 placeholder-modern-gray-400 ${errors.name ? 'border-red-300' : 'border-modern-gray-200'}`}
+                    />
+                    {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>}
+                  </div>
+                  <div>
+                    <input
+                      {...register('phone')}
+                      type="tel"
+                      placeholder="+7 (___) ___-__-__"
+                      onInput={handlePhoneInput}
+                      className={`w-full px-4 py-3 bg-modern-white/80 backdrop-blur-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-modern-primary-500 focus:border-transparent transition-all duration-200 placeholder-modern-gray-400 ${errors.phone ? 'border-red-300' : 'border-modern-gray-200'}`}
+                    />
+                    {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone.message}</p>}
+                  </div>
                 </div>
 
-                {/* Согласие на обработку данных */}
                 <div className="flex items-start space-x-3">
                   <input
+                    {...register('consent')}
                     type="checkbox"
-                    id="consent"
-                    className="mt-1 h-4 w-4 text-modern-primary-600 border-modern-gray-300 rounded focus:ring-modern-primary-500 focus:ring-2"
+                    id="consent-home"
+                    className={`mt-1 h-4 w-4 text-modern-primary-600 border-modern-gray-300 rounded focus:ring-modern-primary-500 focus:ring-2 ${errors.consent ? 'ring-2 ring-red-500' : ''}`}
                   />
-                  <label htmlFor="consent" className="text-sm text-modern-gray-600 leading-relaxed">
+                  <label htmlFor="consent-home" className="text-sm text-modern-gray-600 leading-relaxed">
                     Я даю{' '}
                     <Link
                       to="/personal-data-consent"
@@ -238,16 +270,25 @@ const Home: React.FC = () => {
                     .
                   </label>
                 </div>
-              </div>
+                {errors.consent && <p className="text-red-600 text-sm -mt-2">{errors.consent.message}</p>}
 
-              {/* Кнопка консультации */}
-              <button className="w-full group px-8 py-4 bg-modern-primary-600 text-white rounded-xl hover:bg-modern-primary-700 transition-all duration-200 font-semibold shadow-modern-md hover:shadow-modern-lg transform hover:scale-105">
-                <span className="flex items-center justify-center">
-                  <PhoneIcon className="h-5 w-5 mr-2" />
-                  Получить консультацию
-                  <ArrowRightIcon className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
-                </span>
-              </button>
+                <button type="submit" disabled={isSubmitting} className="w-full group px-8 py-4 bg-modern-primary-600 text-white rounded-xl hover:bg-modern-primary-700 transition-all duration-200 font-semibold shadow-modern-md hover:shadow-modern-lg transform hover:scale-105 disabled:opacity-50">
+                  <span className="flex items-center justify-center">
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                        <span>Отправка...</span>
+                      </>
+                    ) : (
+                      <>
+                        <PhoneIcon className="h-5 w-5 mr-2" />
+                        Получить консультацию
+                        <ArrowRightIcon className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                      </>
+                    )}
+                  </span>
+                </button>
+              </form>
             </div>
 
             {/* Правая часть - Новости, Акции, Мероприятия */}

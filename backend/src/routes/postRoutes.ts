@@ -6,10 +6,15 @@ import * as readySolutionsController from "../controllers/readySolutionsControll
 import * as uploadController from "../controllers/uploadController";
 import * as newsletterController from "../controllers/newsletterController";
 import * as subscribersController from "../controllers/subscribersController";
+import * as callbackController from '../controllers/callbackController';
 import { RequestHandler } from "express";
 import { authMiddleware } from "../middleware/authMiddleware";
 
 const router = express.Router();
+
+// Маршрут для заказа обратного звонка
+router.post("/callback", callbackController.sendCallback as RequestHandler)
+
 
 // Маршруты для картинок в постах
 router.post("/upload-image", uploadController.uploadImage as RequestHandler);
