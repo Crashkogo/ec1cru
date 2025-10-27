@@ -71,8 +71,10 @@ export const getPromotions: RequestHandler = async (req, res) => {
       ];
     }
 
-    if (status !== undefined) {
-      where.status = status === "true";
+    if (status === 'true') {
+      where.endDate = { gte: new Date() };
+    } else if (status === 'false') {
+      where.endDate = { lt: new Date() };
     }
 
     if (dateFrom || dateTo) {
