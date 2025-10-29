@@ -1,3 +1,4 @@
+import { stringify } from 'query-string';
 import React, { useState, useEffect } from 'react';
 import {
     Card,
@@ -16,27 +17,28 @@ import {
     DialogContent,
     DialogActions,
     Chip,
-    Grid,
+    Grid as Grid,
     List,
     ListItem,
     ListItemText,
     ListItemIcon,
-    Divider
+    Divider,
+    RadioGroup,
+    FormControlLabel,
+    Radio,
+    SelectChangeEvent
 } from '@mui/material';
 import {
     PaperAirplaneIcon,
-    ClockIcon,
-    QueueListIcon,
-    CheckCircleIcon,
-    ExclamationTriangleIcon,
     CalendarDaysIcon,
     EnvelopeIcon,
-    UsersIcon
+    MegaphoneIcon,
+    ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
 
 interface Newsletter {
-    id: string;
+    id: number;
     title: string;
     htmlContent: string;
     createdAt: string;
@@ -51,36 +53,64 @@ interface QueueStatus {
 }
 
 interface Campaign {
-    id: string;
+    id: number;
     subject: string;
     status: 'SCHEDULED' | 'SENDING' | 'COMPLETED' | 'FAILED';
-    scheduledDate: string;
-    totalRecipients: number;
-    sentEmails: number;
+    scheduledAt: string;
+    audienceType: 'SUBSCRIBERS' | 'EVENT_GUESTS';
+    audienceEventId?: number;
+    sentCount: number;
     createdAt: string;
     template: {
         title: string;
     };
 }
 
+interface EventItem {
+    id: number;
+    title: string;
+    startDate: string;
+}
+
+interface SendPayload {
+    templateId: number;
+    audience: {
+        type: 'SUBSCRIBERS' | 'EVENT_GUESTS';
+        eventId?: number;
+    };
+    subject?: string;
+    scheduledAt?: string;
+}
+
+type AlertType = 'success' | 'error' | 'info';
+
+interface AlertState {
+    type: AlertType;
+    message: string;
+}
+
 const NewslettersSend: React.FC = () => {
     const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
-    const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+    const [selectedTemplate, setSelectedTemplate] = useState<number | ''>('');
     const [customSubject, setCustomSubject] = useState<string>('');
     const [scheduledDate, setScheduledDate] = useState<string>('');
     const [queueStatus, setQueueStatus] = useState<QueueStatus | null>(null);
     const [campaigns, setCampaigns] = useState<Campaign[]>([]);
     const [loading, setLoading] = useState(false);
     const [confirmDialog, setConfirmDialog] = useState(false);
-    const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+    const [alert, setAlert] = useState<AlertState | null>(null);
+
+    const [audienceType, setAudienceType] = useState<'SUBSCRIBERS' | 'EVENT_GUESTS'>('SUBSCRIBERS');
+    const [selectedEventId, setSelectedEventId] = useState<number | ''>('');
+    const [eventsList, setEventsList] = useState<EventItem[]>([]);
 
     // Загрузка данных
     useEffect(() => {
         fetchNewsletters();
         fetchQueueStatus();
         fetchCampaigns();
+        fetchRecentEvents();
 
-        // Обновляем статус очереди каждые 30 секунд
         const interval = setInterval(fetchQueueStatus, 30000);
         return () => clearInterval(interval);
     }, []);
@@ -109,7 +139,13 @@ const NewslettersSend: React.FC = () => {
 
     const fetchCampaigns = async () => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/posts/newsletters/campaigns`, {
+            const query = {
+                _start: "0",
+                _end: "10",
+                _sort: "createdAt",
+                _order: "DESC",
+            };
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/posts/newsletters/campaigns?${stringify(query)}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             setCampaigns(response.data);
@@ -118,16 +154,35 @@ const NewslettersSend: React.FC = () => {
         }
     };
 
+    const fetchRecentEvents = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/posts/events/recent`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+            });
+            setEventsList(response.data);
+        } catch (error) {
+            console.error('Error fetching recent events:', error);
+        }
+    };
+
     const handleSendNewsletter = async () => {
         if (!selectedTemplate) {
             setAlert({ type: 'error', message: 'Выберите шаблон рассылки' });
             return;
         }
+        if (audienceType === 'EVENT_GUESTS' && !selectedEventId) {
+            setAlert({ type: 'error', message: 'Выберите мероприятие для рассылки' });
+            return;
+        }
 
         setLoading(true);
         try {
-            const payload: any = {
-                templateId: selectedTemplate,
+            const payload: SendPayload = {
+                templateId: selectedTemplate as number,
+                audience: {
+                    type: audienceType,
+                    ...(audienceType === 'EVENT_GUESTS' && { eventId: selectedEventId as number })
+                }
             };
 
             if (customSubject) {
@@ -135,7 +190,7 @@ const NewslettersSend: React.FC = () => {
             }
 
             if (scheduledDate) {
-                payload.scheduledDate = new Date(scheduledDate).toISOString();
+                payload.scheduledAt = new Date(scheduledDate).toISOString();
             }
 
             const response = await axios.post(
@@ -151,21 +206,48 @@ const NewslettersSend: React.FC = () => {
             setSelectedTemplate('');
             setCustomSubject('');
             setScheduledDate('');
+            setAudienceType('SUBSCRIBERS');
+            setSelectedEventId('');
 
-            // Обновляем данные
             fetchQueueStatus();
             fetchCampaigns();
-        } catch (error: any) {
+        } catch (error) {
+            const err = error as { response?: { data?: { message?: string } } };
             setAlert({
                 type: 'error',
-                message: error.response?.data?.message || 'Ошибка при отправке рассылки'
+                message: err.response?.data?.message || 'Ошибка при отправке рассылки'
             });
         } finally {
             setLoading(false);
         }
     };
 
-    const getStatusColor = (status: string) => {
+    const handleRetryCampaign = async (campaignId: number) => {
+        setLoading(true);
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/posts/newsletters/campaigns/${campaignId}/retry`,
+                {},
+                {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                }
+            );
+
+            setAlert({ type: 'success', message: response.data.message });
+            fetchQueueStatus();
+            fetchCampaigns();
+        } catch (error) {
+            const err = error as { response?: { data?: { message?: string } } };
+            setAlert({
+                type: 'error',
+                message: err.response?.data?.message || 'Ошибка при повторной отправке'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getStatusColor = (status: string): 'success' | 'info' | 'warning' | 'error' | 'default' => {
         switch (status) {
             case 'COMPLETED': return 'success';
             case 'SENDING': return 'info';
@@ -175,7 +257,7 @@ const NewslettersSend: React.FC = () => {
         }
     };
 
-    const getStatusText = (status: string) => {
+    const getStatusText = (status: string): string => {
         switch (status) {
             case 'COMPLETED': return 'Завершена';
             case 'SENDING': return 'Отправляется';
@@ -186,13 +268,20 @@ const NewslettersSend: React.FC = () => {
     };
 
     const selectedNewsletterTitle = newsletters.find(n => n.id === selectedTemplate)?.title || '';
+    const selectedEventTitle = eventsList.find(e => e.id === selectedEventId)?.title || '';
 
-    // Минимальная дата - текущий момент + 5 минут
     const minDateTime = new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16);
+
+    const handleTemplateChange = (event: SelectChangeEvent<number | ''>) => {
+        setSelectedTemplate(event.target.value as number | '');
+    };
+
+    const handleEventChange = (event: SelectChangeEvent<number | ''>) => {
+        setSelectedEventId(event.target.value as number | '');
+    };
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-modern-gray-900">Управление рассылками</h1>
@@ -211,8 +300,7 @@ const NewslettersSend: React.FC = () => {
             )}
 
             <Grid container spacing={3}>
-                {/* Форма отправки */}
-                <Grid item xs={12} md={8}>
+                <Grid size={{ xs: 12, md: 8 }}>
                     <Card className="!shadow-sm !border !border-modern-gray-200 !rounded-xl p-6">
                         <Typography variant="h6" className="!font-semibold !text-modern-gray-900 mb-4">
                             Новая рассылка
@@ -223,7 +311,7 @@ const NewslettersSend: React.FC = () => {
                                 <InputLabel>Шаблон рассылки</InputLabel>
                                 <Select
                                     value={selectedTemplate}
-                                    onChange={(e) => setSelectedTemplate(e.target.value)}
+                                    onChange={handleTemplateChange}
                                     label="Шаблон рассылки"
                                 >
                                     {newsletters.map((newsletter) => (
@@ -242,6 +330,39 @@ const NewslettersSend: React.FC = () => {
                                 placeholder={selectedNewsletterTitle || 'Будет использована тема из шаблона'}
                                 helperText="Оставьте пустым, чтобы использовать название шаблона"
                             />
+
+                            {/* Выбор аудитории */}
+                            <FormControl component="fieldset" fullWidth>
+                                <Typography variant="subtitle1" className="!font-medium !text-modern-gray-700 mb-2">
+                                    Аудитория рассылки
+                                </Typography>
+                                <RadioGroup
+                                    row
+                                    value={audienceType}
+                                    onChange={(e) => setAudienceType(e.target.value as 'SUBSCRIBERS' | 'EVENT_GUESTS')}
+                                >
+                                    <FormControlLabel value="SUBSCRIBERS" control={<Radio />} label="Всем подписчикам" />
+                                    <FormControlLabel value="EVENT_GUESTS" control={<Radio />} label="Участникам мероприятия" />
+                                </RadioGroup>
+                            </FormControl>
+
+                            {audienceType === 'EVENT_GUESTS' && (
+                                <FormControl fullWidth>
+                                    <InputLabel>Выберите мероприятие</InputLabel>
+                                    <Select
+                                        value={selectedEventId}
+                                        onChange={handleEventChange}
+                                        label="Выберите мероприятие"
+                                        startAdornment={<MegaphoneIcon className="h-5 w-5 text-modern-gray-400 mr-2" />}
+                                    >
+                                        {eventsList.map((event) => (
+                                            <MenuItem key={event.id} value={event.id}>
+                                                {event.title} ({new Date(event.startDate).toLocaleDateString()})
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            )}
 
                             <TextField
                                 fullWidth
@@ -262,7 +383,7 @@ const NewslettersSend: React.FC = () => {
                                 <Button
                                     variant="contained"
                                     onClick={() => setConfirmDialog(true)}
-                                    disabled={!selectedTemplate || loading}
+                                    disabled={!selectedTemplate || (audienceType === 'EVENT_GUESTS' && !selectedEventId) || loading}
                                     startIcon={scheduledDate ? <CalendarDaysIcon className="h-4 w-4" /> : <PaperAirplaneIcon className="h-4 w-4" />}
                                     className="!bg-modern-primary-600 hover:!bg-modern-primary-700"
                                 >
@@ -275,6 +396,8 @@ const NewslettersSend: React.FC = () => {
                                         setSelectedTemplate('');
                                         setCustomSubject('');
                                         setScheduledDate('');
+                                        setAudienceType('SUBSCRIBERS');
+                                        setSelectedEventId('');
                                     }}
                                     disabled={loading}
                                 >
@@ -285,8 +408,7 @@ const NewslettersSend: React.FC = () => {
                     </Card>
                 </Grid>
 
-                {/* Статус очереди */}
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                     <Card className="!shadow-sm !border !border-modern-gray-200 !rounded-xl p-6">
                         <Typography variant="h6" className="!font-semibold !text-modern-gray-900 mb-4">
                             Статус очереди
@@ -342,8 +464,7 @@ const NewslettersSend: React.FC = () => {
                     </Card>
                 </Grid>
 
-                {/* История рассылок */}
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                     <Card className="!shadow-sm !border !border-modern-gray-200 !rounded-xl p-6">
                         <Typography variant="h6" className="!font-semibold !text-modern-gray-900 mb-4">
                             История рассылок
@@ -363,7 +484,7 @@ const NewslettersSend: React.FC = () => {
                                                     <Chip
                                                         label={getStatusText(campaign.status)}
                                                         size="small"
-                                                        color={getStatusColor(campaign.status) as any}
+                                                        color={getStatusColor(campaign.status)}
                                                     />
                                                 </div>
                                             }
@@ -373,14 +494,35 @@ const NewslettersSend: React.FC = () => {
                                                         Шаблон: {campaign.template.title}
                                                     </span>
                                                     <span className="text-sm text-modern-gray-500">
-                                                        Получателей: {campaign.totalRecipients}
+                                                        Аудитория: {
+                                                            campaign.audienceType === 'SUBSCRIBERS'
+                                                                ? 'Все подписчики'
+                                                                : `Участники мероприятия ${eventsList.find(e => e.id === campaign.audienceEventId)?.title || campaign.audienceEventId}`
+                                                        }
                                                     </span>
                                                     <span className="text-sm text-modern-gray-500">
-                                                        {new Date(campaign.scheduledDate).toLocaleString('ru-RU')}
+                                                        Отправлено: {campaign.sentCount} / Ошибки: {campaign.failedCount}
+                                                    </span>
+                                                    <span className="text-sm text-modern-gray-500">
+                                                        {new Date(campaign.scheduledAt).toLocaleString('ru-RU')}
                                                     </span>
                                                 </div>
                                             }
+                                            primaryTypographyProps={{ component: 'div' }}
+                                            secondaryTypographyProps={{ component: 'div' }}
                                         />
+                                        {(campaign.status === 'FAILED' || campaign.status === 'SENDING') && (
+                                            <Button
+                                                variant="outlined"
+                                                size="small"
+                                                onClick={() => handleRetryCampaign(campaign.id)}
+                                                disabled={loading}
+                                                startIcon={<ArrowPathIcon className="h-4 w-4" />}
+                                                className="!ml-2"
+                                            >
+                                                Повторить
+                                            </Button>
+                                        )}
                                     </ListItem>
                                     {index < campaigns.length - 1 && <Divider />}
                                 </React.Fragment>
@@ -399,7 +541,6 @@ const NewslettersSend: React.FC = () => {
                 </Grid>
             </Grid>
 
-            {/* Диалог подтверждения */}
             <Dialog
                 open={confirmDialog}
                 onClose={() => setConfirmDialog(false)}
@@ -417,6 +558,13 @@ const NewslettersSend: React.FC = () => {
                         <Typography>
                             <strong>Тема:</strong> {customSubject || selectedNewsletterTitle}
                         </Typography>
+                        <Typography>
+                            <strong>Аудитория:</strong> {
+                                audienceType === 'SUBSCRIBERS'
+                                    ? 'Все подписчики'
+                                    : `Участники мероприятия ${selectedEventTitle}`
+                            }
+                        </Typography>
                         {scheduledDate && (
                             <Typography>
                                 <strong>Время отправки:</strong> {new Date(scheduledDate).toLocaleString('ru-RU')}
@@ -425,7 +573,7 @@ const NewslettersSend: React.FC = () => {
                         <Alert severity="info">
                             {scheduledDate
                                 ? 'Рассылка будет запланирована и отправлена автоматически в указанное время.'
-                                : 'Рассылка будет отправлена всем активным подписчикам немедленно.'
+                                : 'Рассылка будет отправлена выбранной аудитории немедленно.'
                             }
                         </Alert>
                     </div>
@@ -438,6 +586,7 @@ const NewslettersSend: React.FC = () => {
                         onClick={handleSendNewsletter}
                         variant="contained"
                         disabled={loading}
+                        startIcon={<PaperAirplaneIcon className="h-4 w-4" />}
                         className="!bg-modern-primary-600 hover:!bg-modern-primary-700"
                     >
                         {loading ? 'Отправка...' : (scheduledDate ? 'Запланировать' : 'Отправить')}
@@ -448,4 +597,4 @@ const NewslettersSend: React.FC = () => {
     );
 };
 
-export default NewslettersSend; 
+export default NewslettersSend;

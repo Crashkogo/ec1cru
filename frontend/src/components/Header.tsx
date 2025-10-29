@@ -41,9 +41,7 @@ const menuItems: MenuItem[] = [
     items: [
       { name: 'Сопровождение', path: '/support' },
       { name: 'Внедрение', path: '/implementation' },
-      { name: 'Доработка', path: '/customization' },
-      { name: 'Обновление', path: '/updates' },
-      { name: 'Техническое обслуживание', path: '/tech-maintenance' },
+      { name: 'IT-аутсорсинг', path: '/tech-maintenance' },
     ],
   },
   {

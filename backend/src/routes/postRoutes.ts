@@ -87,6 +87,7 @@ router.delete(
 // =============================================================================
 // Публичные маршруты
 router.get("/events", eventsController.getEvents as RequestHandler);
+router.get("/events/recent", eventsController.getRecentEvents as RequestHandler);
 router.get("/events/:slug", eventsController.getEventBySlug as RequestHandler);
 router.post(
   "/events/:slug/register",
@@ -303,7 +304,6 @@ router.get(
 // Админские маршруты
 router.get(
   "/admin/newsletters",
-  authMiddleware,
   newsletterController.getNewsletters as RequestHandler
 );
 router.get(
@@ -311,6 +311,43 @@ router.get(
   authMiddleware,
   newsletterController.getAllNewsletters as RequestHandler
 );
+
+// ВАЖНО: Специфичные роуты campaigns ДОЛЖНЫ быть ПЕРЕД роутом /newsletters/:id
+// =============================================================================
+// УПРАВЛЕНИЕ РАССЫЛКАМИ (campaigns)
+// =============================================================================
+router.get(
+  "/newsletters/campaigns",
+  authMiddleware,
+  newsletterController.getCampaigns as RequestHandler
+);
+router.post(
+  "/newsletters/send",
+  authMiddleware,
+  newsletterController.sendNewsletter as RequestHandler
+);
+router.get(
+  "/newsletters/queue/status",
+  authMiddleware,
+  newsletterController.getQueueStatus as RequestHandler
+);
+router.post(
+  "/newsletters/process-scheduled",
+  authMiddleware,
+  newsletterController.processScheduledNewsletters as RequestHandler
+);
+router.post(
+  "/newsletters/campaigns/:id/retry",
+  authMiddleware,
+  newsletterController.retryCampaign as RequestHandler
+);
+router.get(
+  "/newsletters/:id/preview",
+  authMiddleware,
+  newsletterController.previewNewsletter as RequestHandler
+);
+
+// Роуты с параметром :id должны быть ПОСЛЕ специфичных путей
 router.get(
   "/newsletters/:id",
   authMiddleware,
@@ -323,7 +360,6 @@ router.get(
 );
 router.post(
   "/newsletters",
-  authMiddleware,
   newsletterController.createNewsletter as RequestHandler
 );
 router.put(
@@ -331,8 +367,18 @@ router.put(
   authMiddleware,
   newsletterController.updateNewsletterById as RequestHandler
 );
+router.patch(
+  "/admin/newsletters/:id",
+  authMiddleware,
+  newsletterController.updateNewsletterById as RequestHandler
+);
 router.delete(
   "/newsletters/:id",
+  authMiddleware,
+  newsletterController.deleteNewsletterById as RequestHandler
+);
+router.delete(
+  "/admin/newsletters/:id",
   authMiddleware,
   newsletterController.deleteNewsletterById as RequestHandler
 );
@@ -375,30 +421,6 @@ router.delete(
   "/admin/subscribers/:id",
   authMiddleware,
   subscribersController.deleteSubscriber as RequestHandler
-);
-
-// =============================================================================
-// УПРАВЛЕНИЕ РАССЫЛКАМИ
-// =============================================================================
-router.post(
-  "/newsletters/send",
-  authMiddleware,
-  newsletterController.sendNewsletter as RequestHandler
-);
-router.get(
-  "/newsletters/queue/status",
-  authMiddleware,
-  newsletterController.getQueueStatus as RequestHandler
-);
-router.get(
-  "/newsletters/campaigns",
-  authMiddleware,
-  newsletterController.getCampaigns as RequestHandler
-);
-router.post(
-  "/newsletters/process-scheduled",
-  authMiddleware,
-  newsletterController.processScheduledNewsletters as RequestHandler
 );
 
 // Публичная отписка по токену

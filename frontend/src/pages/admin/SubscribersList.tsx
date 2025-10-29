@@ -205,6 +205,7 @@ export const SubscribersList = () => (
             }}
         >
             <List
+                resource="subscribers"
                 filters={SubscriberFilter}
                 actions={<SubscriberListActions />}
                 pagination={<SubscriberPagination />}

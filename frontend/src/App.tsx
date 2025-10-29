@@ -32,6 +32,7 @@ const PersonalDataConsent = React.lazy(() => import('./pages/PersonalDataConsent
 const MetricsConsent = React.lazy(() => import('./pages/MetricsConsent'));
 const UserAgreement = React.lazy(() => import('./pages/UserAgreement'));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
+const TechMaintenance = React.lazy(() => import('./pages/TechMaintenance'));
 
 // Админка
 const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
@@ -250,6 +251,16 @@ function App() {
                   <Layout setShowLogin={setShowLogin}>
                     <Suspense fallback={<PageLoading message="Загрузка политики конфиденциальности..." />}>
                       <PrivacyPolicy />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/tech-maintenance"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка IT-аутсорсинга..." />}>
+                      <TechMaintenance />
                     </Suspense>
                   </Layout>
                 }

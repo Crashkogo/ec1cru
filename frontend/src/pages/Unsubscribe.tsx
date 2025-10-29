@@ -15,10 +15,9 @@ const Unsubscribe: React.FC = () => {
     const [message, setMessage] = useState('');
 
     const token = searchParams.get('token');
-    const subscriber = searchParams.get('subscriber');
 
     useEffect(() => {
-        if (!token || !subscriber) {
+        if (!token) {
             setStatus('error');
             setMessage('Недействительная ссылка для отписки');
             return;
@@ -27,7 +26,7 @@ const Unsubscribe: React.FC = () => {
         const unsubscribe = async () => {
             try {
                 const response = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/api/posts/unsubscribe?token=${token}&subscriber=${subscriber}`
+                    `${import.meta.env.VITE_API_URL}/api/posts/unsubscribe?token=${token}`
                 );
 
                 setStatus('success');
@@ -44,7 +43,7 @@ const Unsubscribe: React.FC = () => {
         };
 
         unsubscribe();
-    }, [token, subscriber]);
+    }, [token]);
 
     const getIcon = () => {
         switch (status) {
