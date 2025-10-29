@@ -605,3 +605,35 @@ export const updateEvent: RequestHandler = async (req, res) => {
     });
   }
 };
+
+export const getRecentEvents: RequestHandler = async (req, res) => {
+  try {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const events = await prisma.events.findMany({
+      where: {
+        registrationEnabled: true,
+        startDate: {
+          gte: sixMonthsAgo,
+        },
+      },
+      orderBy: {
+        startDate: "desc",
+      },
+      select: {
+        id: true,
+        title: true,
+        startDate: true,
+      },
+    });
+
+    res.status(200).json(events);
+  } catch (error) {
+    console.error("Error fetching recent events:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};

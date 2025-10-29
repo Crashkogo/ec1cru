@@ -8,9 +8,6 @@ import {
     Toolbar,
     ListButton,
     TopToolbar,
-    useUpdate,
-    useNotify,
-    useRedirect,
 } from 'react-admin';
 import { Editor } from '@tinymce/tinymce-react';
 import { useFormContext } from 'react-hook-form';
@@ -22,7 +19,11 @@ const RichTextInput = ({ source, label, ...props }: any) => {
 
     const handleEditorChange = useCallback(
         (newContent: string) => {
-            setValue(source, newContent, { shouldValidate: true });
+            setValue(source, newContent, {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true
+            });
         },
         [setValue, source]
     );
@@ -65,7 +66,7 @@ const RichTextInput = ({ source, label, ...props }: any) => {
                     base_url: '/tinymce',
                     suffix: '.min',
                     image_uploadtab: true,
-                    images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=newsletters`,
+                    images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=newsletters&slug=images`,
                     images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
                     automatic_uploads: true,
                     file_picker_types: 'image',
@@ -82,30 +83,11 @@ const NewslettersEditActions = () => (
     </TopToolbar>
 );
 
-const NewslettersEditToolbar = () => {
-    const [update] = useUpdate();
-    const notify = useNotify();
-    const redirect = useRedirect();
-    const { handleSubmit, watch } = useFormContext();
-    const id = watch('id');
-
-    const handleSave = handleSubmit(async (data) => {
-        try {
-            await update('newsletters', { id, data });
-            notify('Шаблон рассылки успешно обновлен');
-            redirect('/admin/newsletters');
-        } catch (error) {
-            console.error('Error updating newsletter:', error);
-            notify('Ошибка при обновлении шаблона рассылки', { type: 'error' });
-        }
-    });
-
-    return (
-        <Toolbar>
-            <SaveButton onClick={handleSave} />
-        </Toolbar>
-    );
-};
+const NewslettersEditToolbar = () => (
+    <Toolbar>
+        <SaveButton />
+    </Toolbar>
+);
 
 export const NewslettersEdit = () => (
     <Edit title="Редактирование шаблона рассылки" actions={<NewslettersEditActions />}>

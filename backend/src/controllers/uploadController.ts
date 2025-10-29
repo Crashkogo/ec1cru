@@ -68,11 +68,15 @@ export const uploadImage: RequestHandler = async (req, res) => {
     return;
   }
   const file = req.files.file as UploadedFile;
-  const slug = req.body.slug || "temp";
+
+  // Получаем slug из query параметров или body, по умолчанию "temp"
+  const slug = (typeof req.query.slug === "string" ? req.query.slug : req.body.slug) || "temp";
+
   const entity =
     typeof req.query.entity === "string"
       ? req.query.entity
       : req.body.entity || "news";
+
   const uploadDir = path.join(
     __dirname,
     "../../frontend/public/uploads",

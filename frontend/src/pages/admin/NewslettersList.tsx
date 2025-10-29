@@ -173,6 +173,7 @@ export const NewslettersList = () => (
             }}
         >
             <List
+                resource="newsletters"
                 filters={NewsletterFilter}
                 actions={<NewslettersListActions />}
                 pagination={<NewsletterPagination />}

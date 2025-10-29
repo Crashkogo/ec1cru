@@ -1,4 +1,4 @@
-import  { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import {
     Create,
     SimpleForm,
@@ -8,9 +8,6 @@ import {
     Toolbar,
     ListButton,
     TopToolbar,
-    useCreate,
-    useNotify,
-    useRedirect,
 } from 'react-admin';
 import { Editor } from '@tinymce/tinymce-react';
 import { useFormContext } from 'react-hook-form';
@@ -22,7 +19,11 @@ const RichTextInput = ({ source, label, ...props }: any) => {
 
     const handleEditorChange = useCallback(
         (newContent: string) => {
-            setValue(source, newContent, { shouldValidate: true });
+            setValue(source, newContent, {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true
+            });
         },
         [setValue, source]
     );
@@ -65,7 +66,7 @@ const RichTextInput = ({ source, label, ...props }: any) => {
                     base_url: '/tinymce',
                     suffix: '.min',
                     image_uploadtab: true,
-                    images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=newsletters`,
+                    images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=newsletters&slug=images`,
                     images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
                     automatic_uploads: true,
                     file_picker_types: 'image',
@@ -82,29 +83,11 @@ const NewslettersCreateActions = () => (
     </TopToolbar>
 );
 
-const NewslettersCreateToolbar = () => {
-    const [create] = useCreate();
-    const notify = useNotify();
-    const redirect = useRedirect();
-    const { handleSubmit } = useFormContext();
-
-    const handleSave = handleSubmit(async (data) => {
-        try {
-            await create('newsletters', { data });
-            notify('Шаблон рассылки успешно создан');
-            redirect('/admin/newsletters');
-        } catch (error) {
-            console.error('Error creating newsletter:', error);
-            notify('Ошибка при создании шаблона рассылки', { type: 'error' });
-        }
-    });
-
-    return (
-        <Toolbar>
-            <SaveButton onClick={handleSave} />
-        </Toolbar>
-    );
-};
+const NewslettersCreateToolbar = () => (
+    <Toolbar>
+        <SaveButton />
+    </Toolbar>
+);
 
 export const NewslettersCreate = () => (
     <Create title="Создание шаблона рассылки" actions={<NewslettersCreateActions />}>

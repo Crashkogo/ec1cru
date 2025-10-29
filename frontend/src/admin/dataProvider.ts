@@ -206,7 +206,7 @@ export const dataProvider: DataProvider = {
       const query = {
         _start: ((page - 1) * perPage).toString(),
         _end: (page * perPage).toString(),
-        _sort: params.sort?.field || 'subscribedAt',
+        _sort: params.sort?.field || 'createdAt',
         _order: params.sort?.order || 'DESC',
         ...params.filter,
       };
@@ -578,7 +578,7 @@ export const dataProvider: DataProvider = {
     }
 
     if (resource === 'newsletters') {
-      const url = `${apiUrl}/api/posts/admin/newsletters`;
+      const url = `${apiUrl}/api/posts/newsletters`;
       const { json } = await fetchUtils.fetchJson(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
