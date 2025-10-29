@@ -1,7 +1,43 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { TariffPlan } from '../types/tariff';
 
 const TechMaintenance: React.FC = () => {
+    const [tariffs, setTariffs] = useState<TariffPlan[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Загрузка тарифов из API
+    useEffect(() => {
+        const fetchTariffs = async () => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tariff-plans`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setTariffs(data);
+                } else {
+                    console.error('Failed to fetch tariffs, status:', response.status);
+                }
+            } catch (error) {
+                console.error('Failed to fetch tariffs:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTariffs();
+    }, []);
+
+    // Функция рендера значения ячейки в зависимости от типа
+    const renderCellValue = (value: string | number, type: string) => {
+        if (type === 'price' && typeof value === 'number') {
+            return value.toLocaleString('ru-RU');
+        }
+        if (type === 'boolean') {
+            return value === '+' ? '+' : value === '-' ? '-' : value;
+        }
+        return value;
+    };
+
     // Плавная прокрутка для якорных ссылок
     useEffect(() => {
         const handleAnchorClick = (e: MouseEvent) => {
@@ -200,250 +236,79 @@ const TechMaintenance: React.FC = () => {
                             </div>
                         </section>
 
-                        {/* Секция "Тарифы" */}
+                        {/* Секция "Тарифы" - ДИНАМИЧЕСКАЯ */}
                         <section className="mb-16" id="tariff">
                             <h2 className="text-3xl font-bold text-modern-gray-900 text-center mb-12">
                                 Тарифы
                             </h2>
 
-                            {/* Тариф "Контроль" */}
-                            <div className="mb-12">
-                                <h3 className="text-2xl font-semibold text-modern-gray-800 mb-6">
-                                    Тариф «Контроль» (для малых организаций)
-                                </h3>
-                                <div className="overflow-x-auto rounded-xl shadow-lg">
-                                    <table className="min-w-full divide-y divide-modern-gray-200">
-                                        <thead className="bg-modern-gray-100">
-                                            <tr>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Наименование</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Кол-во ПК</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Стоимость на ПК*</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Кол-во часов</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Входящий мониторинг Zabbix</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-modern-gray-200 bg-white">
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">1</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">3100</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">+</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">3400</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">+</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">3</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">3700</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">+</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            {loading ? (
+                                <div className="text-center py-12">
+                                    <p className="text-modern-gray-600">Загрузка тарифов...</p>
                                 </div>
-                                <p className="text-sm text-modern-gray-600 text-right mt-4">
-                                    * Цена указана в рублях за 1 месяц. Время расчета с 8 рабочих часов.
-                                </p>
-                            </div>
+                            ) : tariffs.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <p className="text-modern-gray-600">Тарифы временно недоступны</p>
+                                </div>
+                            ) : (
+                                tariffs.map((tariff) => (
+                                    <div key={tariff.id} className="mb-12">
+                                        <h3 className="text-2xl font-semibold text-modern-gray-800 mb-6">
+                                            {tariff.name}
+                                            {tariff.subtitle && (
+                                                <span className="text-modern-gray-600 ml-2">{tariff.subtitle}</span>
+                                            )}
+                                        </h3>
 
-                            {/* Тариф "Стандарт" */}
-                            <div className="mb-12">
-                                <h3 className="text-2xl font-semibold text-modern-gray-800 mb-6">
-                                    Тариф «Стандарт» (подходит большинству организаций)
-                                </h3>
-                                <div className="overflow-x-auto rounded-xl shadow-lg">
-                                    <table className="min-w-full divide-y divide-modern-gray-200">
-                                        <thead className="bg-modern-gray-100">
-                                            <tr>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Наименование</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Кол-во</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Стоимость на ПК*</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Кол-во плановых выездов</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Кол-во аварийных выездов</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-modern-gray-200 bg-white">
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">4-5</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">1000</td>
-                                                <td className="px-6 py-4 text-center">1</td>
-                                                <td className="px-6 py-4 text-center">3</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">6-9</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">900</td>
-                                                <td className="px-6 py-4 text-center">1</td>
-                                                <td className="px-6 py-4 text-center">4</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">10-13</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">850</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">5</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">14-15</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">800</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">6</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">16-19</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">750</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">7</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">20-24</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">720</td>
-                                                <td className="px-6 py-4 text-center">3</td>
-                                                <td className="px-6 py-4 text-center">8</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">25-30</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">700</td>
-                                                <td className="px-6 py-4 text-center">3</td>
-                                                <td className="px-6 py-4 text-center">9</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">От 30</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">По договоренности</td>
-                                                <td className="px-6 py-4 text-center">По договоренности</td>
-                                                <td className="px-6 py-4 text-center">По договоренности</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Серверное место (сервер на ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">1</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">5000</td>
-                                                <td className="px-6 py-4 text-center">-</td>
-                                                <td className="px-6 py-4 text-center">-</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Серверное место (сервер на ОС LINUX)</td>
-                                                <td className="px-6 py-4 text-center">1</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">7000</td>
-                                                <td className="px-6 py-4 text-center">-</td>
-                                                <td className="px-6 py-4 text-center">-</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <p className="text-sm text-modern-gray-600 text-right mt-4">
-                                    * Цена указана в рублях за 1 месяц. Время расчета с 8 рабочих часов.
-                                </p>
-                            </div>
+                                        <div className="overflow-x-auto rounded-xl shadow-lg">
+                                            <table className="min-w-full divide-y divide-modern-gray-200">
+                                                <thead className="bg-modern-gray-100">
+                                                    <tr>
+                                                        {tariff.columns.map((column) => (
+                                                            <th
+                                                                key={column.id}
+                                                                className="px-6 py-4 text-sm font-semibold text-modern-gray-700"
+                                                                style={{ textAlign: column.align || 'center' }}
+                                                            >
+                                                                {column.label}
+                                                            </th>
+                                                        ))}
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-modern-gray-200 bg-white">
+                                                    {tariff.rows.map((row) => (
+                                                        <tr key={row.id} className="hover:bg-modern-gray-50">
+                                                            {tariff.columns.map((column) => (
+                                                                <td
+                                                                    key={column.id}
+                                                                    className="px-6 py-4"
+                                                                    style={{ textAlign: column.align || 'center' }}
+                                                                >
+                                                                    {column.type === 'price' ? (
+                                                                        <span className="font-semibold text-modern-primary-600">
+                                                                            {renderCellValue(row[column.id], column.type)}
+                                                                        </span>
+                                                                    ) : (
+                                                                        renderCellValue(row[column.id], column.type)
+                                                                    )}
+                                                                </td>
+                                                            ))}
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
 
-                            {/* Тариф "Продвинутый" */}
-                            <div className="mb-12">
-                                <h3 className="text-2xl font-semibold text-modern-gray-800 mb-6">
-                                    Тариф «Продвинутый»
-                                </h3>
-                                <div className="overflow-x-auto rounded-xl shadow-lg">
-                                    <table className="min-w-full divide-y divide-modern-gray-200">
-                                        <thead className="bg-modern-gray-100">
-                                            <tr>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Наименование</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Кол-во</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Стоимость на ПК*</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Кол-во плановых выездов</th>
-                                                <th className="px-6 py-4 text-center text-sm font-semibold text-modern-gray-700">Кол-во аварийных выездов</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-modern-gray-200 bg-white">
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">4-5</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">1200</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">5</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">6-9</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">1100</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">6</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">10-13</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">1000</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">7</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">14-15</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">950</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">8</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">16-19</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">900</td>
-                                                <td className="px-6 py-4 text-center">2</td>
-                                                <td className="px-6 py-4 text-center">9</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">20-24</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">860</td>
-                                                <td className="px-6 py-4 text-center">3</td>
-                                                <td className="px-6 py-4 text-center">10</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">25-30</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">830</td>
-                                                <td className="px-6 py-4 text-center">3</td>
-                                                <td className="px-6 py-4 text-center">11</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Рабочее место (ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">От 30</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">По договоренности</td>
-                                                <td className="px-6 py-4 text-center">По договоренности</td>
-                                                <td className="px-6 py-4 text-center">По договоренности</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Серверное место (сервер на ОС WINDOWS)</td>
-                                                <td className="px-6 py-4 text-center">1</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">6000</td>
-                                                <td className="px-6 py-4 text-center">-</td>
-                                                <td className="px-6 py-4 text-center">-</td>
-                                            </tr>
-                                            <tr className="hover:bg-modern-gray-50">
-                                                <td className="px-6 py-4 text-center">Серверное место (сервер на ОС LINUX)</td>
-                                                <td className="px-6 py-4 text-center">1</td>
-                                                <td className="px-6 py-4 text-center font-semibold text-modern-primary-600">8000</td>
-                                                <td className="px-6 py-4 text-center">-</td>
-                                                <td className="px-6 py-4 text-center">-</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <p className="text-sm text-modern-gray-600 text-right mt-4">
-                                    * Цена указана в рублях за 1 месяц. Время расчета с 4 рабочих часа.
-                                </p>
-                            </div>
+                                        {tariff.footnote && (
+                                            <p className="text-sm text-modern-gray-600 text-right mt-4">
+                                                {tariff.footnote}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))
+                            )}
                         </section>
                     </div>
-
                     {/* CTA блок */}
                     <div className="mt-16" id="contact">
                         <div className="bg-modern-primary-50 rounded-xl p-8">

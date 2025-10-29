@@ -44,6 +44,9 @@ import NewslettersSend from './NewslettersSend';
 import { SubscribersList } from './SubscribersList';
 import { SubscribersEdit } from './SubscribersEdit';
 import { EventRegistrationsList } from './EventRegistrationsList';
+import { TariffPlansList } from './TariffPlansList';
+import { TariffPlansCreate } from './TariffPlansCreate';
+import { TariffPlansEdit } from './TariffPlansEdit';
 import { i18nProvider } from '../../admin/i18nProvider';
 import LoginPage from './Login';
 
@@ -220,6 +223,7 @@ const Dashboard: React.FC = () => (
       <Resource name="newsletters" list={NewslettersList} create={NewslettersCreate} edit={NewslettersEdit} />
       <Resource name="newsletters-send" list={NewslettersSend} />
       <Resource name="subscribers" list={SubscribersList} edit={SubscribersEdit} />
+      <Resource name="tariff-plans" list={TariffPlansList} create={TariffPlansCreate} edit={TariffPlansEdit} />
       <Resource
         name="users"
         list={UserList}

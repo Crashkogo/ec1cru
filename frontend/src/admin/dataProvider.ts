@@ -287,6 +287,38 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'tariff-plans') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'order',
+        _order: params.sort?.order || 'ASC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/admin/tariff-plans?${stringify(query)}`;
+      console.log('Fetching tariff-plans from:', url);
+
+      try {
+        const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
+          url,
+          { headers }
+        );
+
+        console.log('Tariff-plans response:', json);
+        console.log('X-Total-Count header:', responseHeaders.get('X-Total-Count'));
+
+        const data = Array.isArray(json) ? json : [json];
+
+        return {
+          data,
+          total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+        };
+      } catch (error) {
+        console.error('Error fetching tariff-plans:', error);
+        throw error;
+      }
+    }
+
     return Promise.reject('Resource not supported');
   },
 
@@ -392,6 +424,19 @@ export const dataProvider: DataProvider = {
         console.error('GetOne subscriber error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to fetch subscriber'
+        );
+      }
+    }
+
+    if (resource === 'tariff-plans') {
+      const url = `${apiUrl}/api/admin/tariff-plans/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, { headers });
+        return { data: json };
+      } catch (error) {
+        console.error('GetOne tariff plan error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch tariff plan'
         );
       }
     }
@@ -587,6 +632,16 @@ export const dataProvider: DataProvider = {
       return { data: json };
     }
 
+    if (resource === 'tariff-plans') {
+      const url = `${apiUrl}/api/admin/tariff-plans`;
+      const { json } = await fetchUtils.fetchJson(url, {
+        method: 'POST',
+        body: JSON.stringify(params.data),
+        headers,
+      });
+      return { data: json };
+    }
+
     return Promise.reject('Resource not supported');
   },
 
@@ -740,6 +795,23 @@ export const dataProvider: DataProvider = {
         console.error('Update subscriber error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to update subscriber'
+        );
+      }
+    }
+
+    if (resource === 'tariff-plans') {
+      const url = `${apiUrl}/api/admin/tariff-plans/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, {
+          method: 'PUT',
+          body: JSON.stringify(params.data),
+          headers,
+        });
+        return { data: json };
+      } catch (error) {
+        console.error('Update tariff plan error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update tariff plan'
         );
       }
     }
@@ -982,6 +1054,22 @@ export const dataProvider: DataProvider = {
         console.error('Delete subscriber error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to delete subscriber'
+        );
+      }
+    }
+
+    if (resource === 'tariff-plans') {
+      const url = `${apiUrl}/api/admin/tariff-plans/${params.id}`;
+      try {
+        await fetchUtils.fetchJson(url, {
+          method: 'DELETE',
+          headers,
+        });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete tariff plan error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete tariff plan'
         );
       }
     }

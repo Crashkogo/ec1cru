@@ -3,6 +3,7 @@ import cors from 'cors';
 import { PORT, FRONTEND_URL } from './config';
 import userRoutes from './routes/userRoutes';
 import postRoutes from './routes/postRoutes';
+import tariffPlanRoutes from './routes/tariffPlanRoutes.js';
 import fileUpload from 'express-fileupload';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +19,7 @@ const corsOptions = {
   credentials: true, // Разрешаем отправку credentials (токенов)
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Разрешённые методы
   allowedHeaders: ['Content-Type', 'Authorization'], // Разрешённые заголовки
+  exposedHeaders: ['X-Total-Count'], // Разрешаем чтение заголовка X-Total-Count для React-Admin
 };
 
 app.use(cors(corsOptions));
@@ -29,6 +31,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../frontend/public/uplo
 
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api', tariffPlanRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
