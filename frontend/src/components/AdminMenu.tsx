@@ -54,6 +54,11 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
       icon: GiftIcon
     },
     {
+      title: 'Курсы',
+      path: '/admin/courses',
+      icon: NewspaperIcon
+    },
+    {
       title: 'Готовые решения',
       path: '/admin/ready-solutions',
       icon: BuildingOffice2Icon

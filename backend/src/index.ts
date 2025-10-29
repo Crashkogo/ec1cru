@@ -4,6 +4,7 @@ import { PORT, FRONTEND_URL } from './config';
 import userRoutes from './routes/userRoutes';
 import postRoutes from './routes/postRoutes';
 import tariffPlanRoutes from './routes/tariffPlanRoutes.js';
+import courseRoutes from './routes/courseRoutes';
 import fileUpload from 'express-fileupload';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -32,6 +33,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../frontend/public/uplo
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api', tariffPlanRoutes);
+app.use('/api', courseRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

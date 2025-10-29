@@ -14,6 +14,7 @@ import PageWrapper from './components/PageWrapper';
 const News = React.lazy(() => import('./pages/News'));
 const Events = React.lazy(() => import('./pages/Events'));
 const Promotions = React.lazy(() => import('./pages/Promotions'));
+const Courses = React.lazy(() => import('./pages/Courses'));
 const Services = React.lazy(() => import('./pages/1CServices'));
 const Programs1C = React.lazy(() => import('./pages/1CPrograms'));
 const Support = React.lazy(() => import('./pages/Support'));
@@ -23,6 +24,7 @@ const About = React.lazy(() => import('./pages/About'));
 const NewsDetail = React.lazy(() => import('./components/NewsDetail'));
 const EventsDetail = React.lazy(() => import('./components/EventsDetail'));
 const PromotionsDetail = React.lazy(() => import('./components/PromotionsDetail'));
+const CourseDetail = React.lazy(() => import('./components/CourseDetail'));
 const ReadySolutionDetail = React.lazy(() => import('./components/ReadySolutionDetail'));
 const ReadySolutionsList = React.lazy(() => import('./components/ReadySolutionsList'));
 
@@ -113,6 +115,16 @@ function App() {
                 }
               />
               <Route
+                path="/1c-courses"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка курсов..." />}>
+                      <Courses />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
                 path="/ready-solutions"
                 element={
                   <Layout setShowLogin={setShowLogin}>
@@ -191,6 +203,16 @@ function App() {
                   <Layout setShowLogin={setShowLogin}>
                     <Suspense fallback={<PageLoading message="Загрузка акции..." />}>
                       <PromotionsDetail />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/1c-courses/:slug"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка курса..." />}>
+                      <CourseDetail />
                     </Suspense>
                   </Layout>
                 }

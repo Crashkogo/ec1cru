@@ -72,6 +72,33 @@ export const dataProvider: DataProvider = {
       };
     }
 
+    if (resource === 'courses') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'createdAt',
+        _order: params.sort?.order || 'DESC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/admin/courses?${stringify(query)}`;
+      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
+        url,
+        { headers }
+      );
+
+      const data = Array.isArray(json)
+        ? json.map((item) => ({
+            ...item,
+            id: item.id,
+          }))
+        : [json];
+
+      return {
+        data,
+        total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+      };
+    }
+
     if (resource === 'events') {
       const query = {
         _start: ((page - 1) * perPage).toString(),
@@ -350,6 +377,19 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'courses') {
+      const url = `${apiUrl}/api/admin/courses/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, { headers });
+        return { data: { ...json, id: json.id } };
+      } catch (error) {
+        console.error('GetOne course error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch course'
+        );
+      }
+    }
+
     if (resource === 'events') {
       const url = `${apiUrl}/api/posts/admin/events/${params.id}`;
       try {
@@ -474,6 +514,20 @@ export const dataProvider: DataProvider = {
       return { data };
     }
 
+    if (resource === 'courses') {
+      const promises = params.ids.map((id) =>
+        fetchUtils.fetchJson(`${apiUrl}/api/admin/courses/${id}`, {
+          headers,
+        })
+      );
+      const results = await Promise.all(promises);
+      const data = results.map(({ json }) => ({
+        ...json,
+        id: json.id,
+      }));
+      return { data };
+    }
+
     if (resource === 'events') {
       // Для мероприятий получаем каждое по отдельности через админский маршрут
       const promises = params.ids.map((id) =>
@@ -580,6 +634,16 @@ export const dataProvider: DataProvider = {
         headers,
       });
       return { data: { ...json, id: json.id } }; // используем оригинальный ID
+    }
+
+    if (resource === 'courses') {
+      const url = `${apiUrl}/api/courses`;
+      const { json } = await fetchUtils.fetchJson(url, {
+        method: 'POST',
+        body: JSON.stringify(params.data),
+        headers,
+      });
+      return { data: { ...json, id: json.id } };
     }
 
     if (resource === 'events') {
@@ -689,6 +753,23 @@ export const dataProvider: DataProvider = {
         console.error('Update news error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to update news'
+        );
+      }
+    }
+
+    if (resource === 'courses') {
+      const url = `${apiUrl}/api/admin/courses/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, {
+          method: 'PATCH',
+          body: JSON.stringify(params.data),
+          headers,
+        });
+        return { data: { ...json, id: json.id } };
+      } catch (error) {
+        console.error('Update course error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update course'
         );
       }
     }
@@ -954,6 +1035,22 @@ export const dataProvider: DataProvider = {
         console.error('Delete news error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to delete news'
+        );
+      }
+    }
+
+    if (resource === 'courses') {
+      const url = `${apiUrl}/api/admin/courses/${params.id}`;
+      try {
+        await fetchUtils.fetchJson(url, {
+          method: 'DELETE',
+          headers,
+        });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete course error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete course'
         );
       }
     }
