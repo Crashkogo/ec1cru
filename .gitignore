@@ -5,14 +5,16 @@ dist
 .env.production
 backend/dist
 frontend/dist
-backend/prisma
+# Prisma - exclude only DB files, keep schema and migrations
+backend/prisma/*.db
+backend/prisma/*.db-journal
+# Temporary/development files
 referens
 plans/
-.gemini/settings.json
-bugs.txt
-GEMINI.md
-*.md
+plan/
 .gemini/
 .genkit/
 .cursor/
-plan/
+# Exclude specific docs, but keep CLAUDE.md
+bugs.txt
+GEMINI.md

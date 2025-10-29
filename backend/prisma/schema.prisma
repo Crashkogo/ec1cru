@@ -1,0 +1,198 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  password  String
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model News {
+  id               Int      @id @default(autoincrement())
+  title            String
+  shortDescription String
+  content          String // Для HTML-контента (будет поддерживать визуальный редактор)
+  createdAt        DateTime @default(now())
+  isPublished      Boolean
+  slug             String   @unique
+  metaTitle        String?
+  metaDescription  String?
+}
+
+model Events {
+  id                  Int                  @id @default(autoincrement())
+  title               String
+  shortDescription    String
+  content             String
+  startDate           DateTime
+  createdAt           DateTime             @default(now())
+  isPublished         Boolean
+  status              Boolean // false - предстоящее, true - прошло
+  ours                Boolean // наше или стороннее
+  registrationEnabled Boolean              @default(false) // Включена ли регистрация на мероприятие
+  slug                String               @unique
+  metaTitle           String?
+  metaDescription     String?
+  eventLink           String? // Новое поле для ссылки на мероприятие
+  registrations       EventsRegistration[] // Связь с регистрациями
+}
+
+model EventsRegistration {
+  id             Int      @id @default(autoincrement())
+  eventId        Int
+  name           String
+  phone          String
+  email          String
+  organization   String   @default("") // Организация
+  privacyConsent Boolean  @default(true) // Согласие на обработку персональных данных
+  createdAt      DateTime @default(now())
+  event          Events   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+model Promotions {
+  id               Int      @id @default(autoincrement())
+  title            String
+  shortDescription String // Краткое описание
+  content          String // Основной HTML-контент (для визуального редактора)
+  startDate        DateTime
+  endDate          DateTime
+  createdAt        DateTime @default(now())
+  isPublished      Boolean
+  slug             String   @unique
+  metaTitle        String?
+  metaDescription  String?
+  status           Boolean // true - активна, false - завершена
+}
+
+// Основная таблица решений
+model ReadySolution {
+  id               Int               @id @default(autoincrement())
+  type             SolutionType      @default(PROCESSING) // Тип: Обработка, Печатная форма, Отчёт
+  programs         SolutionProgram[] @relation("SolutionPrograms") // Связь many-to-many с Program
+  freshSupport     Boolean           @default(false) // Поддержка в 1C:Fresh
+  title            String // Название
+  shortDescription String // Краткое описание
+  fullDescription  String // Полное описание
+  price            Float? // Цена (необязательная, если не указана - "Цена по запросу")
+  images           String[] // Список ссылок на изображения для галереи
+  isPublished      Boolean           @default(false) // Опубликовано или нет
+  slug             String            @unique // Уникальный slug
+  metaTitle        String? // Мета-заголовок для SEO
+  metaDescription  String? // Мета-описание для SEO
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model Program {
+  id        Int               @id @default(autoincrement())
+  fullName  String // Полное название программы
+  shortName String // Краткое название программы
+  solutions SolutionProgram[] @relation("SolutionPrograms") // Связь many-to-many с ReadySolution
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model SolutionProgram {
+  solutionId Int
+  programId  Int
+  solution   ReadySolution @relation(fields: [solutionId], references: [id], name: "SolutionPrograms", onDelete: Cascade)
+  program    Program       @relation(fields: [programId], references: [id], name: "SolutionPrograms")
+
+  @@id([solutionId, programId])
+}
+
+// Новые модели для системы рассылок
+model NewsletterTemplate {
+  id          Int                  @id @default(autoincrement())
+  title       String // Название шаблона рассылки
+  htmlContent String // HTML-код письма, вводится в редакторе TinyMCE
+  createdAt   DateTime             @default(now())
+  campaigns   NewsletterCampaign[] // Связь с кампаниями
+}
+
+model NewsletterSubscriber {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  isActive  Boolean  @default(true)
+  token     String?  @unique
+}
+
+model NewsletterCampaign {
+  id              Int          @id @default(autoincrement())
+  createdAt       DateTime     @default(now())
+  subject         String
+  templateId      Int
+  template        NewsletterTemplate @relation(fields: [templateId], references: [id])
+  status          String       // e.g., PENDING, SENT, FAILED
+  sentCount       Int          @default(0)
+  failedCount     Int          @default(0)
+  scheduledAt     DateTime?    // Time for scheduled sending
+  audienceType    AudienceType @default(SUBSCRIBERS) // Тип аудитории
+  audienceEventId Int?         // ID мероприятия, если рассылка по участникам
+}
+
+enum AudienceType {
+  SUBSCRIBERS
+  EVENT_GUESTS
+}
+
+enum NewsletterStatus {
+  SCHEDULED // Запланирована
+  SENDING // Отправляется
+  COMPLETED // Завершена
+  FAILED // Ошибка
+}
+
+enum SolutionType {
+  PROCESSING // Обработка
+  PRINT_FORM // Печатная форма
+  REPORT // Отчёт
+}
+
+// Модель для тарифных планов IT-аутсорсинга
+model TariffPlan {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique // "Контроль", "Стандарт", "Продвинутый"
+  subtitle    String?  // "(для малых организаций)"
+  columns     Json     // Структура колонок таблицы
+  rows        Json     // Данные строк таблицы
+  footnote    String?  @db.Text // Примечание под таблицей
+  order       Int      @default(0) // Порядок отображения
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tariff_plans")
+}
+
+// Модель для курсов 1С
+model Course {
+  id               Int      @id @default(autoincrement())
+  title            String   // Заголовок
+  shortDescription String   // Краткое описание
+  content          String   @db.Text // Основное содержание (HTML)
+  slug             String   @unique // Уникальный идентификатор для URL
+  isPublished      Boolean  @default(false) // Опубликован
+  metaTitle        String?  // Meta Title для SEO
+  metaDescription  String?  // Meta Description для SEO
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("courses")
+}
