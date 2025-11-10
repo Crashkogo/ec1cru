@@ -18,6 +18,7 @@ const Courses = React.lazy(() => import('./pages/Courses'));
 const Services = React.lazy(() => import('./pages/1CServices'));
 const Programs1C = React.lazy(() => import('./pages/1CPrograms'));
 const Support = React.lazy(() => import('./pages/Support'));
+const Implementation = React.lazy(() => import('./pages/Implementation'));
 const About = React.lazy(() => import('./pages/About'));
 
 // Detail компоненты (самые тяжелые - обязательно lazy)
@@ -160,6 +161,17 @@ function App() {
                   <Layout setShowLogin={setShowLogin}>
                     <Suspense fallback={<PageLoading message="Загрузка сопровождения..." />}>
                       <Support/>
+                    </Suspense>
+                  </Layout>
+                }
+              />
+
+              <Route
+                path="/implementation"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка страницы внедрения..." />}>
+                      <Implementation />
                     </Suspense>
                   </Layout>
                 }

@@ -7,13 +7,14 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallbackForm } from '../hooks/useCallbackForm';
 import {
+  ClockIcon,
   ArrowRightIcon,
-  ChevronDownIcon
+  CalendarIcon,
+  PhoneIcon
 } from '@heroicons/react/24/outline';
 import csImage from '../assets/cs.png';
 import { usePreloadOnHover, preloadOnIdle } from '../utils/preloadRoutes';
 import SubscribeForm from '../components/SubscribeForm';
-import WorkflowTimeline from '../components/WorkflowTimeline';
 
 // Схема валидации Zod
 const callbackSchema = z.object({
@@ -27,6 +28,37 @@ const callbackSchema = z.object({
 type CallbackFormInputs = z.infer<typeof callbackSchema>;
 
 // Типы данных
+interface NewsItem {
+  id: number;
+  title: string;
+  shortDescription: string;
+  slug: string;
+  createdAt: string;
+  isPublished: boolean;
+}
+
+interface PromotionItem {
+  id: number;
+  title: string;
+  shortDescription: string;
+  slug: string;
+  startDate: string;
+  endDate: string;
+  status: boolean;
+  isPublished: boolean;
+}
+
+interface EventItem {
+  id: number;
+  title: string;
+  shortDescription: string;
+  slug: string;
+  startDate: string;
+  isPublished: boolean;
+  ours: boolean;
+  status: boolean;
+}
+
 interface Program {
   id: number;
   shortName: string;
@@ -43,6 +75,9 @@ interface ReadySolutionItem {
 }
 
 const Home: React.FC = () => {
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [promotions, setPromotions] = useState<PromotionItem[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [solutions, setSolutions] = useState<ReadySolutionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeAboutTab, setActiveAboutTab] = useState('history');
@@ -93,7 +128,16 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const solutionsRes = await axios.get(`${import.meta.env.VITE_API_URL}/api/posts/ready-solutions?limit=4`);
+        const [newsRes, promotionsRes, eventsRes, solutionsRes] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/news?take=4`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/promotions?take=4`), 
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/events?take=4`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/ready-solutions?limit=4`)
+        ]);
+
+        setNews(newsRes.data);
+        setPromotions(promotionsRes.data);
+        setEvents(eventsRes.data);
         setSolutions(solutionsRes.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -139,80 +183,76 @@ const Home: React.FC = () => {
         </div>
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Левая колонка - ~25% ширины с плитками и формой */}
-            <div className="w-full lg:w-80 flex-shrink-0 space-y-3">
-              {/* Статистические плитки вертикально */}
-              <div className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
-                <div>
-                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">600+</div>
-                  <div className="text-xs font-medium text-modern-gray-700">Клиентов с нами</div>
-                </div>
-                <ChevronDownIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:scale-125" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* Левая часть - УТП и статистика */}
+            <div className="space-y-8">
+              {/* УТП */}
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold text-modern-gray-900 mb-6 leading-tight">
+                  <span className="text-modern-primary-600 block">Индивидуальный подход</span>
+                  от лидеров в регионе
+                </h1>
+                <h2 className="text-2xl md:text-3xl font-semibold text-modern-gray-700 mb-8">
+                  Полный цикл услуг
+                </h2>
               </div>
 
-              <div className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
-                <div>
-                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">50+</div>
-                  <div className="text-xs font-medium text-modern-gray-700">Внедрений реализовано</div>
+              {/* Статистика в компактном виде */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                  <div className="text-3xl font-bold text-modern-primary-600 mb-2">600+</div>
+                  <div className="text-sm font-medium text-modern-gray-700">Клиентов с нами</div>
                 </div>
-                <ChevronDownIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:scale-125" />
+                <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                  <div className="text-3xl font-bold text-modern-primary-600 mb-2">50+</div>
+                  <div className="text-sm font-medium text-modern-gray-700">Внедрений реализовано</div>
+                </div>
+                <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                  <div className="text-3xl font-bold text-modern-primary-600 mb-2">30</div>
+                  <div className="text-sm font-medium text-modern-gray-700">Лет на рынке</div>
+                </div>
+                <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                  <img src={csImage} alt="1С" className="h-16 w-auto mx-auto" />
+                </div>
+                {/* Новый блок IT-аутсорсинг */}
+                <div className="col-span-2 bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                  <div className="text-xl font-bold text-modern-primary-600 mb-2">IT-аутсорсинг</div>
+                  <div className="text-sm font-medium text-modern-gray-700">Комплексное сопровождение бизнеса в сфере IT</div>
+                </div>
               </div>
 
-              <div className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
-                <div>
-                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">30</div>
-                  <div className="text-xs font-medium text-modern-gray-700">Лет на рынке</div>
-                </div>
-                <ChevronDownIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:scale-125" />
-              </div>
-
-              <div className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
-                <div className="flex-1 flex justify-center">
-                  <img src={csImage} alt="1С" className="h-12 w-auto" />
-                </div>
-                <ChevronDownIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:scale-125" />
-              </div>
-
-              <div className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
-                <div>
-                  <div className="text-base font-bold text-modern-primary-600 mb-1">IT-аутсорсинг</div>
-                  <div className="text-xs font-medium text-modern-gray-700">Комплексное сопровождение</div>
-                </div>
-                <ChevronDownIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:scale-125" />
-              </div>
-
-              {/* Форма обратной связи - вертикальная */}
-              <form onSubmit={handleSubmit(onSubmit)} className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern space-y-3">
-                <div>
-                  <input
-                    {...register('name')}
-                    type="text"
-                    placeholder="Ваше имя"
-                    className={`w-full px-3 py-2 bg-modern-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-modern-primary-500 focus:border-transparent transition-all duration-200 placeholder-modern-gray-400 text-sm ${errors.name ? 'border-red-300' : 'border-modern-gray-200'}`}
-                  />
-                  {errors.name && <p className="text-red-600 text-xs mt-1">{errors.name.message}</p>}
+              {/* Форма обратной связи */}
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <input
+                      {...register('name')}
+                      type="text"
+                      placeholder="Ваше имя"
+                      className={`w-full px-4 py-3 bg-modern-white/80 backdrop-blur-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-modern-primary-500 focus:border-transparent transition-all duration-200 placeholder-modern-gray-400 ${errors.name ? 'border-red-300' : 'border-modern-gray-200'}`}
+                    />
+                    {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name.message}</p>}
+                  </div>
+                  <div>
+                    <input
+                      {...register('phone')}
+                      type="tel"
+                      placeholder="+7 (___) ___-__-__"
+                      onInput={handlePhoneInput}
+                      className={`w-full px-4 py-3 bg-modern-white/80 backdrop-blur-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-modern-primary-500 focus:border-transparent transition-all duration-200 placeholder-modern-gray-400 ${errors.phone ? 'border-red-300' : 'border-modern-gray-200'}`}
+                    />
+                    {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone.message}</p>}
+                  </div>
                 </div>
 
-                <div>
-                  <input
-                    {...register('phone')}
-                    type="tel"
-                    placeholder="+7 (___) ___-__-__"
-                    onInput={handlePhoneInput}
-                    className={`w-full px-3 py-2 bg-modern-white border rounded-lg focus:outline-none focus:ring-2 focus:ring-modern-primary-500 focus:border-transparent transition-all duration-200 placeholder-modern-gray-400 text-sm ${errors.phone ? 'border-red-300' : 'border-modern-gray-200'}`}
-                  />
-                  {errors.phone && <p className="text-red-600 text-xs mt-1">{errors.phone.message}</p>}
-                </div>
-
-                <div className="flex items-start space-x-2">
+                <div className="flex items-start space-x-3">
                   <input
                     {...register('consent')}
                     type="checkbox"
                     id="consent-home"
-                    className={`mt-0.5 h-4 w-4 text-modern-primary-600 border-modern-gray-300 rounded focus:ring-modern-primary-500 flex-shrink-0 ${errors.consent ? 'ring-2 ring-red-500' : ''}`}
+                    className={`mt-1 h-4 w-4 text-modern-primary-600 border-modern-gray-300 rounded focus:ring-modern-primary-500 focus:ring-2 ${errors.consent ? 'ring-2 ring-red-500' : ''}`}
                   />
-                  <label htmlFor="consent-home" className="text-xs text-modern-gray-600 leading-tight">
+                  <label htmlFor="consent-home" className="text-sm text-modern-gray-600 leading-relaxed">
                     Я даю{' '}
                     <Link
                       to="/personal-data-consent"
@@ -220,111 +260,134 @@ const Home: React.FC = () => {
                     >
                       Согласие
                     </Link>
-                    {' '}на обработку персональных данных
+                    {' '}на обработку персональных данных в соответствии с{' '}
+                    <Link
+                      to="/privacy-policy"
+                      className="text-modern-primary-600 hover:text-modern-primary-700 underline transition-colors duration-200"
+                    >
+                      Политикой Конфиденциальности
+                    </Link>
+                    .
                   </label>
                 </div>
-                {errors.consent && <p className="text-red-600 text-xs">{errors.consent.message}</p>}
+                {errors.consent && <p className="text-red-600 text-sm -mt-2">{errors.consent.message}</p>}
 
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full px-4 py-2 bg-modern-primary-600 text-white rounded-lg hover:bg-modern-primary-700 transition-all duration-200 font-semibold text-sm shadow-modern hover:shadow-modern-md disabled:opacity-50"
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      <span>Отправка...</span>
-                    </span>
-                  ) : (
-                    'Получить консультацию'
-                  )}
+                <button type="submit" disabled={isSubmitting} className="w-full group px-8 py-4 bg-modern-primary-600 text-white rounded-xl hover:bg-modern-primary-700 transition-all duration-200 font-semibold shadow-modern-md hover:shadow-modern-lg transform hover:scale-105 disabled:opacity-50">
+                  <span className="flex items-center justify-center">
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                        <span>Отправка...</span>
+                      </>
+                    ) : (
+                      <>
+                        <PhoneIcon className="h-5 w-5 mr-2" />
+                        Получить консультацию
+                        <ArrowRightIcon className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                      </>
+                    )}
+                  </span>
                 </button>
               </form>
             </div>
 
-            {/* Правая часть - ~75% ширины с тремя информационными блоками в общей обёртке */}
-            <div className="flex-1 bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 shadow-modern">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Блок 1: Автоматизация учета */}
-                <div>
-                  <h2 className="text-2xl font-bold text-modern-primary-600 mb-4 leading-tight">
-                    Автоматизация учета — ваше конкурентное преимущество
-                  </h2>
-                  <p className="text-modern-gray-700 text-sm leading-relaxed">
-                    Мы не просто устанавливаем программы. Мы внедряем отлаженную систему, которая объединяет разрозненные отделы, устраняет рутину и дает вам единую, точную картину бизнеса в реальном времени. Это позволяет принимать решения на основе данных, а не догадок.
-                  </p>
+            {/* Правая часть - Новости, Акции, Мероприятия */}
+            <div className="space-y-3">
+              {/* Новости */}
+              <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern">
+                <Link
+                  to="/news"
+                  onMouseEnter={() => handleMouseEnter('/news')}
+                  className="block text-center mb-4 hover:text-modern-primary-700 transition-all duration-200"
+                >
+                  <h3 className="text-lg font-bold text-modern-primary-600 transition-transform duration-200 hover:scale-110">Новости</h3>
+                </Link>
+                <div className="grid grid-cols-2 gap-2">
+                  {news.slice(0, 4).map((item) => (
+                    <Link
+                      key={item.id}
+                      to={`/news/${item.slug}`}
+                      onMouseEnter={() => handleMouseEnter(`/news/${item.slug}`)}
+                      className="block hover:bg-modern-gray-50 rounded-lg p-2 transition-colors duration-200 group"
+                    >
+                      <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-primary-600 transition-colors duration-200 line-clamp-2 mb-1">
+                        {item.title}
+                      </h4>
+                      <div className="flex items-center text-xs text-modern-gray-500">
+                        <ClockIcon className="h-3 w-3 mr-1" />
+                        {new Date(item.createdAt).toLocaleDateString('ru-RU')}
+                      </div>
+                    </Link>
+                  ))}
                 </div>
+              </div>
 
-                {/* Блок 2: Что мы автоматизируем */}
-                <div>
-                  <h2 className="text-2xl font-bold text-modern-primary-600 mb-4 leading-tight">
-                    Что мы автоматизируем
-                  </h2>
-                  <div className="space-y-3 text-sm text-modern-gray-700">
-                    <div>
-                      <div className="font-semibold text-modern-gray-900 mb-1">Финансы:</div>
-                      <p className="leading-relaxed">Управленческий учет, расчет себестоимости, казначейство</p>
+              {/* Акции */}
+              <div className="bg-modern-accent-50/80 backdrop-blur-sm rounded-xl p-4 shadow-modern border border-modern-accent-200">
+                <Link
+                  to="/promotions"
+                  onMouseEnter={() => handleMouseEnter('/promotions')}
+                  className="block text-center mb-4 hover:text-modern-accent-700 transition-all duration-200"
+                >
+                  <h3 className="text-lg font-bold text-modern-accent-600 transition-transform duration-200 hover:scale-110">Акции</h3>
+                </Link>
+                <div className="grid grid-cols-2 gap-2">
+                  {promotions.length > 0 ? (
+                    promotions.slice(0, 4).map((item) => (
+                      <Link
+                        key={item.id}
+                        to={`/promotions/${item.slug}`}
+                        onMouseEnter={() => handleMouseEnter(`/promotions/${item.slug}`)}
+                        className="block hover:bg-modern-accent-100/50 rounded-lg p-2 transition-colors duration-200 group"
+                      >
+                        <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-accent-700 transition-colors duration-200 line-clamp-2 mb-1">
+                          {item.title}
+                        </h4>
+                        <div className="text-xs text-modern-gray-500">
+                          До {new Date(item.endDate).toLocaleDateString('ru-RU')}
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center text-modern-gray-500 text-sm">
+                      Акции скоро появятся!
                     </div>
-                    <div>
-                      <div className="font-semibold text-modern-gray-900 mb-1">Продажи и CRM:</div>
-                      <p className="leading-relaxed">От первого контакта до отгрузки и анализа эффективности менеджеров</p>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-modern-gray-900 mb-1">Склад и логистика:</div>
-                      <p className="leading-relaxed">Учет остатков, оптимизация запасов, маршрутизация</p>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-modern-gray-900 mb-1">Производство:</div>
-                      <p className="leading-relaxed">Планирование, контроль операций, расчет норм расхода</p>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-modern-gray-900 mb-1">Закупки:</div>
-                      <p className="leading-relaxed">Контроль закупочных цен, планирование поставок</p>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-modern-gray-900 mb-1">Персонал и кадровый учет:</div>
-                      <p className="leading-relaxed">Расчет заработной платы, управление отпусками и больничными, кадровое делопроизводство</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
+              </div>
 
-                {/* Блок 3: Отрасли */}
-                <div>
-                  <h2 className="text-2xl font-bold text-modern-primary-600 mb-4 leading-tight">
-                    Мы обеспечим сквозную автоматизацию для вашей отрасли
-                  </h2>
-                  <div className="space-y-2 text-sm">
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Производство
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Розничная торговля
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Оптовая торговля
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Сельское хозяйство
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Общепит
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      ЖКХ
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Услуги
-                    </div>
-                  </div>
+              {/* Мероприятия */}
+              <div className="bg-modern-primary-50/80 backdrop-blur-sm rounded-xl p-4 shadow-modern border border-modern-primary-200">
+                <Link
+                  to="/events"
+                  onMouseEnter={() => handleMouseEnter('/events')}
+                  className="block text-center mb-4 hover:text-modern-primary-700 transition-all duration-200"
+                >
+                  <h3 className="text-lg font-bold text-modern-primary-600 transition-transform duration-200 hover:scale-110">Мероприятия</h3>
+                </Link>
+                <div className="grid grid-cols-2 gap-2">
+                  {events.slice(0, 4).map((item) => (
+                    <Link
+                      key={item.id}
+                      to={`/events/${item.slug}`}
+                      onMouseEnter={() => handleMouseEnter(`/events/${item.slug}`)}
+                      className="block hover:bg-modern-primary-100/50 rounded-lg p-2 transition-colors duration-200 group"
+                    >
+                      <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-primary-700 transition-colors duration-200 line-clamp-2 mb-1">
+                        {item.title}
+                      </h4>
+                      <div className="flex items-center text-xs text-modern-gray-500">
+                        <CalendarIcon className="h-3 w-3 mr-1" />
+                        {new Date(item.startDate).toLocaleDateString('ru-RU')}
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      {/* Как мы работаем - Workflow Timeline */}
-      <WorkflowTimeline />
 
       {/* Готовые решения */}
       {
