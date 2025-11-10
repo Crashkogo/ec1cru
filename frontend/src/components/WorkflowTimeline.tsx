@@ -1,6 +1,10 @@
 import React from 'react';
 
-const WorkflowTimeline: React.FC = () => {
+interface WorkflowTimelineProps {
+  largeFonts?: boolean;
+}
+
+const WorkflowTimeline: React.FC<WorkflowTimelineProps> = ({ largeFonts = false }) => {
   const steps = [
     {
       number: '1',
@@ -45,7 +49,7 @@ const WorkflowTimeline: React.FC = () => {
   ];
 
   return (
-    <section className="py-16 bg-modern-white">
+    <section className={`bg-modern-white ${largeFonts ? 'py-8' : 'py-16'}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl md:text-4xl font-bold text-modern-gray-900 text-center mb-12">
           Как мы работаем
@@ -67,12 +71,12 @@ const WorkflowTimeline: React.FC = () => {
                   </div>
 
                   {/* Заголовок - увеличенный шрифт */}
-                  <h3 className="font-semibold text-modern-gray-900 mb-2 text-sm leading-tight min-h-[2.8rem] flex items-center">
+                  <h3 className={`font-semibold text-modern-gray-900 mb-2 leading-tight min-h-[2.8rem] flex items-center ${largeFonts ? 'text-base' : 'text-sm'}`}>
                     {step.title}
                   </h3>
 
                   {/* Описание - увеличенный шрифт */}
-                  <p className="text-xs text-modern-gray-600 leading-relaxed">
+                  <p className={`text-modern-gray-600 leading-relaxed ${largeFonts ? 'text-sm' : 'text-xs'}`}>
                     {step.description}
                   </p>
                 </div>
