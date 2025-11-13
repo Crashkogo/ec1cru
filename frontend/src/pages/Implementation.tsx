@@ -261,7 +261,7 @@ const Implementation: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span className="text-2xl font-bold">100%</span>
+                        <span className="text-lg font-bold">100%</span>
                       </div>
                       <div>
                         <div className="font-semibold">Под ваши задачи</div>

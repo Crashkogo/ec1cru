@@ -5,9 +5,9 @@ import { PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 const Footer: React.FC = () => {
     const [isExpanded, setIsExpanded] = useState(false);
     return (
-        <footer className="bg-modern-gray-900 text-white">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <footer className="bg-modern-gray-900 text-white" style={{ border: 'none', outline: 'none', boxShadow: 'none' }}>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12" style={{ border: 'none', outline: 'none', boxShadow: 'none' }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" style={{ border: 'none', outline: 'none' }}>
 
                     {/* Компания */}
                     <div>
@@ -86,7 +86,7 @@ const Footer: React.FC = () => {
                 </div>
 
                 {/* Нижняя часть футера */}
-                <div className="border-t border-modern-gray-800 mt-8 pt-8">
+                <div className="mt-8 pt-8">
                     <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
                         <div className="text-modern-gray-400 text-sm">
                             © 2025 ООО «Инженер-центр». Все права защищены.
@@ -103,6 +103,7 @@ const Footer: React.FC = () => {
                                     }
                                 }}
                                 className="bg-modern-gray-900 text-modern-gray-500 text-xs hover:text-modern-gray-300 transition-colors duration-200 focus:outline-none"
+                                style={{ outline: 'none', border: 'none' }}
                             >
                                 Настоящий сайт является официальным сайтом Общества с ограниченной ответственностью "Инженер-Центр".
                             </button>

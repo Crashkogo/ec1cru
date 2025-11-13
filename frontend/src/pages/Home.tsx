@@ -175,13 +175,6 @@ const Home: React.FC = () => {
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-modern-primary-100 via-modern-white to-modern-accent-100 pt-20 pb-16 overflow-hidden">
-        <div className="absolute inset-0 opacity-50">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.03) 2px, transparent 2px)`,
-            backgroundSize: '60px 60px'
-          }}></div>
-        </div>
-
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Левая часть - УТП и статистика */}
@@ -390,19 +383,19 @@ const Home: React.FC = () => {
       </section>
 
       {/* Готовые решения */}
-      {
-        solutions.length > 0 && (
-          <section className="py-12 bg-modern-gray-50">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-modern-gray-900 mb-4">
-                  Готовые решения 1С
-                </h2>
-                <p className="text-xl text-modern-gray-600">
-                  Проверенные решения для быстрого старта вашего бизнеса
-                </p>
-              </div>
+      <section className="py-12 bg-modern-gray-50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-modern-gray-900 mb-4">
+              Готовые решения 1С
+            </h2>
+            <p className="text-xl text-modern-gray-600">
+              Проверенные решения для быстрого старта вашего бизнеса
+            </p>
+          </div>
 
+          {solutions.length > 0 ? (
+            <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {solutions.map((solution) => (
                   <Link
@@ -411,13 +404,11 @@ const Home: React.FC = () => {
                     onMouseEnter={() => handleMouseEnter(`/ready-solutions/${solution.slug}`)}
                     className="group bg-modern-white rounded-xl p-4 shadow-modern hover:shadow-modern-lg transition-all duration-200 transform hover:scale-105 flex flex-col"
                   >
-                    {/* Заголовок и программы на одном уровне */}
                     <div className="flex items-start justify-between mb-3 gap-2">
                       <h3 className="text-lg font-semibold text-modern-gray-900 group-hover:text-modern-primary-600 transition-colors duration-200 flex-1">
                         {solution.title}
                       </h3>
 
-                      {/* Программы справа */}
                       <div className="flex flex-wrap gap-1 justify-end flex-shrink-0">
                         {solution.programs && solution.programs.length > 0 && (
                           <>
@@ -465,10 +456,22 @@ const Home: React.FC = () => {
                   <ArrowRightIcon className="h-5 w-5 ml-2" />
                 </Link>
               </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <div className="max-w-md mx-auto bg-modern-white rounded-xl p-8 shadow-modern">
+                <div className="text-6xl mb-4">📦</div>
+                <h3 className="text-xl font-semibold text-modern-gray-900 mb-2">
+                  Готовые решения скоро появятся
+                </h3>
+                <p className="text-modern-gray-600">
+                  Мы работаем над наполнением раздела готовых решений. Следите за обновлениями!
+                </p>
+              </div>
             </div>
-          </section>
-        )
-      }
+          )}
+        </div>
+      </section>
 
       {/* О компании */}
       <section className="py-16 bg-modern-white">
