@@ -32,8 +32,9 @@ const menuItems: MenuItem[] = [
     items: [
       { name: 'Программы 1С', path: '/1c-programs' },
       { name: 'Сервисы 1С', path: '/1c-services' },
-      { name: 'Оборудование', path: '/equipment' },
       { name: 'Наши разработки', path: '/ready-solutions' },
+      { name: 'Zabbix', path: '/zabbix' },
+      { name: 'Оборудование', path: '/equipment' },
     ],
   },
   {

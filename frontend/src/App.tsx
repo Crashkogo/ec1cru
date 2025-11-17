@@ -20,6 +20,7 @@ const Programs1C = React.lazy(() => import('./pages/1CPrograms'));
 const Support = React.lazy(() => import('./pages/Support'));
 const Implementation = React.lazy(() => import('./pages/Implementation'));
 const About = React.lazy(() => import('./pages/About'));
+const Zabbix = React.lazy(() => import('./pages/Zabbix'));
 
 // Detail компоненты (самые тяжелые - обязательно lazy)
 const NewsDetail = React.lazy(() => import('./components/NewsDetail'));
@@ -183,6 +184,17 @@ function App() {
                   <Layout setShowLogin={setShowLogin}>
                     <Suspense fallback={<PageLoading message="Загрузка страницы о нас..." />}>
                       <About />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+
+              <Route
+                path="/zabbix"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка информации о Zabbix..." />}>
+                      <Zabbix />
                     </Suspense>
                   </Layout>
                 }

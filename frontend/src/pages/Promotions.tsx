@@ -97,16 +97,29 @@ const Promotions: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, hasMore]);
 
-    const resetFilters = () => {
+    const resetFilters = React.useCallback(() => {
         setSearchQuery('');
         setStatusFilter(null);
         setDateFrom('');
         setDateTo('');
         setMobileFiltersOpen(false);
-    };
+    }, []);
 
-    // Компонент фильтров
-    const FiltersContent = () => (
+    // Обработчики изменений с сохранением фокуса
+    const handleSearchChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+    }, []);
+
+    const handleDateFromChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setDateFrom(e.target.value);
+    }, []);
+
+    const handleDateToChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setDateTo(e.target.value);
+    }, []);
+
+    // Компонент фильтров с использованием useMemo для предотвращения пересоздания
+    const FiltersContent = React.useMemo(() => (
         <>
             {/* Поиск */}
             <div className="mb-6">
@@ -114,12 +127,13 @@ const Promotions: React.FC = () => {
                     Поиск по названию
                 </label>
                 <div className="relative">
-                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-modern-gray-400" />
+                    <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-modern-gray-400 pointer-events-none" />
                     <input
                         type="text"
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={handleSearchChange}
                         placeholder="Введите название..."
+                        autoComplete="off"
                         className="w-full pl-10 pr-4 py-3 border border-modern-gray-300 rounded-lg focus:ring-2 focus:ring-modern-accent-500 focus:border-modern-accent-500 transition-all duration-200 text-modern-gray-900 placeholder-modern-gray-500"
                     />
                 </div>
@@ -172,7 +186,7 @@ const Promotions: React.FC = () => {
                 <input
                     type="date"
                     value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
+                    onChange={handleDateFromChange}
                     className="w-full px-3 py-2 border border-modern-gray-300 rounded-lg focus:ring-2 focus:ring-modern-accent-500 focus:border-modern-accent-500 text-modern-gray-900"
                 />
             </div>
@@ -185,7 +199,7 @@ const Promotions: React.FC = () => {
                 <input
                     type="date"
                     value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
+                    onChange={handleDateToChange}
                     className="w-full px-3 py-2 border border-modern-gray-300 rounded-lg focus:ring-2 focus:ring-modern-accent-500 focus:border-modern-accent-500 text-modern-gray-900"
                 />
             </div>
@@ -198,7 +212,7 @@ const Promotions: React.FC = () => {
                 Сбросить фильтры
             </button>
         </>
-    );
+    ), [searchQuery, handleSearchChange, statusFilter, dateFrom, handleDateFromChange, dateTo, handleDateToChange, resetFilters]);
 
     if (initialLoading) {
         return (
@@ -253,7 +267,7 @@ const Promotions: React.FC = () => {
                                 <XMarkIcon className="h-5 w-5" />
                             </button>
                             <h2 className="text-xl font-semibold text-modern-gray-900 mb-6">Фильтры</h2>
-                            <FiltersContent />
+                            {FiltersContent}
                         </div>
                     )}
 
@@ -262,7 +276,7 @@ const Promotions: React.FC = () => {
                         {/* Десктопные фильтры */}
                         <div className="hidden lg:block w-1/6 bg-modern-white rounded-xl shadow-modern p-6 h-fit">
                             <h2 className="text-xl font-semibold text-modern-gray-900 mb-6">Фильтры</h2>
-                            <FiltersContent />
+                            {FiltersContent}
                         </div>
 
                         {/* Список акций */}

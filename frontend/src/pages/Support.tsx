@@ -1,97 +1,199 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Link } from 'react-router-dom';
+import { ArrowRightIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
-interface Tab {
-    id: string;
-    label: string;
-    content: React.ReactNode;
-}
+// Accordion компонент для длинных текстов
+const AccordionItem: React.FC<{
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  id?: string;
+}> = ({ title, children, defaultOpen = false, id }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
 
-const supportMainContent = (
-    <div> 
-        <p className="text-center text-2xl font-bold mb-4 text-modern-gray-700  leading-relaxed max-w-5xl mx-auto">
-            Заключив договор ИТС, вы не просто получаете абонентское обслуживание, а приобретаете «страховой полис» для стабильной, легальной и эффективной работы вашей программы 1С.
-        </p>
+  return (
+    <div id={id} className="border border-modern-gray-200 rounded-xl overflow-hidden mb-3 bg-white">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-6 py-4 flex items-center justify-between hover:bg-modern-gray-50 transition-colors duration-200"
+      >
+        <h3 className="text-lg font-semibold text-modern-gray-900 text-left">{title}</h3>
+        {isOpen ? (
+          <ChevronUpIcon className="h-5 w-5 text-modern-primary-600 flex-shrink-0" />
+        ) : (
+          <ChevronDownIcon className="h-5 w-5 text-modern-primary-600 flex-shrink-0" />
+        )}
+      </button>
+      {isOpen && (
+        <div className="px-6 pb-6 text-modern-gray-700 space-y-4">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 px-4">
-            {/* Блок 1 - Светло-голубой */}
-            <div className="bg-blue-100 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-                <div className="text-modern-gray-900">
-                    <h3 className="font-bold text-lg mb-3">Программа всегда актуальна и легальна.</h3>
-                    <p className="text-sm leading-relaxed">
-                        Своевременные обновления: Вы получаете официальные обновления от фирмы «1С», которые автоматически вносят все изменения в налоговое законодательство, формы отчетности (НДС, Налог на прибыль, НДФЛ, РСВ) и кадровые документы.
-                        Легальность ПО: Гарантия использования только лицензионных и официально обновляемых версий программных продуктов «1С».
-                        Нулевые ошибки по незнанию закона: Ваши бухгалтеры всегда работают в актуальной программе, что сводит к нулю риски технических ошибок из-за устаревших форм или расчетов.
-                    </p>
-                </div>
-            </div>
+const Support: React.FC = () => {
+  return (
+    <>
+      <Helmet>
+        <title>Поддержка и сопровождение - ООО «Инженер-центр»</title>
+        <meta
+          name="description"
+          content="Ознакомьтесь с тарифными планами, регламентом линии консультации и типовыми условиями сопровождения программ 1С."
+        />
+      </Helmet>
 
-            {/* Блок 2 - Фиолетовый */}
-            <div className="bg-purple-100 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-                <div className="text-modern-gray-900">
-                    <h3 className="font-bold text-lg mb-3">Профессиональная техническая поддержка.</h3>
-                    <p className="text-sm leading-relaxed">
-                        Консультации экспертов: Наши сертифицированные специалисты отвечают на любые ваши вопросы по работе с программой — от сложных проводок до настройки нестандартных отчетов.
-                        «Скорая помощь» для 1С: Мы оперативно диагностируем и устраняем любые сбои: «вылеты» программы, ошибки при проведении документов, проблемы с обменом данными и многое другое.
-                        Удаленный доступ: Большинство проблем решаются удаленно в кратчайшие сроки, без необходимости визита специалиста в ваш офис.
-                    </p>
-                </div>
-            </div>
-
-            {/* Блок 3 - Зеленый-изумрудный темный */}
-            <div className="bg-emerald-300 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-                <div className="text-modern-gray-900">
-                    <h3 className="font-bold text-lg mb-3">Доступ к эксклюзивным знаниям.</h3>
-                    <p className="text-sm leading-relaxed">
-                        База знаний 1С:ИТС: Это ваша онлайн-библиотека с постоянным доступом к актуальным методическим материалам и рекомендациям по сложным вопросам учета.
-                    </p>
-                </div>
-            </div>
-
-            {/* Блок 4 - Зеленый-изумрудный светлый */}
-            <div className="bg-emerald-200 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300">
-                <div className="text-modern-gray-900">
-                    <h3 className="font-bold text-lg mb-3">Сохранность данных.</h3>
-                    <p className="text-sm leading-relaxed">
-                        Помощь в настройке резервного копирования: Мы поможем правильно организовать автоматическое ежедневное резервное копирование вашей информационной базы.
-                        Защита от потери информации: В случае серьезного сбоя, вирусной атаки или поломки оборудования вы всегда сможете восстановить работоспособность системы из последней резервной копии.
-                    </p>
-                </div>
-            </div>
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-modern-primary-100 via-modern-white to-modern-accent-100 pt-16 pb-8 overflow-hidden">
+        <div className="absolute inset-0 opacity-50">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.03) 2px, transparent 2px)`,
+            backgroundSize: '60px 60px'
+          }}></div>
         </div>
 
-        <p className="text-center text-xl text-modern-gray-700 leading-relaxed max-w-5xl mx-auto px-4">
-            Сопровождение 1С по договору ИТС — это не статья расходов, а стратегическая инвестиция
-            в стабильность и безопасность вашего бизнеса. Вы платите за уверенность в том, что ваш
-            финансовый учет в полном порядке, а ваша команда работает с максимальной эффективностью.
-        </p>
-    </div>
-);
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Левая колонка с навигационными плитками */}
+            <div className="w-full lg:w-80 flex-shrink-0 space-y-3">
+              <Link to="/support" className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
+                <div>
+                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">ИТС</div>
+                  <div className="text-xs font-medium text-modern-gray-700">
+                    Сопровождение 1С<br />Горячая линия 24/7
+                  </div>
+                </div>
+                <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
 
-const consultationRegulationsContent = (
-    <div className="prose max-w-none">
-        <h2 className="text-2xl font-bold mb-4">Регламент линии консультаций</h2>
-        <ol className="list-decimal pl-5 mb-8 space-y-2">
-            <li><a href="#section-1" className="text-modern-primary-600 hover:underline">Порядок оказания услуг на Линии консультаций.</a></li>
-            <li><a href="#section-2" className="text-modern-primary-600 hover:underline">По каким вопросам Линия консультаций не консультирует.</a></li>
-            <li><a href="#section-3" className="text-modern-primary-600 hover:underline">По каким программным продуктам 1С оказывается консультационная поддержка Линией консультаций?</a></li>
-            <li><a href="#section-4" className="text-modern-primary-600 hover:underline">Способы обращения на Линию консультаций.</a></li>
-            <li><a href="#section-5" className="text-modern-primary-600 hover:underline">Порядок обработки обращений пользователей.</a></li>
-            <li><a href="#section-6" className="text-modern-primary-600 hover:underline">В каких случаях может быть отказано пользователям в консультации?</a></li>
-            <li><a href="#section-7" className="text-modern-primary-600 hover:underline">Способы удаленного подключения.</a></li>
-            <li><a href="#section-8" className="text-modern-primary-600 hover:underline">Как быстро ответят на вопрос?</a></li>
-            <li><a href="#section-9" className="text-modern-primary-600 hover:underline">Сколько стоит Линия консультаций?</a></li>
-            <li><a href="#section-10" className="text-modern-primary-600 hover:underline">Как работает линия консультаций?</a></li>
-        </ol>
+              <Link to="/implementation" className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
+                <div>
+                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">Внедрение</div>
+                  <div className="text-xs font-medium text-modern-gray-700">
+                    Автоматизация бизнеса<br />От обследования до запуска
+                  </div>
+                </div>
+                <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
 
-        <p className="mb-6">Линия консультаций- самая востребованная услуга среди пользователей программных продуктов Фирмы «1С». Ежедневно сотни наших клиентов обращаются за помощью в решении своих профессиональных задач к сотрудникам Линии консультаций. Эта услуга в различном объеме заложена в более чем 80% действующих договоров сопровождения и является нашим регулярным обязательством перед клиентами.</p>
+              <Link to="/tech-maintenance" className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
+                <div>
+                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">IT-Аутсорс</div>
+                  <div className="text-xs font-medium text-modern-gray-700">
+                    Обслуживание ПК и серверов<br />Торговое оборудование
+                  </div>
+                </div>
+                <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
+            </div>
 
-        <div id="section-1" className="mb-8">
-            <h3 className="text-xl font-bold mb-4">1. Порядок оказания услуг на Линии консультаций</h3>
-            <p>Все поступающие обращения в компанию могут быть разнесены по 3-м видам поддержки:</p>
-            <p><span className="text-modern-primary-700 font-bold">Первая линия поддержки — это Линия консультаций.</span></p>
-            <p>К вопросам Линии консультаций относятся:</p>
-            <ul className="list-disc pl-5 space-y-2">
+            {/* Правая часть - основной контент */}
+            <div className="flex-1 bg-modern-white/80 backdrop-blur-sm rounded-xl p-8 shadow-modern">
+              {/* Заголовок и описание по центру */}
+              <div className="text-center mb-8">
+                <h1 className="text-4xl font-bold text-modern-primary-600 mb-5 leading-tight">
+                  Поддержка и сопровождение 1С
+                </h1>
+                <p className="text-lg text-modern-gray-700 leading-relaxed max-w-4xl mx-auto font-medium">
+                  Заключив договор ИТС, вы не просто получаете абонентское обслуживание, а приобретаете «страховой полис» для стабильной, легальной и эффективной работы вашей программы 1С.
+                </p>
+              </div>
+
+             
+              {/* 4 блока в ряд */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="group">
+                  <h3 className="text-lg font-bold text-modern-primary-600 mb-3 group-hover:text-modern-primary-700 transition-colors duration-200">
+                    Программа всегда актуальна и легальна
+                  </h3>
+                  <p className="text-base text-modern-gray-700 leading-relaxed">
+                    Своевременные обновления: Вы получаете официальные обновления от фирмы «1С», которые автоматически вносят все изменения в налоговое законодательство, формы отчетности (НДС, Налог на прибыль, НДФЛ, РСВ) и кадровые документы.
+                    Легальность ПО: Гарантия использования только лицензионных и официально обновляемых версий программных продуктов «1С».
+                    Нулевые ошибки по незнанию закона: Ваши бухгалтеры всегда работают в актуальной программе, что сводит к нулю риски технических ошибок из-за устаревших форм или расчетов.
+                  </p>
+                </div>
+
+                <div className="group">
+                  <h3 className="text-lg font-bold text-modern-primary-600 mb-3 group-hover:text-modern-primary-700 transition-colors duration-200">
+                    Профессиональная техническая поддержка
+                  </h3>
+                  <p className="text-base text-modern-gray-700 leading-relaxed">
+                    Консультации экспертов: Наши сертифицированные специалисты отвечают на любые ваши вопросы по работе с программой — от сложных проводок до настройки нестандартных отчетов.
+                    «Скорая помощь» для 1С: Мы оперативно диагностируем и устраняем любые сбои: «вылеты» программы, ошибки при проведении документов, проблемы с обменом данными и многое другое.
+                    Удаленный доступ: Большинство проблем решаются удаленно в кратчайшие сроки, без необходимости визита специалиста в ваш офис.
+                  </p>
+                </div>
+
+                <div className="group">
+                  <h3 className="text-lg font-bold text-modern-primary-600 mb-3 group-hover:text-modern-primary-700 transition-colors duration-200">
+                    Доступ к эксклюзивным знаниям
+                  </h3>
+                  <p className="text-base text-modern-gray-700 leading-relaxed">
+                    База знаний 1С:ИТС: Это ваша онлайн-библиотека с постоянным доступом к актуальным методическим материалам и рекомендациям по сложным вопросам учета.
+                  </p>
+                </div>
+
+                <div className="group">
+                  <h3 className="text-lg font-bold text-modern-primary-600 mb-3 group-hover:text-modern-primary-700 transition-colors duration-200">
+                    Сохранность данных
+                  </h3>
+                  <p className="text-base text-modern-gray-700 leading-relaxed">
+                    Помощь в настройке резервного копирования: Мы поможем правильно организовать автоматическое ежедневное резервное копирование вашей информационной базы.
+                    Защита от потери информации: В случае серьезного сбоя, вирусной атаки или поломки оборудования вы всегда сможете восстановить работоспособность системы из последней резервной копии.
+                  </p>
+                </div>
+              </div>
+           
+              {/* Заключительный текст */}
+              <div className="bg-gradient-to-r from-modern-primary-50 to-modern-accent-50 rounded-xl p-6">
+                <p className="text-center text-lg text-modern-gray-800 leading-relaxed font-medium">
+                  Сопровождение 1С по договору ИТС — это не статья расходов, а <span className="text-modern-primary-700 font-bold">стратегическая инвестиция</span> в стабильность и безопасность вашего бизнеса. Вы платите за уверенность в том, что ваш финансовый учет в полном порядке, а ваша команда работает с максимальной эффективностью.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Тарифные планы - плейсхолдер */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-modern-primary-600 text-center mb-4">
+            Тарифные планы
+          </h2>
+          <p className="text-center text-modern-gray-600 mb-10 max-w-3xl mx-auto">
+            Мы предлагаем гибкие тарифы для сопровождения 1С. Выберите оптимальный план для вашего бизнеса. Свяжитесь с нами для консультации.
+          </p>
+
+          <div className="max-w-5xl mx-auto bg-gradient-to-br from-modern-primary-50 to-modern-accent-50 rounded-xl p-8 text-center">
+            <p className="text-lg text-modern-gray-700 mb-6">
+              Раздел с детализацией тарифных планов находится в разработке.
+            </p>
+            <p className="text-modern-gray-600">
+              Для получения подробной информации о тарифах обращайтесь к нашим специалистам.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Регламент линии консультаций */}
+      <section className="py-12 bg-gradient-to-br from-modern-gray-50 to-modern-primary-50/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-modern-primary-600 text-center mb-4">
+            Регламент линии консультаций
+          </h2>
+          <p className="text-center text-modern-gray-600 mb-10 max-w-3xl mx-auto">
+            Линия консультаций- самая востребованная услуга среди пользователей программных продуктов Фирмы «1С». Ежедневно сотни наших клиентов обращаются за помощью в решении своих профессиональных задач к сотрудникам Линии консультаций. Эта услуга в различном объеме заложена в более чем 80% действующих договоров сопровождения и является нашим регулярным обязательством перед клиентами.
+          </p>
+
+          <div className="max-w-5xl mx-auto">
+            <AccordionItem title="1. Порядок оказания услуг на Линии консультаций" defaultOpen={true} id="section-1">
+              <p>Все поступающие обращения в компанию могут быть разнесены по 3-м видам поддержки:</p>
+              <p><span className="text-modern-primary-700 font-bold">Первая линия поддержки — это Линия консультаций.</span></p>
+              <p>К вопросам Линии консультаций относятся:</p>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>Консультации по использованию типового функционала программных продуктов Фирмы «1С».</li>
                 <li>Методики ввода документов, работы с журналами, настройки стандартных отчетов.</li>
                 <li>Отражение хозяйственных операций в ПП «1С», последовательность заполнения регламентированной отчетности.</li>
@@ -112,15 +214,15 @@ const consultationRegulationsContent = (
                 <li>Как задать вопрос аудитору?</li>
                 <li>Вопросы по работе с сервисами 1С: ИТС (например: 1С-ЭДО, отправка и получение отчетов через сервис 1С: Отчетность).</li>
                 <li>Консультирование по работе с сервисом 1С: Предприятие 8 через Интернет.</li>
-            </ul>
-            <p>Ответы на стандартные, часто задаваемые вопросы, даются в виде ссылок на методические материалы сайта its.1c.ru.</p>
-            <p><span className="text-modern-primary-700 font-bold">Важно! Все действия, рекомендованные консультантом, пользователь выполняет самостоятельно.</span></p>
-            <p>Сотрудники Линии консультаций могут подключиться к базе клиента и предоставить устные рекомендации! Все изменения в базе – создание объектов, перезапись и прочее, клиент производит САМОСТОЯТЕЛЬНО и осознанно. Если клиент настаивает на вводе данных в программном продукте силами наших специалистов, выполнение такой задачи возможно только в рамках второй линии поддержки.</p>
-        </div>
+              </ul>
+              <p>Ответы на стандартные, часто задаваемые вопросы, даются в виде ссылок на методические материалы сайта its.1c.ru.</p>
+              <p><span className="text-modern-primary-700 font-bold">Важно! Все действия, рекомендованные консультантом, пользователь выполняет самостоятельно.</span></p>
+              <p>Сотрудники Линии консультаций могут подключиться к базе клиента и предоставить устные рекомендации! Все изменения в базе – создание объектов, перезапись и прочее, клиент производит САМОСТОЯТЕЛЬНО и осознанно. Если клиент настаивает на вводе данных в программном продукте силами наших специалистов, выполнение такой задачи возможно только в рамках второй линии поддержки.</p>
+            </AccordionItem>
 
-        <div id="section-2" className="mb-8">
-            <h3 className="text-xl font-bold mb-4">2. Специалисты Линии консультаций НЕ консультируют по:</h3>
-            <ul className="list-disc pl-5 space-y-2">
+            <AccordionItem title="2. По каким вопросам Линия консультаций не консультирует" id="section-2">
+              <h3 className="text-xl font-bold mb-4">Специалисты Линии консультаций НЕ консультируют по:</h3>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>Вопросы по нетиповым (измененным) конфигурациям и по программам 1С с «дописанным функционалом». Обновление нетиповой 1С.</li>
                 <li>Подготовка информационной базы к переносу данных, перенос данных.</li>
                 <li>Настройка базы под особенности учета в организации (вопросы по внедрению программного продукта).</li>
@@ -138,13 +240,13 @@ const consultationRegulationsContent = (
                 <li>Методология ведения бухгалтерского и налогового учета: какие должны быть проводки? Какие должны быть данные? (Для решения данных вопросов можно воспользоваться сервисом «Отвечает аудитор»).</li>
                 <li>Удаленное обновление «1С» и руководство процессом обновления по телефону (специалисты подскажут, как запустить автоматическое обновление, непосредственно процессом обновления руководить не будут.</li>
                 <li>Услуги по администрированию конфигурации компьютерной сети пользователя, серверов и компьютеров.</li>
-            </ul>
-            <p><span className="text-modern-primary-700 font-bold">Сотрудникам Линии консультации запрещается проводить работы посредством удаленного подключения в отсутствии пользователя.</span></p>
-        </div>
+              </ul>
+              <p><span className="text-modern-primary-700 font-bold">Сотрудникам Линии консультации запрещается проводить работы посредством удаленного подключения в отсутствии пользователя.</span></p>
+            </AccordionItem>
 
-        <div id="section-3" className="mb-8">
-            <h3 className="text-xl font-bold mb-4">3. Консультационная поддержка оказывается Линией консультаций пользователям по следующим программным продуктам 1С:</h3>
-            <ul className="list-disc pl-5 space-y-2">
+            <AccordionItem title="3. По каким программным продуктам 1С оказывается консультационная поддержка Линией консультаций?" id="section-3">
+              <h3 className="text-xl font-bold mb-4">Консультационная поддержка оказывается Линией консультаций пользователям по следующим программным продуктам 1С:</h3>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>Бухгалтерия предприятия, редакция 3.0</li>
                 <li>Бухгалтерия государственного учреждения ред. 2.0</li>
                 <li>Зарплата и кадры государственного учреждения, редакция 3</li>
@@ -160,96 +262,96 @@ const consultationRegulationsContent = (
                 <li>КАМИН: Расчет заработной платы для бюджетных учреждений Версия 3.5</li>
                 <li>1С:Гаражи</li>
                 <li>1С:Садовод</li>
-            </ul>
-        </div>
+              </ul>
+            </AccordionItem>
 
-        <div id="section-4" className="mb-8">
-            <h3 className="text-xl font-bold mb-4">4. Способы обращения на Линию консультаций:</h3>
-            <ul className="list-disc pl-5 space-y-2">
+            <AccordionItem title="4. Способы обращения на Линию консультаций" id="section-4">
+              <h3 className="text-xl font-bold mb-4">Способы обращения на Линию консультаций:</h3>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>По телефону: (8443)30-08-01;</li>
                 <li>По электронной почте: 1c@enginf.ru; hotline@ec-1c.ru;</li>
                 <li>Через сервис 1С-Коннект по линии: !Линия Консультаций;</li>
                 <li>Передать заявку через своего обслуживающего специалиста.</li>
-            </ul>
-            <p>При обращении на Линию консультаций потребуется следующая информация:</p>
-            <p><strong>По телефону:</strong></p>
-            <ul className="list-disc pl-5 space-y-2">
+              </ul>
+              <p>При обращении на Линию консультаций потребуется следующая информация:</p>
+              <p><strong>По телефону:</strong></p>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>ИНН организации;</li>
                 <li>Наименование организации;</li>
                 <li>Наименование программного продукта, по которому Вы хотите получить консультацию.</li>
-            </ul>
-            <p><strong>По электронной почте:</strong></p>
-            <ul className="list-disc pl-5 space-y-2">
+              </ul>
+              <p><strong>По электронной почте:</strong></p>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>ИНН организации;</li>
                 <li>Наименование организации;</li>
                 <li>Наименование конфигурации и релиз конфигурации;</li>
                 <li>Вопрос.</li>
-            </ul>
-            <p>Дополнительно можно указать:</p>
-            <ul className="list-disc pl-5 space-y-2">
+              </ul>
+              <p>Дополнительно можно указать:</p>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>подробное описание проблемы и, по возможности, пошаговое описание действий по воспроизведению проблемы;</li>
                 <li>прикрепить «скриншоты» в форматах: jpg, gif, png, doc, bmp, ссылку на видеозапись с демонстрацией проблемы или другую информацию.</li>
-            </ul>
-            <p><strong>Через сервис 1С-Коннект:</strong> данные клиента уточнять не нужно, вся информация есть в сервисе. Потребуется только задать вопрос.</p>
-        </div>
+              </ul>
+              <p><strong>Через сервис 1С-Коннект:</strong> данные клиента уточнять не нужно, вся информация есть в сервисе. Потребуется только задать вопрос.</p>
+            </AccordionItem>
 
-        <div id="section-5" className="mb-8">
-            <h3 className="text-xl font-bold mb-4">5. Порядок обработки обращений пользователей:</h3>
-            <ul className="list-disc pl-5 space-y-2">
+            <AccordionItem title="5. Порядок обработки обращений пользователей" id="section-5">
+              <h3 className="text-xl font-bold mb-4">Порядок обработки обращений пользователей:</h3>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>Общая продолжительность консультации не более 15 минут.</li>
                 <li>Необходимость удаленного подключения определяет специалист Линии консультаций.</li>
                 <li>Если при первичном контакте клиент сообщает, что он не готов общаться по заказанной консультации или не отвечает на поступающий звонок, то в соответствии с правилами оказания услуг, это обращение переносится в конец очереди.</li>
-            </ul>
-        </div>
+              </ul>
+            </AccordionItem>
 
-        <div id="section-6" className="mb-8">
-            <h3 className="text-xl font-bold mb-4">6. Пользователям может быть отказано в консультации по следующим причинам:</h3>
-            <ul className="list-disc pl-5 space-y-2">
+            <AccordionItem title="6. В каких случаях может быть отказано пользователям в консультации?" id="section-6">
+              <h3 className="text-xl font-bold mb-4">Пользователям может быть отказано в консультации по следующим причинам:</h3>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>Не предоставлена, либо предоставлена некорректно информация: ИНН, наименование клиента.</li>
                 <li>Истек срок действия договора ИТС.</li>
                 <li>Не оплачена услуга: Линия консультаций (для Базовых, ИТС Техно, 1С:ГРМ).</li>
                 <li>При не уважительном обращении к сотрудникам компании ООО «ИЦ».</li>
-            </ul>
-        </div>
+              </ul>
+            </AccordionItem>
 
-        <div id="section-7" className="mb-8">
-            <h3 className="text-xl font-bold mb-4">7. Способы удаленного подключения:</h3>
-            <ul className="list-disc pl-5 space-y-2">
+            <AccordionItem title="7. Способы удаленного подключения" id="section-7">
+              <h3 className="text-xl font-bold mb-4">Способы удаленного подключения:</h3>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>Через сервис 1С-Коннект.</li>
-            </ul>
-        </div>
+              </ul>
+            </AccordionItem>
 
-        <div id="section-8" className="mb-8">
-            <h3 className="text-xl font-bold mb-4">8. Как быстро ответят на вопрос?</h3>
-            <p>При наличии свободного специалиста – сразу переключат на него.  Если все заняты, Ваш вопрос зарегистрируют. Вам перезвонят, как только освободится специалист.</p>
-            <p>Все обращения пользователя фиксируются и обязательно будут рассмотрены в порядке очереди.</p>
-            <p>Также у нас есть "пиковые нагрузки" на Линию консультаций – период сдачи бухгалтерской отчетности.  Дозвониться на Линию консультаций в это время сложнее и ждать ответа приходится дольше.</p>
-            <p>Вне очереди могут обрабатываться обращения с высоким уровнем критичности, требующие экстренного вмешательства или консультации специалистов технической поддержки. К таким обращениям могут быть отнесены вопросы восстановления работоспособности программы:</p>
-            <p>Не открывается программа, не работает 1С….</p>
-            <p><span className="text-modern-primary-700 font-bold">Критическими не считаются обращения вида: «Сегодня последний день сдачи отчётности, помогите отправить отчет»</span></p>
-        </div>
+            <AccordionItem title="8. Как быстро ответят на вопрос?" id="section-8">
+              <h3 className="text-xl font-bold mb-4">Как быстро ответят на вопрос?</h3>
+              <p>При наличии свободного специалиста – сразу переключат на него.  Если все заняты, Ваш вопрос зарегистрируют. Вам перезвонят, как только освободится специалист.</p>
+              <p>Все обращения пользователя фиксируются и обязательно будут рассмотрены в порядке очереди.</p>
+              <p>Также у нас есть "пиковые нагрузки" на Линию консультаций – период сдачи бухгалтерской отчетности.  Дозвониться на Линию консультаций в это время сложнее и ждать ответа приходится дольше.</p>
+              <p>Вне очереди могут обрабатываться обращения с высоким уровнем критичности, требующие экстренного вмешательства или консультации специалистов технической поддержки. К таким обращениям могут быть отнесены вопросы восстановления работоспособности программы:</p>
+              <p>Не открывается программа, не работает 1С….</p>
+              <p><span className="text-modern-primary-700 font-bold">Критическими не считаются обращения вида: «Сегодня последний день сдачи отчётности, помогите отправить отчет»</span></p>
+            </AccordionItem>
 
-        <div id="section-9" className="mb-8">
-            <h3 className="text-xl font-bold mb-4">9. Сколько стоит Линия консультаций?</h3>
-            <p>Если у Вас заключен с нами договор на сопровождение уровня ПРОФ - бесплатно.</p>
-            <p>Если у Вас:</p>
-            <ul className="list-disc pl-5 space-y-2">
+            <AccordionItem title="9. Сколько стоит Линия консультаций?" id="section-9">
+              <h3 className="text-xl font-bold mb-4">Сколько стоит Линия консультаций?</h3>
+              <p>Если у Вас заключен с нами договор на сопровождение уровня ПРОФ - бесплатно.</p>
+              <p>Если у Вас:</p>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>Базовая версия программы 1С;</li>
                 <li>Договор уровня ТЕХНО;</li>
                 <li>Используете "1С:Готовое рабочее место" (1С:ГРМ).</li>
-            </ul>
-            <p>Стоимость пользования Линией консультаций составляет: 10 000 руб. за 12 месяцев.</p>
-        </div>
+              </ul>
+              <p>Стоимость пользования Линией консультаций составляет: 10 000 руб. за 12 месяцев.</p>
+            </AccordionItem>
 
-        <div id="section-10" className="mb-8">
-            <h3 className="text-xl font-bold mb-4">10. Как работает Линия консультаций?</h3>
-            <p>По рабочим дням с 8-30 до 17-15 (время московское), за исключением выходных и праздничных дней (в соответствии с производственным календарем РФ).</p>
-            <p>Время реакции на обращения включает в себя только рабочее время.</p>
-            <p><span className="text-modern-primary-700 font-bold">Наша Компания может изменять положения настоящего регламента для повышения качества обслуживания. Об этом мы информируем пользователей на сайте «ООО ИЦ» (https://ec-1c.ru)</span></p>
-            <p>Справочно сообщаем, что в рамках второй и третьей линий поддержки могут быть оказаны следующие услуги. Данные услуги оказываются на основании договора на адаптацию и ИТС ПП 1С.</p>
-            <p><span className="text-modern-primary-700 font-bold">Вторая линия поддержки.</span></p>
-            <p>К компетенции второй линии поддержки относятся:</p>
-            <ul className="list-disc pl-5 space-y-2">
+            <AccordionItem title="10. Как работает Линия консультаций?" id="section-10">
+              <h3 className="text-xl font-bold mb-4">Как работает Линия консультаций?</h3>
+              <p>По рабочим дням с 8-30 до 17-15 (время московское), за исключением выходных и праздничных дней (в соответствии с производственным календарем РФ).</p>
+              <p>Время реакции на обращения включает в себя только рабочее время.</p>
+              <p><span className="text-modern-primary-700 font-bold">Наша Компания может изменять положения настоящего регламента для повышения качества обслуживания. Об этом мы информируем пользователей на сайте «ООО ИЦ» (https://ec-1c.ru)</span></p>
+              <p>Справочно сообщаем, что в рамках второй и третьей линий поддержки могут быть оказаны следующие услуги. Данные услуги оказываются на основании договора на адаптацию и ИТС ПП 1С.</p>
+              <p><span className="text-modern-primary-700 font-bold">Вторая линия поддержки.</span></p>
+              <p>К компетенции второй линии поддержки относятся:</p>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>Сложные вопросы учета, в которых требуется анализ действий пользователя и данных, введенных в программу.</li>
                 <li>Вопросы, решение которых, по предварительной оценке консультанта, может превышать 15 минут.</li>
                 <li>Обновление типовой программы 1С.</li>
@@ -259,115 +361,69 @@ const consultationRegulationsContent = (
                 <li>Обучение работе с программой 1С.</li>
                 <li>Настройка не стандартных отчетов.</li>
                 <li>Внедрение и настройка 1С.</li>
-            </ul>
-            <p><span className="text-modern-primary-700 font-bold">Третья линия поддержки.</span></p>
-            <p>К компетенции третьей линии поддержки относятся:</p>
-            <ul className="list-disc pl-5 space-y-2">
+              </ul>
+              <p><span className="text-modern-primary-700 font-bold">Третья линия поддержки.</span></p>
+              <p>К компетенции третьей линии поддержки относятся:</p>
+              <ul className="list-disc pl-5 space-y-2">
                 <li>Вопросы по доработанному функционалу программных продуктов, где требуется работа с кодом программного продукта.</li>
                 <li>Доработка программ 1С.</li>
                 <li>Обновление нетиповой программы 1С.</li>
-            </ul>
+              </ul>
+            </AccordionItem>
+          </div>
         </div>
-    </div>
-);
+      </section>
 
-const tabs: Tab[] = [
-    {
-        id: 'support',
-        label: 'Сопровождение',
-        content: supportMainContent,
-    },
-    {
-        id: 'tariffs',
-        label: 'Тарифные планы',
-        content:
-            'Мы предлагаем гибкие тарифы для сопровождения 1С. Выберите оптимальный план для вашего бизнеса. Свяжитесь с нами для консультации.',
-    },
-    {
-        id: 'consultation-regulations',
-        label: 'Регламент линии консультации',
-        content: consultationRegulationsContent,
-    },
-    {
-        id: 'support-conditions',
-        label: 'Типовые условия сопровождения',
-        content:
-            'Гарантируем качественное сопровождение программ 1С. Условия включают регулярные обновления и техподдержку. Подробности доступны по запросу.',
-    },
-];
+      {/* Типовые условия сопровождения */}
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-modern-primary-600 text-center mb-4">
+            Типовые условия сопровождения
+          </h2>
+          <p className="text-center text-modern-gray-600 mb-10 max-w-3xl mx-auto">
+            Подробная информация об условиях договора ИТС, правах и обязанностях сторон.
+          </p>
 
-const Support: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<string>(tabs[0].id);
+          <div className="max-w-5xl mx-auto bg-gradient-to-br from-modern-primary-50 to-modern-accent-50 rounded-xl p-8 text-center">
+            <p className="text-lg text-modern-gray-700 mb-6">
+              Гарантируем качественное сопровождение программ 1С. Условия включают регулярные обновления и техподдержку. Подробности доступны по запросу.
+            </p>
+          </div>
+        </div>
+      </section>
 
-    return (
-        <>
-            <Helmet>
-                <title>Поддержка и сопровождение - ООО «Инженер-центр»</title>
-                <meta
-                    name="description"
-                    content="Ознакомьтесь с тарифными планами, регламентом линии консультации и типовыми условиями сопровождения программ 1С."
-                />
-            </Helmet>
-
-            <div className="min-h-screen bg-modern-gray-50">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                    <div className="text-center mb-12">
-                        <h1 className="text-4xl font-bold text-modern-primary-700">
-                            Поддержка и сопровождение
-                        </h1>
-                    </div>
-
-                    <div className="flex flex-wrap justify-center gap-4 mb-12">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${activeTab === tab.id
-                                    ? 'bg-modern-primary-600 text-white shadow-modern-md'
-                                    : 'bg-modern-white text-modern-gray-700 hover:bg-modern-gray-100 border border-modern-gray-200'
-                                    }`}
-                                aria-selected={activeTab === tab.id}
-                                role="tab"
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-
-                    <div className="bg-modern-white rounded-xl shadow-modern p-8 mx-auto">
-                        <div className="text-modern-gray-600 text-lg leading-relaxed">
-                            {tabs.find((tab) => tab.id === activeTab)?.content}
-                        </div>
-                    </div>
-
-                    <div className="mt-16 text-center">
-                        <div className="bg-modern-primary-50 rounded-xl p-8">
-                            <h2 className="text-2xl font-bold text-modern-primary-900 mb-4">
-                                Нужна консультация по выбору подходящего тарифа?
-                            </h2>
-                            <p className="text-modern-primary-700 mb-6">
-                                Наши специалисты помогут подобрать оптимальное решение для вашего бизнеса
-                            </p>
-                            <div className="flex flex-wrap justify-center gap-4">
-                                <a
-                                    href="tel:+78443300801"
-                                    className="inline-flex items-center px-6 py-3 bg-modern-primary-600 text-white rounded-xl hover:bg-modern-primary-700 transition-colors duration-200 font-semibold"
-                                >
-                                    📞 8 (8443) 300-801
-                                </a>
-                                <a
-                                    href="mailto:mail@ec-1c.ru"
-                                    className="inline-flex items-center px-6 py-3 bg-modern-white text-modern-primary-700 border-2 border-modern-primary-600 rounded-xl hover:bg-modern-primary-50 transition-colors duration-200 font-semibold"
-                                >
-                                    ✉️ mail@ec-1c.ru
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      {/* CTA секция */}
+      <section className="py-12 bg-gradient-to-br from-modern-primary-600 to-modern-primary-700">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center text-white">
+            <h2 className="text-3xl font-bold mb-4">
+              Нужна консультация по выбору подходящего тарифа?
+            </h2>
+            <p className="text-xl mb-8 text-modern-primary-50">
+              Наши специалисты помогут подобрать оптимальное решение для вашего бизнеса
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <a
+                href="tel:+78443300801"
+                className="inline-flex items-center px-6 py-3 bg-white text-modern-primary-700 rounded-xl hover:bg-modern-gray-100 transition-all duration-200 font-semibold shadow-modern-lg hover:scale-105"
+              >
+                📞 8 (8443) 300-801
+              </a>
+              <a
+                href="mailto:mail@ec-1c.ru"
+                className="inline-flex items-center px-6 py-3 bg-modern-primary-800 text-white rounded-xl hover:bg-modern-primary-900 transition-all duration-200 font-semibold shadow-modern-lg hover:scale-105"
+              >
+                ✉️ mail@ec-1c.ru
+              </a>
             </div>
-        </>
-    );
+            <p className="mt-6 text-modern-primary-100">
+              Работаем по рабочим дням с 8:30 до 17:15 (МСК)
+            </p>
+          </div>
+        </div>
+      </section>
+    </>
+  );
 };
 
 export default Support;

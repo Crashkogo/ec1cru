@@ -9,7 +9,6 @@ import { useCallbackForm } from '../hooks/useCallbackForm';
 import {
   ClockIcon,
   ArrowRightIcon,
-  CalendarIcon,
   PhoneIcon
 } from '@heroicons/react/24/outline';
 import csImage from '../assets/cs.png';
@@ -59,6 +58,17 @@ interface EventItem {
   status: boolean;
 }
 
+// Объединённый тип для всех постов
+interface UnifiedPost {
+  id: number;
+  title: string;
+  shortDescription: string;
+  slug: string;
+  date: string;
+  type: 'news' | 'promotion' | 'event';
+  link: string;
+}
+
 interface Program {
   id: number;
   shortName: string;
@@ -75,10 +85,8 @@ interface ReadySolutionItem {
 }
 
 const Home: React.FC = () => {
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [promotions, setPromotions] = useState<PromotionItem[]>([]);
-  const [events, setEvents] = useState<EventItem[]>([]);
   const [solutions, setSolutions] = useState<ReadySolutionItem[]>([]);
+  const [unifiedPosts, setUnifiedPosts] = useState<UnifiedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeAboutTab, setActiveAboutTab] = useState('history');
   const { handleMouseEnter } = usePreloadOnHover();
@@ -129,16 +137,49 @@ const Home: React.FC = () => {
     const fetchData = async () => {
       try {
         const [newsRes, promotionsRes, eventsRes, solutionsRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/news?take=4`),
-          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/promotions?take=4`), 
-          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/events?take=4`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/news?take=10`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/promotions?take=10`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/events?take=10`),
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/ready-solutions?limit=4`)
         ]);
 
-        setNews(newsRes.data);
-        setPromotions(promotionsRes.data);
-        setEvents(eventsRes.data);
         setSolutions(solutionsRes.data);
+
+        // Объединяем все посты в один массив
+        const allPosts: UnifiedPost[] = [
+          ...newsRes.data.map((item: NewsItem) => ({
+            id: item.id,
+            title: item.title,
+            shortDescription: item.shortDescription,
+            slug: item.slug,
+            date: item.createdAt,
+            type: 'news' as const,
+            link: `/news/${item.slug}`
+          })),
+          ...promotionsRes.data.map((item: PromotionItem) => ({
+            id: item.id,
+            title: item.title,
+            shortDescription: item.shortDescription,
+            slug: item.slug,
+            date: item.startDate,
+            type: 'promotion' as const,
+            link: `/promotions/${item.slug}`
+          })),
+          ...eventsRes.data.map((item: EventItem) => ({
+            id: item.id,
+            title: item.title,
+            shortDescription: item.shortDescription,
+            slug: item.slug,
+            date: item.startDate,
+            type: 'event' as const,
+            link: `/events/${item.slug}`
+          }))
+        ];
+
+        // Сортируем по дате (от новых к старым)
+        allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        setUnifiedPosts(allPosts);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -284,98 +325,81 @@ const Home: React.FC = () => {
               </form>
             </div>
 
-            {/* Правая часть - Новости, Акции, Мероприятия */}
-            <div className="space-y-3">
-              {/* Новости */}
-              <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern">
+            {/* Правая часть - Единый блок Новости/Акции/Мероприятия */}
+            <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 shadow-modern flex flex-col h-full">
+              {/* Заголовки в одну строку */}
+              <div className="flex justify-around items-center mb-6 pb-4 border-b border-modern-gray-200">
                 <Link
                   to="/news"
                   onMouseEnter={() => handleMouseEnter('/news')}
-                  className="block text-center mb-4 hover:text-modern-primary-700 transition-all duration-200"
+                  className="text-base font-bold text-modern-primary-600 hover:text-modern-primary-700 transition-all duration-200 hover:scale-110"
                 >
-                  <h3 className="text-lg font-bold text-modern-primary-600 transition-transform duration-200 hover:scale-110">Новости</h3>
+                  Новости
                 </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  {news.slice(0, 4).map((item) => (
-                    <Link
-                      key={item.id}
-                      to={`/news/${item.slug}`}
-                      onMouseEnter={() => handleMouseEnter(`/news/${item.slug}`)}
-                      className="block hover:bg-modern-gray-50 rounded-lg p-2 transition-colors duration-200 group"
-                    >
-                      <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-primary-600 transition-colors duration-200 line-clamp-2 mb-1">
-                        {item.title}
-                      </h4>
-                      <div className="flex items-center text-xs text-modern-gray-500">
-                        <ClockIcon className="h-3 w-3 mr-1" />
-                        {new Date(item.createdAt).toLocaleDateString('ru-RU')}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Акции */}
-              <div className="bg-modern-accent-50/80 backdrop-blur-sm rounded-xl p-4 shadow-modern border border-modern-accent-200">
+                <span className="text-modern-gray-300">|</span>
                 <Link
                   to="/promotions"
                   onMouseEnter={() => handleMouseEnter('/promotions')}
-                  className="block text-center mb-4 hover:text-modern-accent-700 transition-all duration-200"
+                  className="text-base font-bold text-modern-accent-600 hover:text-modern-accent-700 transition-all duration-200 hover:scale-110"
                 >
-                  <h3 className="text-lg font-bold text-modern-accent-600 transition-transform duration-200 hover:scale-110">Акции</h3>
+                  Акции
                 </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  {promotions.length > 0 ? (
-                    promotions.slice(0, 4).map((item) => (
-                      <Link
-                        key={item.id}
-                        to={`/promotions/${item.slug}`}
-                        onMouseEnter={() => handleMouseEnter(`/promotions/${item.slug}`)}
-                        className="block hover:bg-modern-accent-100/50 rounded-lg p-2 transition-colors duration-200 group"
-                      >
-                        <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-accent-700 transition-colors duration-200 line-clamp-2 mb-1">
-                          {item.title}
-                        </h4>
-                        <div className="text-xs text-modern-gray-500">
-                          До {new Date(item.endDate).toLocaleDateString('ru-RU')}
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="col-span-2 text-center text-modern-gray-500 text-sm">
-                      Акции скоро появятся!
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Мероприятия */}
-              <div className="bg-modern-primary-50/80 backdrop-blur-sm rounded-xl p-4 shadow-modern border border-modern-primary-200">
+                <span className="text-modern-gray-300">|</span>
                 <Link
                   to="/events"
                   onMouseEnter={() => handleMouseEnter('/events')}
-                  className="block text-center mb-4 hover:text-modern-primary-700 transition-all duration-200"
+                  className="text-base font-bold text-modern-primary-600 hover:text-modern-primary-700 transition-all duration-200 hover:scale-110"
                 >
-                  <h3 className="text-lg font-bold text-modern-primary-600 transition-transform duration-200 hover:scale-110">Мероприятия</h3>
+                  Мероприятия
                 </Link>
-                <div className="grid grid-cols-2 gap-2">
-                  {events.slice(0, 4).map((item) => (
-                    <Link
-                      key={item.id}
-                      to={`/events/${item.slug}`}
-                      onMouseEnter={() => handleMouseEnter(`/events/${item.slug}`)}
-                      className="block hover:bg-modern-primary-100/50 rounded-lg p-2 transition-colors duration-200 group"
-                    >
-                      <h4 className="font-medium text-modern-gray-900 text-sm group-hover:text-modern-primary-700 transition-colors duration-200 line-clamp-2 mb-1">
-                        {item.title}
-                      </h4>
-                      <div className="flex items-center text-xs text-modern-gray-500">
-                        <CalendarIcon className="h-3 w-3 mr-1" />
-                        {new Date(item.startDate).toLocaleDateString('ru-RU')}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+              </div>
+
+              {/* Список постов */}
+              <div className="space-y-2 flex-1 overflow-hidden">
+                {unifiedPosts.length > 0 ? (
+                  unifiedPosts.slice(0, 7).map((post) => {
+                    // Определяем цветовую схему в зависимости от типа
+                    const colorClasses = {
+                      news: 'bg-modern-white hover:bg-modern-gray-50 border-modern-gray-200',
+                      promotion: 'bg-modern-accent-50/50 hover:bg-modern-accent-100/50 border-modern-accent-200',
+                      event: 'bg-modern-primary-50/50 hover:bg-modern-primary-100/50 border-modern-primary-200'
+                    };
+
+                    return (
+                      <Link
+                        key={`${post.type}-${post.id}`}
+                        to={post.link}
+                        onMouseEnter={() => handleMouseEnter(post.link)}
+                        className={`flex items-center gap-4 p-3 rounded-lg border transition-all duration-200 group ${colorClasses[post.type]}`}
+                      >
+                        {/* Левая часть: заголовок и дата */}
+                        <div className="flex-shrink-0 w-1/3">
+                          <h4 className="font-semibold text-modern-gray-900 text-sm group-hover:text-modern-primary-600 transition-colors duration-200 line-clamp-2 mb-1">
+                            {post.title}
+                          </h4>
+                          <div className="flex items-center text-xs text-modern-gray-500">
+                            <ClockIcon className="h-3 w-3 mr-1 flex-shrink-0" />
+                            {new Date(post.date).toLocaleDateString('ru-RU')}
+                          </div>
+                        </div>
+
+                        {/* Правая часть: краткое описание */}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-modern-gray-600 line-clamp-2">
+                            {post.shortDescription}
+                          </p>
+                        </div>
+
+                        {/* Стрелка */}
+                        <ArrowRightIcon className="h-5 w-5 text-modern-gray-400 group-hover:text-modern-primary-600 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
+                      </Link>
+                    );
+                  })
+                ) : (
+                  <div className="text-center text-modern-gray-500 text-sm py-8">
+                    Посты скоро появятся!
+                  </div>
+                )}
               </div>
             </div>
           </div>

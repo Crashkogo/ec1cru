@@ -3,9 +3,8 @@ import { Helmet } from 'react-helmet-async';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChevronDownIcon, ArrowDownIcon, UserIcon, PhoneIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { ArrowDownIcon, UserIcon, PhoneIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
-import csImage from '../assets/cs.png';
 import WorkflowTimeline from '../components/WorkflowTimeline';
 import ProjectsCarousel from '../components/ProjectsCarousel';
 import { useCallbackForm } from '../hooks/useCallbackForm';
@@ -89,44 +88,36 @@ const Implementation: React.FC = () => {
             {/* Левая колонка - ~25% ширины с плитками и формой */}
             <div className="w-full lg:w-80 flex-shrink-0 space-y-3">
               {/* Статистические плитки вертикально */}
-              <div className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
-                <div>
-                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">600+</div>
-                  <div className="text-xs font-medium text-modern-gray-700">Клиентов с нами</div>
-                </div>
-                <ChevronDownIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:scale-125" />
-              </div>
 
-              <div className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
+              <Link to="/support" className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
                 <div>
-                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">50+</div>
-                  <div className="text-xs font-medium text-modern-gray-700">Внедрений реализовано</div>
+                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">ИТС</div>
+                  <div className="text-xs font-medium text-modern-gray-700">
+                    Сопровождение 1С<br />Горячая линия 24/7
+                  </div>
                 </div>
-                <ChevronDownIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:scale-125" />
-              </div>
+                <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
 
-              <div className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
+              <Link to="/implementation" className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
                 <div>
-                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">30</div>
-                  <div className="text-xs font-medium text-modern-gray-700">Лет на рынке</div>
+                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">Внедрение</div>
+                  <div className="text-xs font-medium text-modern-gray-700">
+                    Автоматизация бизнеса<br />От обследования до запуска
+                  </div>
                 </div>
-                <ChevronDownIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:scale-125" />
-              </div>
+                <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
 
-              <div className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
-                <div className="flex-1 flex justify-center">
-                  <img src={csImage} alt="1С" className="h-12 w-auto" />
-                </div>
-                <ChevronDownIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:scale-125" />
-              </div>
-
-              <div className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
+              <Link to="/tech-maintenance" className="group bg-modern-white/80 backdrop-blur-sm rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg transition-all duration-200">
                 <div>
-                  <div className="text-base font-bold text-modern-primary-600 mb-1">IT-аутсорсинг</div>
-                  <div className="text-xs font-medium text-modern-gray-700">Комплексное сопровождение</div>
+                  <div className="text-2xl font-bold text-modern-primary-600 mb-1">IT-Аутсорс</div>
+                  <div className="text-xs font-medium text-modern-gray-700">
+                    Обслуживание ПК и серверов<br />Торговое оборудование
+                  </div>
                 </div>
-                <ChevronDownIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:scale-125" />
-              </div>
+                <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
             </div>
 
             {/* Правая часть - ~75% ширины с тремя информационными блоками в общей обёртке */}
@@ -296,9 +287,8 @@ const Implementation: React.FC = () => {
                             {...register('name')}
                             type="text"
                             placeholder="Введите ваше имя"
-                            className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-modern-primary-500 focus:border-modern-primary-500 transition-all duration-200 ${
-                              errors.name ? 'border-red-300 bg-red-50' : 'border-modern-gray-300'
-                            }`}
+                            className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-modern-primary-500 focus:border-modern-primary-500 transition-all duration-200 ${errors.name ? 'border-red-300 bg-red-50' : 'border-modern-gray-300'
+                              }`}
                           />
                         </div>
                         {errors.name && <p className="text-red-600 text-sm mt-1 ml-1">{errors.name.message}</p>}
@@ -317,9 +307,8 @@ const Implementation: React.FC = () => {
                             type="tel"
                             placeholder="+7 (___) ___-__-__"
                             onInput={handlePhoneInput}
-                            className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-modern-primary-500 focus:border-modern-primary-500 transition-all duration-200 ${
-                              errors.phone ? 'border-red-300 bg-red-50' : 'border-modern-gray-300'
-                            }`}
+                            className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-modern-primary-500 focus:border-modern-primary-500 transition-all duration-200 ${errors.phone ? 'border-red-300 bg-red-50' : 'border-modern-gray-300'
+                              }`}
                           />
                         </div>
                         {errors.phone && <p className="text-red-600 text-sm mt-1 ml-1">{errors.phone.message}</p>}
@@ -332,9 +321,8 @@ const Implementation: React.FC = () => {
                         id="consent"
                         {...register('consent')}
                         type="checkbox"
-                        className={`mt-0.5 h-4 w-4 text-modern-primary-600 border-modern-gray-300 rounded focus:ring-modern-primary-500 focus:ring-2 cursor-pointer ${
-                          errors.consent ? 'ring-2 ring-red-500' : ''
-                        }`}
+                        className={`mt-0.5 h-4 w-4 text-modern-primary-600 border-modern-gray-300 rounded focus:ring-modern-primary-500 focus:ring-2 cursor-pointer ${errors.consent ? 'ring-2 ring-red-500' : ''
+                          }`}
                       />
                       <label htmlFor="consent" className="text-xs text-modern-gray-700 leading-relaxed cursor-pointer">
                         Я даю{' '}
