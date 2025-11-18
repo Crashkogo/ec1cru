@@ -65,7 +65,7 @@ const TechMaintenance: React.FC = () => {
                                 <div>
                                     <div className="text-2xl font-bold text-modern-primary-600 mb-1">ИТС</div>
                                     <div className="text-xs font-medium text-modern-gray-700">
-                                        Сопровождение 1С<br />Горячая линия 24/7
+                                        Сопровождение 1С<br />Горячая линия
                                     </div>
                                 </div>
                                 <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
@@ -502,7 +502,7 @@ const TechMaintenance: React.FC = () => {
                             Вы получаете мгновенные уведомления о любых сбоях — ещё до того, как они повлияют на бизнес.
                         </p>
                         <p className="text-lg mb-8 leading-relaxed font-semibold text-modern-accent-200">
-                            Никаких «внезапно всё упало» — только спокойствие и полный контроль.
+                            Никаких «внезапно всё упало» — только спокойствие и полный контроль 24/7.
                         </p>
                         <a
                             href="/zabbix"
