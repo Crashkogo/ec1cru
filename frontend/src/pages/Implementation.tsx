@@ -93,7 +93,7 @@ const Implementation: React.FC = () => {
                 <div>
                   <div className="text-2xl font-bold text-modern-primary-600 mb-1">ИТС</div>
                   <div className="text-xs font-medium text-modern-gray-700">
-                    Сопровождение 1С<br />Горячая линия 24/7
+                    Сопровождение 1С<br />Горячая линия
                   </div>
                 </div>
                 <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
