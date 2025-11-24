@@ -34,6 +34,18 @@ model News {
   metaDescription  String?
 }
 
+model CompanyLife {
+  id               Int      @id @default(autoincrement())
+  title            String
+  shortDescription String
+  content          String // Для HTML-контента (будет поддерживать визуальный редактор)
+  createdAt        DateTime @default(now())
+  isPublished      Boolean
+  slug             String   @unique
+  metaTitle        String?
+  metaDescription  String?
+}
+
 model Events {
   id                  Int                  @id @default(autoincrement())
   title               String

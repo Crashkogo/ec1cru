@@ -25,6 +25,9 @@ import { UserShow } from './UserShow';
 import { NewsList } from './NewsList';
 import { NewsCreate } from './NewsCreate';
 import { NewsEdit } from './NewsEdit';
+import { CompanyLifeList } from './CompanyLifeList';
+import { CompanyLifeCreate } from './CompanyLifeCreate';
+import { CompanyLifeEdit } from './CompanyLifeEdit';
 import { EventsList } from './EventsList';
 import { EventsCreate } from './EventsCreate';
 import { EventsEdit } from './EventsEdit';
@@ -219,6 +222,7 @@ const Dashboard: React.FC = () => (
       dashboard={DashboardContent}
     >
       <Resource name="news" list={NewsList} create={NewsCreate} edit={NewsEdit} />
+      <Resource name="company-life" list={CompanyLifeList} create={CompanyLifeCreate} edit={CompanyLifeEdit} />
       <Resource name="events" list={EventsList} create={EventsCreate} edit={EventsEdit} />
       <Resource name="promotions" list={PromotionsList} create={PromotionsCreate} edit={PromotionsEdit} />
       <Resource name="courses" list={CoursesList} create={CoursesCreate} edit={CoursesEdit} />

@@ -65,7 +65,7 @@ interface UnifiedPost {
   shortDescription: string;
   slug: string;
   date: string;
-  type: 'news' | 'promotion' | 'event';
+  type: 'news' | 'promotion' | 'event' | 'companylife';
   link: string;
 }
 
@@ -136,8 +136,9 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [newsRes, promotionsRes, eventsRes, solutionsRes] = await Promise.all([
+        const [newsRes, companyLifeRes, promotionsRes, eventsRes, solutionsRes] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/news?take=10`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/company-life?take=10`),
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/promotions?take=10`),
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/events?take=10`),
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/ready-solutions?limit=4`)
@@ -155,6 +156,15 @@ const Home: React.FC = () => {
             date: item.createdAt,
             type: 'news' as const,
             link: `/news/${item.slug}`
+          })),
+          ...companyLifeRes.data.map((item: NewsItem) => ({
+            id: item.id,
+            title: item.title,
+            shortDescription: item.shortDescription,
+            slug: item.slug,
+            date: item.createdAt,
+            type: 'companylife' as const,
+            link: `/life/${item.slug}`
           })),
           ...promotionsRes.data.map((item: PromotionItem) => ({
             id: item.id,
@@ -332,25 +342,33 @@ const Home: React.FC = () => {
                 <Link
                   to="/news"
                   onMouseEnter={() => handleMouseEnter('/news')}
-                  className="text-base font-bold text-modern-primary-600 hover:text-modern-primary-700 transition-all duration-200 hover:scale-110"
+                  className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-all duration-200 hover:scale-110"
                 >
                   Новости
                 </Link>
                 <span className="text-modern-gray-300">|</span>
                 <Link
+                  to="/events"
+                  onMouseEnter={() => handleMouseEnter('/events')}
+                  className="text-sm font-bold text-orange-600 hover:text-orange-700 transition-all duration-200 hover:scale-110"
+                >
+                  Мероприятия
+                </Link>
+                <span className="text-modern-gray-300">|</span>
+                <Link
                   to="/promotions"
                   onMouseEnter={() => handleMouseEnter('/promotions')}
-                  className="text-base font-bold text-modern-accent-600 hover:text-modern-accent-700 transition-all duration-200 hover:scale-110"
+                  className="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-all duration-200 hover:scale-110"
                 >
                   Акции
                 </Link>
                 <span className="text-modern-gray-300">|</span>
                 <Link
-                  to="/events"
-                  onMouseEnter={() => handleMouseEnter('/events')}
-                  className="text-base font-bold text-modern-primary-600 hover:text-modern-primary-700 transition-all duration-200 hover:scale-110"
+                  to="/life"
+                  onMouseEnter={() => handleMouseEnter('/life')}
+                  className="text-sm font-bold text-purple-600 hover:text-purple-700 transition-all duration-200 hover:scale-110"
                 >
-                  Мероприятия
+                  Наша жизнь
                 </Link>
               </div>
 
@@ -360,9 +378,10 @@ const Home: React.FC = () => {
                   unifiedPosts.slice(0, 7).map((post) => {
                     // Определяем цветовую схему в зависимости от типа
                     const colorClasses = {
-                      news: 'bg-modern-white hover:bg-modern-gray-50 border-modern-gray-200',
-                      promotion: 'bg-modern-accent-50/50 hover:bg-modern-accent-100/50 border-modern-accent-200',
-                      event: 'bg-modern-primary-50/50 hover:bg-modern-primary-100/50 border-modern-primary-200'
+                      news: 'bg-blue-50/50 hover:bg-blue-100/50 border-blue-200',
+                      event: 'bg-orange-50/50 hover:bg-orange-100/50 border-orange-200',
+                      promotion: 'bg-emerald-50/50 hover:bg-emerald-100/50 border-emerald-200',
+                      companylife: 'bg-purple-50/50 hover:bg-purple-100/50 border-purple-200'
                     };
 
                     return (

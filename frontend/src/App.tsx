@@ -12,6 +12,7 @@ import PageWrapper from './components/PageWrapper';
 
 // Lazy loading для всех остальных компонентов
 const News = React.lazy(() => import('./pages/News'));
+const CompanyLife = React.lazy(() => import('./pages/CompanyLife'));
 const Events = React.lazy(() => import('./pages/Events'));
 const Promotions = React.lazy(() => import('./pages/Promotions'));
 const Courses = React.lazy(() => import('./pages/Courses'));
@@ -24,6 +25,7 @@ const Zabbix = React.lazy(() => import('./pages/Zabbix'));
 
 // Detail компоненты (самые тяжелые - обязательно lazy)
 const NewsDetail = React.lazy(() => import('./components/NewsDetail'));
+const CompanyLifeDetail = React.lazy(() => import('./components/CompanyLifeDetail'));
 const EventsDetail = React.lazy(() => import('./components/EventsDetail'));
 const PromotionsDetail = React.lazy(() => import('./components/PromotionsDetail'));
 const CourseDetail = React.lazy(() => import('./components/CourseDetail'));
@@ -92,6 +94,16 @@ function App() {
                   <Layout setShowLogin={setShowLogin}>
                     <Suspense fallback={<PageLoading message="Загрузка новостей..." />}>
                       <News />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/life"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка жизни компании..." />}>
+                      <CompanyLife />
                     </Suspense>
                   </Layout>
                 }
@@ -207,6 +219,16 @@ function App() {
                   <Layout setShowLogin={setShowLogin}>
                     <Suspense fallback={<PageLoading message="Загрузка новости..." />}>
                       <NewsDetail />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/life/:slug"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка поста..." />}>
+                      <CompanyLifeDetail />
                     </Suspense>
                   </Layout>
                 }

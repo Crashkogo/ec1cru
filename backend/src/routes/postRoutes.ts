@@ -1,5 +1,6 @@
 import express from "express";
 import * as newsController from "../controllers/newsController";
+import * as companyLifeController from "../controllers/companyLifeController";
 import * as eventsController from "../controllers/eventsController";
 import * as promotionsController from "../controllers/promotionsController";
 import * as readySolutionsController from "../controllers/readySolutionsController";
@@ -80,6 +81,60 @@ router.delete(
   "/admin/news/:id",
   authMiddleware,
   newsController.deleteNewsById as RequestHandler
+);
+
+// =============================================================================
+// ЖИЗНЬ КОМПАНИИ
+// =============================================================================
+// Публичные маршруты
+router.get("/company-life", companyLifeController.getCompanyLife as RequestHandler);
+router.get("/company-life/:slug", companyLifeController.getCompanyLifeBySlug as RequestHandler);
+
+// Админские маршруты
+router.get(
+  "/admin/company-life",
+  authMiddleware,
+  companyLifeController.getAllCompanyLife as RequestHandler
+);
+router.get(
+  "/company-life/all",
+  authMiddleware,
+  companyLifeController.getAllCompanyLife as RequestHandler
+);
+router.get(
+  "/admin/company-life/:id",
+  authMiddleware,
+  companyLifeController.getCompanyLifeById as RequestHandler
+);
+router.post(
+  "/company-life",
+  authMiddleware,
+  companyLifeController.createCompanyLife as RequestHandler
+);
+router.put(
+  "/company-life/:slug",
+  authMiddleware,
+  companyLifeController.updateCompanyLife as RequestHandler
+);
+router.put(
+  "/company-life/id/:id",
+  authMiddleware,
+  companyLifeController.updateCompanyLifeById as RequestHandler
+);
+router.patch(
+  "/admin/company-life/:id",
+  authMiddleware,
+  companyLifeController.updateCompanyLifeById as RequestHandler
+);
+router.delete(
+  "/company-life/id/:id",
+  authMiddleware,
+  companyLifeController.deleteCompanyLifeById as RequestHandler
+);
+router.delete(
+  "/admin/company-life/:id",
+  authMiddleware,
+  companyLifeController.deleteCompanyLifeById as RequestHandler
 );
 
 // =============================================================================

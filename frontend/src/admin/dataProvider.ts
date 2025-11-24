@@ -155,6 +155,34 @@ export const dataProvider: DataProvider = {
       };
     }
 
+    if (resource === 'company-life') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'createdAt',
+        _order: params.sort?.order || 'DESC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/posts/admin/company-life?${stringify(query)}`;
+      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
+        url,
+        { headers }
+      );
+
+      // Оставляем оригинальный ID для React Admin
+      const data = Array.isArray(json)
+        ? json.map((item) => ({
+            ...item,
+            id: item.id, // используем числовой ID
+          }))
+        : [json];
+
+      return {
+        data,
+        total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+      };
+    }
+
     if (resource === 'ready-solutions') {
       const query = {
         _start: ((page - 1) * perPage).toString(),
@@ -416,6 +444,19 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'company-life') {
+      const url = `${apiUrl}/api/posts/admin/company-life/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, { headers });
+        return { data: { ...json, id: json.id } }; // используем оригинальный ID
+      } catch (error) {
+        console.error('GetOne company-life error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch company-life post'
+        );
+      }
+    }
+
     if (resource === 'ready-solutions') {
       const url = `${apiUrl}/api/posts/admin/ready-solutions/${params.id}`;
       try {
@@ -558,6 +599,21 @@ export const dataProvider: DataProvider = {
       return { data };
     }
 
+    if (resource === 'company-life') {
+      // Для постов о жизни компании получаем каждый по отдельности через админский маршрут
+      const promises = params.ids.map((id) =>
+        fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/company-life/${id}`, {
+          headers,
+        })
+      );
+      const results = await Promise.all(promises);
+      const data = results.map(({ json }) => ({
+        ...json,
+        id: json.id, // используем оригинальный ID
+      }));
+      return { data };
+    }
+
     if (resource === 'ready-solutions') {
       // Для готовых решений получаем каждое по отдельности через админский маршрут
       const promises = params.ids.map((id) =>
@@ -658,6 +714,16 @@ export const dataProvider: DataProvider = {
 
     if (resource === 'promotions') {
       const url = `${apiUrl}/api/posts/promotions`;
+      const { json } = await fetchUtils.fetchJson(url, {
+        method: 'POST',
+        body: JSON.stringify(params.data),
+        headers,
+      });
+      return { data: { ...json, id: json.id } }; // используем оригинальный ID
+    }
+
+    if (resource === 'company-life') {
+      const url = `${apiUrl}/api/posts/company-life`;
       const { json } = await fetchUtils.fetchJson(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
@@ -806,6 +872,24 @@ export const dataProvider: DataProvider = {
         console.error('Update promotion error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to update promotion'
+        );
+      }
+    }
+
+    if (resource === 'company-life') {
+      // Используем админский маршрут с ID
+      const url = `${apiUrl}/api/posts/admin/company-life/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, {
+          method: 'PATCH',
+          body: JSON.stringify(params.data),
+          headers,
+        });
+        return { data: { ...json, id: json.id } }; // используем оригинальный ID
+      } catch (error) {
+        console.error('Update company-life error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update company-life post'
         );
       }
     }
@@ -968,6 +1052,20 @@ export const dataProvider: DataProvider = {
       return { data: results.map(({ json }) => json.id) };
     }
 
+    if (resource === 'company-life') {
+      // Используем админские маршруты с ID
+      const results = await Promise.all(
+        params.ids.map((id) =>
+          fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/company-life/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(params.data),
+            headers,
+          })
+        )
+      );
+      return { data: results.map(({ json }) => json.id) };
+    }
+
     if (resource === 'ready-solutions') {
       // Используем админские маршруты с ID
       const results = await Promise.all(
@@ -1085,6 +1183,23 @@ export const dataProvider: DataProvider = {
         console.error('Delete promotion error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to delete promotion'
+        );
+      }
+    }
+
+    if (resource === 'company-life') {
+      // Используем админский маршрут с ID
+      const url = `${apiUrl}/api/posts/admin/company-life/${params.id}`;
+      try {
+        await fetchUtils.fetchJson(url, {
+          method: 'DELETE',
+          headers,
+        });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete company-life error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete company-life post'
         );
       }
     }
@@ -1225,6 +1340,19 @@ export const dataProvider: DataProvider = {
       await Promise.all(
         params.ids.map((id) =>
           fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/promotions/${id}`, {
+            method: 'DELETE',
+            headers,
+          })
+        )
+      );
+      return { data: params.ids };
+    }
+
+    if (resource === 'company-life') {
+      // Используем админские маршруты с ID
+      await Promise.all(
+        params.ids.map((id) =>
+          fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/company-life/${id}`, {
             method: 'DELETE',
             headers,
           })
