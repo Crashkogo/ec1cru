@@ -232,12 +232,25 @@ export const getEvents: RequestHandler = async (req, res) => {
 
     // Если передан take, используем старую логику для совместимости
     if (take) {
-      const events = await prisma.events.findMany({
-        orderBy: { createdAt: "desc" },
-        take: parseInt(take as string),
+      const allEvents = await prisma.events.findMany({
+        take: parseInt(take as string) * 2,
         where: { isPublished: true },
       });
-      res.status(200).json(events);
+
+      const now = new Date();
+      const pinnedEvents = allEvents.filter(
+        (item) => item.isPinned && item.pinnedUntil && new Date(item.pinnedUntil) >= now
+      );
+      const regularEvents = allEvents.filter(
+        (item) => !item.isPinned || !item.pinnedUntil || new Date(item.pinnedUntil) < now
+      );
+
+      pinnedEvents.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+      regularEvents.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+
+      const sortedEvents = [...pinnedEvents, ...regularEvents].slice(0, parseInt(take as string));
+
+      res.status(200).json(sortedEvents);
       return;
     }
 
@@ -281,14 +294,25 @@ export const getEvents: RequestHandler = async (req, res) => {
       }
     }
 
-    const events = await prisma.events.findMany({
+    const allEvents = await prisma.events.findMany({
       where,
-      orderBy: { startDate: "desc" },
-      skip,
-      take: takeNum,
     });
 
-    res.status(200).json(events);
+    const now = new Date();
+    const pinnedEvents = allEvents.filter(
+      (item) => item.isPinned && item.pinnedUntil && new Date(item.pinnedUntil) >= now
+    );
+    const regularEvents = allEvents.filter(
+      (item) => !item.isPinned || !item.pinnedUntil || new Date(item.pinnedUntil) < now
+    );
+
+    pinnedEvents.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+    regularEvents.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+
+    const sortedEvents = [...pinnedEvents, ...regularEvents];
+    const paginatedEvents = sortedEvents.slice(skip, skip + takeNum);
+
+    res.status(200).json(paginatedEvents);
   } catch (error) {
     console.error("Error fetching events:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -402,6 +426,8 @@ export const updateEventById: RequestHandler = async (req, res) => {
     metaTitle,
     metaDescription,
     eventLink,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     // Ищем мероприятие по ID
@@ -432,6 +458,13 @@ export const updateEventById: RequestHandler = async (req, res) => {
       }
     }
 
+    let processedPinnedUntil = pinnedUntil !== undefined ? null : existingEvent.pinnedUntil;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const updatedEvent = await prisma.events.update({
       where: { id: parseInt(id) },
       data: {
@@ -448,6 +481,8 @@ export const updateEventById: RequestHandler = async (req, res) => {
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
         eventLink: eventLink || null,
+        isPinned: isPinned !== undefined ? (isPinned === "true" || isPinned === true) : existingEvent.isPinned,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(200).json(updatedEvent);
@@ -489,6 +524,8 @@ export const createEvent: RequestHandler = async (req, res) => {
     metaTitle,
     metaDescription,
     eventLink,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     if (!title || !slug || !startDate) {
@@ -509,6 +546,13 @@ export const createEvent: RequestHandler = async (req, res) => {
       return;
     }
 
+    let processedPinnedUntil = null;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const newEvent = await prisma.events.create({
       data: {
         title,
@@ -524,6 +568,8 @@ export const createEvent: RequestHandler = async (req, res) => {
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
         eventLink: eventLink || null,
+        isPinned: isPinned === "true" || isPinned === true || false,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(201).json(newEvent);
@@ -551,6 +597,8 @@ export const updateEvent: RequestHandler = async (req, res) => {
     metaTitle,
     metaDescription,
     eventLink,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     const existingEvent = await prisma.events.findUnique({ where: { slug } });
@@ -578,6 +626,13 @@ export const updateEvent: RequestHandler = async (req, res) => {
       }
     }
 
+    let processedPinnedUntil = null;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const updatedEvent = await prisma.events.update({
       where: { slug },
       data: {
@@ -594,6 +649,8 @@ export const updateEvent: RequestHandler = async (req, res) => {
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
         eventLink: eventLink || null,
+        isPinned: isPinned === "true" || isPinned === true || false,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(200).json(updatedEvent);

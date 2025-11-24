@@ -53,12 +53,25 @@ export const getCompanyLife: RequestHandler = async (req, res) => {
 
     // Если передан take, используем старую логику для совместимости
     if (take) {
-      const companyLife = await prisma.companyLife.findMany({
-        orderBy: { createdAt: "desc" },
-        take: parseInt(take as string),
+      const allCompanyLife = await prisma.companyLife.findMany({
+        take: parseInt(take as string) * 2,
         where: { isPublished: true },
       });
-      res.status(200).json(companyLife);
+
+      const now = new Date();
+      const pinnedPosts = allCompanyLife.filter(
+        (item) => item.isPinned && item.pinnedUntil && new Date(item.pinnedUntil) >= now
+      );
+      const regularPosts = allCompanyLife.filter(
+        (item) => !item.isPinned || !item.pinnedUntil || new Date(item.pinnedUntil) < now
+      );
+
+      pinnedPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      regularPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      const sortedPosts = [...pinnedPosts, ...regularPosts].slice(0, parseInt(take as string));
+
+      res.status(200).json(sortedPosts);
       return;
     }
 
@@ -89,14 +102,25 @@ export const getCompanyLife: RequestHandler = async (req, res) => {
       }
     }
 
-    const companyLife = await prisma.companyLife.findMany({
+    const allCompanyLife = await prisma.companyLife.findMany({
       where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: takeNum,
     });
 
-    res.status(200).json(companyLife);
+    const now = new Date();
+    const pinnedPosts = allCompanyLife.filter(
+      (item) => item.isPinned && item.pinnedUntil && new Date(item.pinnedUntil) >= now
+    );
+    const regularPosts = allCompanyLife.filter(
+      (item) => !item.isPinned || !item.pinnedUntil || new Date(item.pinnedUntil) < now
+    );
+
+    pinnedPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    regularPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const sortedPosts = [...pinnedPosts, ...regularPosts];
+    const paginatedPosts = sortedPosts.slice(skip, skip + takeNum);
+
+    res.status(200).json(paginatedPosts);
   } catch (error) {
     console.error("Error fetching company life posts:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -166,6 +190,8 @@ export const createCompanyLife: RequestHandler = async (req, res) => {
     slug,
     metaTitle,
     metaDescription,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     const existingCompanyLife = await prisma.companyLife.findUnique({ where: { slug } });
@@ -173,6 +199,14 @@ export const createCompanyLife: RequestHandler = async (req, res) => {
       res.status(400).json({ message: "Slug already exists" });
       return;
     }
+
+    let processedPinnedUntil = null;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const newCompanyLife = await prisma.companyLife.create({
       data: {
         title,
@@ -182,6 +216,8 @@ export const createCompanyLife: RequestHandler = async (req, res) => {
         slug,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
+        isPinned: isPinned === "true" || isPinned === true || false,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(201).json(newCompanyLife);
@@ -200,6 +236,8 @@ export const updateCompanyLife: RequestHandler = async (req, res) => {
     isPublished,
     metaTitle,
     metaDescription,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     const existingCompanyLife = await prisma.companyLife.findUnique({ where: { slug } });
@@ -207,6 +245,14 @@ export const updateCompanyLife: RequestHandler = async (req, res) => {
       res.status(404).json({ message: "Company life post not found" });
       return;
     }
+
+    let processedPinnedUntil = null;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const updatedCompanyLife = await prisma.companyLife.update({
       where: { slug },
       data: {
@@ -216,6 +262,8 @@ export const updateCompanyLife: RequestHandler = async (req, res) => {
         isPublished: isPublished === "true" || isPublished === true,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
+        isPinned: isPinned === "true" || isPinned === true || false,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(200).json(updatedCompanyLife);
@@ -235,6 +283,8 @@ export const updateCompanyLifeById: RequestHandler = async (req, res) => {
     metaTitle,
     metaDescription,
     slug,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     // Ищем пост по ID
@@ -256,6 +306,13 @@ export const updateCompanyLifeById: RequestHandler = async (req, res) => {
       }
     }
 
+    let processedPinnedUntil = pinnedUntil !== undefined ? null : existingCompanyLife.pinnedUntil;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const updatedCompanyLife = await prisma.companyLife.update({
       where: { id: parseInt(id) },
       data: {
@@ -266,6 +323,8 @@ export const updateCompanyLifeById: RequestHandler = async (req, res) => {
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
         slug: slug || existingCompanyLife.slug,
+        isPinned: isPinned !== undefined ? (isPinned === "true" || isPinned === true) : existingCompanyLife.isPinned,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(200).json(updatedCompanyLife);

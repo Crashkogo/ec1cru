@@ -1,7 +1,8 @@
 // frontend/src/components/Header.tsx - СОВРЕМЕННАЯ ВЕРСИЯ
 import { useState, useEffect, useRef, forwardRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { UserCircleIcon, Bars3Icon, XMarkIcon, PhoneIcon, ComputerDesktopIcon, ChevronDownIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon, PhoneIcon, ComputerDesktopIcon, ChevronDownIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon } from '@heroicons/react/24/solid';
 import { authProvider } from '../admin/authProvider';
 import { usePreloadOnHover } from '../utils/preloadRoutes';
 import logo from '../assets/logo.png';
@@ -26,7 +27,7 @@ type MenuItem = MenuItemSimple | MenuItemWithSubItems;
 
 const menuItems: MenuItem[] = [
   { title: 'Новости', path: '/news' },
-  { title: 'Акции', path: '/promotions' },
+  { title: 'Мероприятия', path: '/events' },
   {
     title: 'Продукты',
     items: [
@@ -56,6 +57,7 @@ const menuItems: MenuItem[] = [
     title: 'О нас',
     items: [
       { name: 'О компании', path: '/about' },
+      { name: 'Отзывы', path: '/otzyvy' },
       { name: 'Супер команда', path: '/team' },
       { name: 'Работа у нас', path: 'https://career-ec.ru/' },
       { name: 'Наша жизнь', path: '/life' },
@@ -262,6 +264,25 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
               {/* Contact Info */}
               <div className="flex flex-col text-left px-3">
                 <a
+                  href="tel:+78443300200"
+                  className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                  aria-label="Позвонить по телефону 8(8443)300-200"
+                >
+                  <PhoneIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                  8 (8443) 300-200
+                </a>
+                <a
+                  href="mailto:it@enginf.ru"
+                  className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                  aria-label="Написать на email it@enginf.ru"
+                >
+                  <EnvelopeIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                  it@enginf.ru
+                </a>
+              </div>
+
+              <div className="flex flex-col text-left px-3">
+                <a
                   href="tel:+78443300801"
                   className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
                   aria-label="Позвонить по телефону 8(8443)300-801"
@@ -282,14 +303,10 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
               <button
                 onClick={handleLoginClick}
                 onMouseEnter={() => handleMouseEnter('/admin')}
-                className="group flex items-center px-4 py-2.5 bg-modern-gray-100 hover:bg-modern-gray-200 text-modern-gray-600 hover:text-modern-gray-800 rounded-xl transition-all duration-200 text-sm font-medium"
+                className="group flex items-center justify-center w-10 h-10 bg-modern-gray-100 hover:bg-modern-gray-200 text-modern-gray-600 hover:text-modern-gray-800 rounded-xl transition-all duration-200"
                 aria-label="Открыть форму входа"
               >
-                <UserCircleIcon
-                  className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200"
-                  aria-hidden="true"
-                />
-                <span>Войти</span>
+                <UserCircleIcon className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
               </button>
             </div>
 
@@ -405,6 +422,22 @@ const Header = forwardRef<HTMLDivElement, HeaderProps>(({ setShowLogin }, ref) =
 
                 {/* Mobile Contact Info */}
                 <div className="flex flex-col items-center space-y-1 py-2">
+                  <a
+                    href="tel:+78443300200"
+                    className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                    aria-label="Позвонить по телефону 8(8443)300-200"
+                  >
+                    <PhoneIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+                    8(8443)300-200
+                  </a>
+                  <a
+                    href="mailto:it@enginf.ru"
+                    className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                    aria-label="Написать на email it@enginf.ru"
+                  >
+                    <EnvelopeIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+                    it@enginf.ru
+                  </a>
                   <a
                     href="tel:+78443300801"
                     className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"

@@ -342,6 +342,33 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'testimonials') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'createdAt',
+        _order: params.sort?.order || 'DESC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/posts/admin/testimonials?${stringify(query)}`;
+      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
+        url,
+        { headers }
+      );
+
+      const data = Array.isArray(json)
+        ? json.map((item) => ({
+            ...item,
+            id: item.id,
+          }))
+        : [json];
+
+      return {
+        data,
+        total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+      };
+    }
+
     if (resource === 'tariff-plans') {
       const query = {
         _start: ((page - 1) * perPage).toString(),
@@ -505,6 +532,19 @@ export const dataProvider: DataProvider = {
         console.error('GetOne subscriber error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to fetch subscriber'
+        );
+      }
+    }
+
+    if (resource === 'testimonials') {
+      const url = `${apiUrl}/api/posts/admin/testimonials/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, { headers });
+        return { data: { ...json, id: json.id } };
+      } catch (error) {
+        console.error('GetOne testimonial error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch testimonial'
         );
       }
     }
@@ -762,6 +802,16 @@ export const dataProvider: DataProvider = {
       return { data: json };
     }
 
+    if (resource === 'testimonials') {
+      const url = `${apiUrl}/api/posts/testimonials`;
+      const { json } = await fetchUtils.fetchJson(url, {
+        method: 'POST',
+        body: JSON.stringify(params.data),
+        headers,
+      });
+      return { data: { ...json, id: json.id } };
+    }
+
     if (resource === 'tariff-plans') {
       const url = `${apiUrl}/api/admin/tariff-plans`;
       const { json } = await fetchUtils.fetchJson(url, {
@@ -960,6 +1010,23 @@ export const dataProvider: DataProvider = {
         console.error('Update subscriber error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to update subscriber'
+        );
+      }
+    }
+
+    if (resource === 'testimonials') {
+      const url = `${apiUrl}/api/posts/admin/testimonials/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, {
+          method: 'PATCH',
+          body: JSON.stringify(params.data),
+          headers,
+        });
+        return { data: { ...json, id: json.id } };
+      } catch (error) {
+        console.error('Update testimonial error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update testimonial'
         );
       }
     }
@@ -1266,6 +1333,22 @@ export const dataProvider: DataProvider = {
         console.error('Delete subscriber error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to delete subscriber'
+        );
+      }
+    }
+
+    if (resource === 'testimonials') {
+      const url = `${apiUrl}/api/posts/admin/testimonials/${params.id}`;
+      try {
+        await fetchUtils.fetchJson(url, {
+          method: 'DELETE',
+          headers,
+        });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete testimonial error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete testimonial'
         );
       }
     }

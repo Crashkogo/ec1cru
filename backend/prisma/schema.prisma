@@ -23,27 +23,31 @@ model User {
 }
 
 model News {
-  id               Int      @id @default(autoincrement())
+  id               Int       @id @default(autoincrement())
   title            String
   shortDescription String
   content          String // Для HTML-контента (будет поддерживать визуальный редактор)
-  createdAt        DateTime @default(now())
+  createdAt        DateTime  @default(now())
   isPublished      Boolean
-  slug             String   @unique
+  slug             String    @unique
   metaTitle        String?
   metaDescription  String?
+  isPinned         Boolean   @default(false) // Закреплён ли пост
+  pinnedUntil      DateTime? // Дата окончания закрепа (конец дня 23:59:59)
 }
 
 model CompanyLife {
-  id               Int      @id @default(autoincrement())
+  id               Int       @id @default(autoincrement())
   title            String
   shortDescription String
   content          String // Для HTML-контента (будет поддерживать визуальный редактор)
-  createdAt        DateTime @default(now())
+  createdAt        DateTime  @default(now())
   isPublished      Boolean
-  slug             String   @unique
+  slug             String    @unique
   metaTitle        String?
   metaDescription  String?
+  isPinned         Boolean   @default(false) // Закреплён ли пост
+  pinnedUntil      DateTime? // Дата окончания закрепа (конец дня 23:59:59)
 }
 
 model Events {
@@ -62,6 +66,8 @@ model Events {
   metaDescription     String?
   eventLink           String? // Новое поле для ссылки на мероприятие
   registrations       EventsRegistration[] // Связь с регистрациями
+  isPinned            Boolean              @default(false) // Закреплён ли пост
+  pinnedUntil         DateTime? // Дата окончания закрепа (конец дня 23:59:59)
 }
 
 model EventsRegistration {
@@ -77,18 +83,20 @@ model EventsRegistration {
 }
 
 model Promotions {
-  id               Int      @id @default(autoincrement())
+  id               Int       @id @default(autoincrement())
   title            String
   shortDescription String // Краткое описание
   content          String // Основной HTML-контент (для визуального редактора)
   startDate        DateTime
   endDate          DateTime
-  createdAt        DateTime @default(now())
+  createdAt        DateTime  @default(now())
   isPublished      Boolean
-  slug             String   @unique
+  slug             String    @unique
   metaTitle        String?
   metaDescription  String?
   status           Boolean // true - активна, false - завершена
+  isPinned         Boolean   @default(false) // Закреплён ли пост
+  pinnedUntil      DateTime? // Дата окончания закрепа (конец дня 23:59:59)
 }
 
 // Основная таблица решений
@@ -207,4 +215,17 @@ model Course {
   updatedAt        DateTime @updatedAt
 
   @@map("courses")
+}
+
+// Модель для отзывов клиентов
+model Testimonial {
+  id          Int      @id @default(autoincrement())
+  companyName String   // Наименование компании
+  content     String   @db.Text // Текст отзыва (HTML)
+  slug        String   @unique // Уникальный идентификатор для URL
+  isPublished Boolean  @default(false) // Опубликован
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("testimonials")
 }

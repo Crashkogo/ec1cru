@@ -33,6 +33,8 @@ const ReadySolutionDetail = React.lazy(() => import('./components/ReadySolutionD
 const ReadySolutionsList = React.lazy(() => import('./components/ReadySolutionsList'));
 
 // Специальные страницы
+const Testimonials = React.lazy(() => import('./components/Testimonials'));
+const TestimonialDetail = React.lazy(() => import('./components/TestimonialDetail'));
 const Unsubscribe = React.lazy(() => import('./pages/Unsubscribe'));
 const PersonalDataConsent = React.lazy(() => import('./pages/PersonalDataConsent'));
 const MetricsConsent = React.lazy(() => import('./pages/MetricsConsent'));
@@ -104,6 +106,16 @@ function App() {
                   <Layout setShowLogin={setShowLogin}>
                     <Suspense fallback={<PageLoading message="Загрузка жизни компании..." />}>
                       <CompanyLife />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/otzyvy"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка отзывов..." />}>
+                      <Testimonials />
                     </Suspense>
                   </Layout>
                 }
@@ -269,6 +281,16 @@ function App() {
                   <Layout setShowLogin={setShowLogin}>
                     <Suspense fallback={<PageLoading message="Загрузка решения..." />}>
                       <ReadySolutionDetail />
+                    </Suspense>
+                  </Layout>
+                }
+              />
+              <Route
+                path="/otzyvy/:slug"
+                element={
+                  <Layout setShowLogin={setShowLogin}>
+                    <Suspense fallback={<PageLoading message="Загрузка отзыва..." />}>
+                      <TestimonialDetail />
                     </Suspense>
                   </Layout>
                 }

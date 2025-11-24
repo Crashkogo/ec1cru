@@ -4,6 +4,7 @@ import * as companyLifeController from "../controllers/companyLifeController";
 import * as eventsController from "../controllers/eventsController";
 import * as promotionsController from "../controllers/promotionsController";
 import * as readySolutionsController from "../controllers/readySolutionsController";
+import * as testimonialController from "../controllers/testimonialController";
 import * as uploadController from "../controllers/uploadController";
 import * as newsletterController from "../controllers/newsletterController";
 import * as subscribersController from "../controllers/subscribersController";
@@ -482,6 +483,40 @@ router.delete(
 router.get(
   "/unsubscribe",
   newsletterController.unsubscribeByToken as RequestHandler
+);
+
+// =============================================================================
+// ОТЗЫВЫ
+// =============================================================================
+// Публичные маршруты
+router.get("/testimonials", testimonialController.getTestimonials as RequestHandler);
+router.get("/testimonials/:slug", testimonialController.getTestimonialBySlug as RequestHandler);
+
+// Админские маршруты
+router.get(
+  "/admin/testimonials",
+  authMiddleware,
+  testimonialController.getAllTestimonials as RequestHandler
+);
+router.get(
+  "/admin/testimonials/:id",
+  authMiddleware,
+  testimonialController.getTestimonialById as RequestHandler
+);
+router.post(
+  "/testimonials",
+  authMiddleware,
+  testimonialController.createTestimonial as RequestHandler
+);
+router.patch(
+  "/admin/testimonials/:id",
+  authMiddleware,
+  testimonialController.updateTestimonialById as RequestHandler
+);
+router.delete(
+  "/admin/testimonials/:id",
+  authMiddleware,
+  testimonialController.deleteTestimonialById as RequestHandler
 );
 
 export default router;

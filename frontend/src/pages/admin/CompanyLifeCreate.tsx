@@ -4,6 +4,7 @@ import {
     SimpleForm,
     TextInput,
     BooleanInput,
+    DateTimeInput,
     required,
     SaveButton,
     Toolbar,
@@ -234,6 +235,18 @@ export const CompanyLifeCreate = () => (
                     source="isPublished"
                     label="Опубликовать"
                     defaultValue={false}
+                />
+
+                <BooleanInput
+                    source="isPinned"
+                    label="Закреплён"
+                    defaultValue={false}
+                />
+
+                <DateTimeInput
+                    source="pinnedUntil"
+                    label="Дата закрепа (конец дня)"
+                    helperText="Пост будет закреплён до конца этого дня (23:59:59)"
                 />
 
                 <TextInput

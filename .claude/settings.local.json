@@ -3,7 +3,8 @@
     "allow": [
       "Bash(cp:*)",
       "Bash(npm install:*)",
-      "Bash(npx prisma migrate:*)"
+      "Bash(npx prisma migrate:*)",
+      "Bash(npx prisma:*)"
     ],
     "deny": [],
     "ask": []

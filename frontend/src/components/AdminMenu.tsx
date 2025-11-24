@@ -15,7 +15,8 @@ import {
   XMarkIcon,
   EnvelopeIcon,
   UserGroupIcon,
-  PaperAirplaneIcon
+  PaperAirplaneIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 interface AdminMenuProps {
@@ -62,6 +63,11 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
       title: 'Курсы',
       path: '/admin/courses',
       icon: NewspaperIcon
+    },
+    {
+      title: 'Отзывы клиентов',
+      path: '/admin/testimonials',
+      icon: ChatBubbleLeftRightIcon
     },
     {
       title: 'Готовые решения',

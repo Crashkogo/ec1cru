@@ -4,7 +4,6 @@ import {
     SimpleForm,
     TextInput,
     BooleanInput,
-    DateTimeInput,
     required,
     SaveButton,
     Toolbar,
@@ -38,7 +37,7 @@ const ContentInput = ({ source, label }: ContentInputProps) => {
 
         images.forEach((img) => {
             const src = img.getAttribute('src');
-            if (src && src.includes('/uploads/news/temp/') && !tempImageUrls.includes(src)) {
+            if (src && src.includes('/uploads/testimonials/temp/') && !tempImageUrls.includes(src)) {
                 tempImageUrls.push(src);
             }
         });
@@ -97,7 +96,7 @@ const ContentInput = ({ source, label }: ContentInputProps) => {
                     base_url: '/tinymce',
                     suffix: '.min',
                     image_uploadtab: true,
-                    images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=news`,
+                    images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=testimonials`,
                     images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
                     automatic_uploads: true,
                     file_picker_types: 'image',
@@ -116,16 +115,16 @@ interface SlugInputProps {
 
 const SlugInput = ({ source, label, ...rest }: SlugInputProps) => {
     const { setValue, watch } = useFormContext();
-    const title = watch('title');
+    const companyName = watch('companyName');
     const slug = watch(source);
     const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
 
     useEffect(() => {
-        if (title && !isSlugManuallyEdited ) {
-            const generatedSlug = transliterate(title);
+        if (companyName && !isSlugManuallyEdited) {
+            const generatedSlug = transliterate(companyName);
             setValue(source, generatedSlug);
         }
-    }, [title, slug, setValue, source, isSlugManuallyEdited]);
+    }, [companyName, slug, setValue, source, isSlugManuallyEdited]);
 
     const handleSlugChange = (value: string) => {
         setIsSlugManuallyEdited(true);
@@ -136,20 +135,20 @@ const SlugInput = ({ source, label, ...rest }: SlugInputProps) => {
         <TextInput
             source={source}
             label={label}
-            helperText="Автоматически генерируется из заголовка, но можно изменить"
+            helperText="Автоматически генерируется из названия компании, но можно изменить"
             onChange={handleSlugChange}
             {...rest}
         />
     );
 };
 
-const NewsCreateActions = () => (
+const TestimonialCreateActions = () => (
     <TopToolbar>
         <ListButton />
     </TopToolbar>
 );
 
-const NewsCreateToolbar = () => {
+const TestimonialCreateToolbar = () => {
     const [create] = useCreate();
     const notify = useNotify();
     const redirect = useRedirect();
@@ -164,7 +163,7 @@ const NewsCreateToolbar = () => {
                 const token = localStorage.getItem('token');
 
                 tempImagesList.forEach((tempUrl: string) => {
-                    const newUrl = tempUrl.replace('/uploads/news/temp/', `/uploads/news/${data.slug}/`);
+                    const newUrl = tempUrl.replace('/uploads/testimonials/temp/', `/uploads/testimonials/${data.slug}/`);
                     updatedContent = updatedContent.replace(tempUrl, newUrl);
                 });
 
@@ -173,7 +172,7 @@ const NewsCreateToolbar = () => {
                     {
                         oldSlug: 'temp',
                         newSlug: data.slug,
-                        entity: 'news',
+                        entity: 'testimonials',
                     },
                     { headers: { Authorization: `Bearer ${token}` } }
                 );
@@ -182,14 +181,14 @@ const NewsCreateToolbar = () => {
             }
 
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { tempImages: _tempImages, ...newsData } = data;
+            const { tempImages: _tempImages, ...testimonialData } = data;
 
-            await create('news', { data: newsData });
-            notify('Новость успешно создана');
-            redirect('/admin/news');
+            await create('testimonials', { data: testimonialData });
+            notify('Отзыв успешно создан');
+            redirect('/admin/testimonials');
         } catch (error) {
-            console.error('Error creating news:', error);
-            notify('Ошибка при создании новости', { type: 'error' });
+            console.error('Error creating testimonial:', error);
+            notify('Ошибка при создании отзыва', { type: 'error' });
         }
     });
 
@@ -200,29 +199,20 @@ const NewsCreateToolbar = () => {
     );
 };
 
-export const NewsCreate = () => (
-    <Create title="Создание новости" actions={<NewsCreateActions />}>
+export const TestimonialCreate = () => (
+    <Create title="Создание отзыва" actions={<TestimonialCreateActions />}>
         <Card className="p-6">
-            <SimpleForm toolbar={<NewsCreateToolbar />}>
+            <SimpleForm toolbar={<TestimonialCreateToolbar />}>
                 <TextInput
-                    source="title"
-                    label="Заголовок"
+                    source="companyName"
+                    label="Название компании"
                     validate={required()}
-                    fullWidth
-                />
-
-                <TextInput
-                    source="shortDescription"
-                    label="Краткое описание"
-                    validate={required()}
-                    multiline
-                    rows={3}
                     fullWidth
                 />
 
                 <ContentInput
                     source="content"
-                    label="Основное содержание"
+                    label="Текст отзыва"
                 />
 
                 <SlugInput
@@ -235,32 +225,6 @@ export const NewsCreate = () => (
                     source="isPublished"
                     label="Опубликовать"
                     defaultValue={false}
-                />
-
-                <BooleanInput
-                    source="isPinned"
-                    label="Закреплён"
-                    defaultValue={false}
-                />
-
-                <DateTimeInput
-                    source="pinnedUntil"
-                    label="Дата закрепа (конец дня)"
-                    helperText="Пост будет закреплён до конца этого дня (23:59:59)"
-                />
-
-                <TextInput
-                    source="metaTitle"
-                    label="Meta Title"
-                    fullWidth
-                />
-
-                <TextInput
-                    source="metaDescription"
-                    label="Meta Description"
-                    multiline
-                    rows={3}
-                    fullWidth
                 />
             </SimpleForm>
         </Card>

@@ -198,6 +198,17 @@ export const PromotionsEdit = () => (
                     label="Опубликовать"
                 />
 
+                <BooleanInput
+                    source="isPinned"
+                    label="Закреплён"
+                />
+
+                <DateTimeInput
+                    source="pinnedUntil"
+                    label="Дата закрепа (конец дня)"
+                    helperText="Пост будет закреплён до конца этого дня (23:59:59)"
+                />
+
                 <TextInput
                     source="metaTitle"
                     label="Meta Title"

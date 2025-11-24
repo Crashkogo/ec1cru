@@ -9,7 +9,8 @@ import { useCallbackForm } from '../hooks/useCallbackForm';
 import {
   ClockIcon,
   ArrowRightIcon,
-  PhoneIcon
+  PhoneIcon,
+  MapPinIcon
 } from '@heroicons/react/24/outline';
 import csImage from '../assets/cs.png';
 import { usePreloadOnHover, preloadOnIdle } from '../utils/preloadRoutes';
@@ -34,6 +35,8 @@ interface NewsItem {
   slug: string;
   createdAt: string;
   isPublished: boolean;
+  isPinned?: boolean;
+  pinnedUntil?: string;
 }
 
 interface PromotionItem {
@@ -45,6 +48,16 @@ interface PromotionItem {
   endDate: string;
   status: boolean;
   isPublished: boolean;
+  isPinned?: boolean;
+  pinnedUntil?: string;
+}
+
+interface Testimonial {
+  id: number;
+  companyName: string;
+  content: string;
+  slug: string;
+  createdAt: string;
 }
 
 interface EventItem {
@@ -56,6 +69,8 @@ interface EventItem {
   isPublished: boolean;
   ours: boolean;
   status: boolean;
+  isPinned?: boolean;
+  pinnedUntil?: string;
 }
 
 // Объединённый тип для всех постов
@@ -67,6 +82,8 @@ interface UnifiedPost {
   date: string;
   type: 'news' | 'promotion' | 'event' | 'companylife';
   link: string;
+  isPinned?: boolean;
+  pinnedUntil?: string;
 }
 
 interface Program {
@@ -87,6 +104,7 @@ interface ReadySolutionItem {
 const Home: React.FC = () => {
   const [solutions, setSolutions] = useState<ReadySolutionItem[]>([]);
   const [unifiedPosts, setUnifiedPosts] = useState<UnifiedPost[]>([]);
+  const [randomTestimonial, setRandomTestimonial] = useState<Testimonial | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeAboutTab, setActiveAboutTab] = useState('history');
   const { handleMouseEnter } = usePreloadOnHover();
@@ -136,15 +154,22 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [newsRes, companyLifeRes, promotionsRes, eventsRes, solutionsRes] = await Promise.all([
+        const [newsRes, companyLifeRes, promotionsRes, eventsRes, solutionsRes, testimonialsRes] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/news?take=10`),
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/company-life?take=10`),
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/promotions?take=10`),
           axios.get(`${import.meta.env.VITE_API_URL}/api/posts/events?take=10`),
-          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/ready-solutions?limit=4`)
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/ready-solutions?limit=4`),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/posts/testimonials`)
         ]);
 
         setSolutions(solutionsRes.data);
+
+        // Выбираем случайный отзыв
+        if (testimonialsRes.data && testimonialsRes.data.length > 0) {
+          const randomIndex = Math.floor(Math.random() * testimonialsRes.data.length);
+          setRandomTestimonial(testimonialsRes.data[randomIndex]);
+        }
 
         // Объединяем все посты в один массив
         const allPosts: UnifiedPost[] = [
@@ -155,7 +180,9 @@ const Home: React.FC = () => {
             slug: item.slug,
             date: item.createdAt,
             type: 'news' as const,
-            link: `/news/${item.slug}`
+            link: `/news/${item.slug}`,
+            isPinned: item.isPinned,
+            pinnedUntil: item.pinnedUntil
           })),
           ...companyLifeRes.data.map((item: NewsItem) => ({
             id: item.id,
@@ -164,7 +191,9 @@ const Home: React.FC = () => {
             slug: item.slug,
             date: item.createdAt,
             type: 'companylife' as const,
-            link: `/life/${item.slug}`
+            link: `/life/${item.slug}`,
+            isPinned: item.isPinned,
+            pinnedUntil: item.pinnedUntil
           })),
           ...promotionsRes.data.map((item: PromotionItem) => ({
             id: item.id,
@@ -173,7 +202,9 @@ const Home: React.FC = () => {
             slug: item.slug,
             date: item.startDate,
             type: 'promotion' as const,
-            link: `/promotions/${item.slug}`
+            link: `/promotions/${item.slug}`,
+            isPinned: item.isPinned,
+            pinnedUntil: item.pinnedUntil
           })),
           ...eventsRes.data.map((item: EventItem) => ({
             id: item.id,
@@ -182,14 +213,29 @@ const Home: React.FC = () => {
             slug: item.slug,
             date: item.startDate,
             type: 'event' as const,
-            link: `/events/${item.slug}`
+            link: `/events/${item.slug}`,
+            isPinned: item.isPinned,
+            pinnedUntil: item.pinnedUntil
           }))
         ];
 
-        // Сортируем по дате (от новых к старым)
-        allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        // Фильтруем посты на закреплённые и обычные
+        const now = new Date();
+        const pinnedPosts = allPosts.filter(
+          post => post.isPinned && post.pinnedUntil && new Date(post.pinnedUntil) >= now
+        );
+        const regularPosts = allPosts.filter(
+          post => !post.isPinned || !post.pinnedUntil || new Date(post.pinnedUntil) < now
+        );
 
-        setUnifiedPosts(allPosts);
+        // Сортируем каждую группу по дате (от новых к старым)
+        pinnedPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        regularPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        // Объединяем: сначала закреплённые, затем обычные
+        const sortedPosts = [...pinnedPosts, ...regularPosts];
+
+        setUnifiedPosts(sortedPosts);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -243,26 +289,41 @@ const Home: React.FC = () => {
 
               {/* Статистика в компактном виде */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                <Link
+                  to="/otzyvy"
+                  className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern hover:shadow-modern-lg hover:scale-105 transition-all duration-200 cursor-pointer"
+                >
                   <div className="text-3xl font-bold text-modern-primary-600 mb-2">600+</div>
                   <div className="text-sm font-medium text-modern-gray-700">Клиентов с нами</div>
-                </div>
-                <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                </Link>
+                <Link
+                  to="/implementation"
+                  className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern hover:shadow-modern-lg hover:scale-105 transition-all duration-200 cursor-pointer"
+                >
                   <div className="text-3xl font-bold text-modern-primary-600 mb-2">50+</div>
                   <div className="text-sm font-medium text-modern-gray-700">Внедрений реализовано</div>
-                </div>
-                <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                </Link>
+                <Link
+                  to="/about"
+                  className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern hover:shadow-modern-lg hover:scale-105 transition-all duration-200 cursor-pointer"
+                >
                   <div className="text-3xl font-bold text-modern-primary-600 mb-2">30</div>
                   <div className="text-sm font-medium text-modern-gray-700">Лет на рынке</div>
-                </div>
-                <div className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                </Link>
+                <Link
+                  to="/support"
+                  className="bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern hover:shadow-modern-lg hover:scale-105 transition-all duration-200 cursor-pointer"
+                >
                   <img src={csImage} alt="1С" className="h-16 w-auto mx-auto" />
-                </div>
+                </Link>
                 {/* Новый блок IT-аутсорсинг */}
-                <div className="col-span-2 bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern">
+                <Link
+                  to="/tech-maintenance"
+                  className="col-span-2 bg-modern-white/80 backdrop-blur-sm rounded-xl p-6 text-center shadow-modern hover:shadow-modern-lg hover:scale-105 transition-all duration-200 cursor-pointer"
+                >
                   <div className="text-xl font-bold text-modern-primary-600 mb-2">IT-аутсорсинг</div>
                   <div className="text-sm font-medium text-modern-gray-700">Комплексное сопровождение бизнеса в сфере IT</div>
-                </div>
+                </Link>
               </div>
 
               {/* Форма обратной связи */}
@@ -384,6 +445,9 @@ const Home: React.FC = () => {
                       companylife: 'bg-purple-50/50 hover:bg-purple-100/50 border-purple-200'
                     };
 
+                    // Проверяем, закреплён ли пост
+                    const isPinned = post.isPinned && post.pinnedUntil && new Date(post.pinnedUntil) >= new Date();
+
                     return (
                       <Link
                         key={`${post.type}-${post.id}`}
@@ -393,9 +457,14 @@ const Home: React.FC = () => {
                       >
                         {/* Левая часть: заголовок и дата */}
                         <div className="flex-shrink-0 w-1/3">
-                          <h4 className="font-semibold text-modern-gray-900 text-sm group-hover:text-modern-primary-600 transition-colors duration-200 line-clamp-2 mb-1">
-                            {post.title}
-                          </h4>
+                          <div className="flex items-start gap-1 mb-1">
+                            {isPinned && (
+                              <MapPinIcon className="h-4 w-4 text-modern-primary-600 flex-shrink-0 mt-0.5" />
+                            )}
+                            <h4 className="font-semibold text-modern-gray-900 text-sm group-hover:text-modern-primary-600 transition-colors duration-200 line-clamp-2">
+                              {post.title}
+                            </h4>
+                          </div>
                           <div className="flex items-center text-xs text-modern-gray-500">
                             <ClockIcon className="h-3 w-3 mr-1 flex-shrink-0" />
                             {new Date(post.date).toLocaleDateString('ru-RU')}
@@ -698,6 +767,86 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Блок с отзывами */}
+      {randomTestimonial && (
+        <section className="py-16 bg-gradient-to-br from-modern-gray-50 to-modern-primary-50/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto">
+              {/* Заголовок секции */}
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold text-modern-gray-900 mb-4">
+                  Отзывы наших клиентов
+                </h2>
+                <p className="text-lg text-modern-gray-600">
+                  Мы гордимся доверием компаний, которые выбирают нас
+                </p>
+              </div>
+
+              {/* Карточка отзыва */}
+              <div className="bg-modern-white rounded-2xl shadow-modern-lg p-8 md:p-12 relative overflow-hidden">
+                {/* Декоративный элемент */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-modern-primary-100/20 to-transparent rounded-full -mr-32 -mt-32"></div>
+
+                {/* Иконка кавычек */}
+                <div className="relative mb-6">
+                  <svg
+                    className="w-12 h-12 md:w-16 md:h-16 text-modern-primary-600 opacity-20"
+                    fill="currentColor"
+                    viewBox="0 0 32 32"
+                    aria-hidden="true"
+                  >
+                    <path d="M9.352 4C4.456 7.456 1 13.12 1 19.36c0 5.088 3.072 8.064 6.624 8.064 3.36 0 5.856-2.688 5.856-5.856 0-3.168-2.208-5.472-5.088-5.472-.576 0-1.344.096-1.536.192.48-3.264 3.552-7.104 6.624-9.024L9.352 4zm16.512 0c-4.8 3.456-8.256 9.12-8.256 15.36 0 5.088 3.072 8.064 6.624 8.064 3.264 0 5.856-2.688 5.856-5.856 0-3.168-2.304-5.472-5.184-5.472-.576 0-1.248.096-1.44.192.48-3.264 3.456-7.104 6.528-9.024L25.864 4z" />
+                  </svg>
+                </div>
+
+                {/* Текст отзыва */}
+                <div
+                  className="relative prose prose-lg max-w-none prose-headings:text-modern-gray-900 prose-p:text-modern-gray-700 prose-p:leading-relaxed mb-8"
+                  dangerouslySetInnerHTML={{ __html: randomTestimonial.content }}
+                />
+
+                {/* Информация о компании */}
+                <div className="relative flex items-center justify-between pt-6 border-t border-modern-gray-200">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-modern-primary-100 to-modern-primary-200 flex items-center justify-center border-2 border-modern-primary-300 mr-4">
+                      <span className="text-modern-primary-700 font-semibold text-lg">
+                        {randomTestimonial.companyName.charAt(0)}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-modern-gray-900 text-lg">
+                        {randomTestimonial.companyName}
+                      </h4>
+                      <p className="text-modern-gray-500 text-sm">Клиент</p>
+                    </div>
+                  </div>
+
+                  {/* Ссылка на полный отзыв */}
+                  <Link
+                    to={`/otzyvy/${randomTestimonial.slug}`}
+                    className="inline-flex items-center text-modern-primary-600 hover:text-modern-primary-700 transition-colors duration-200 text-sm font-medium group"
+                  >
+                    Подробнее
+                    <ArrowRightIcon className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-200" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Кнопка "Посмотреть все отзывы" */}
+              <div className="text-center mt-8">
+                <Link
+                  to="/otzyvy"
+                  className="inline-flex items-center justify-center px-8 py-4 bg-modern-primary-600 text-white rounded-xl hover:bg-modern-primary-700 transition-colors duration-200 font-semibold text-lg shadow-lg hover:shadow-xl group"
+                >
+                  Посмотреть все отзывы
+                  <ArrowRightIcon className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Подписка на рассылку */}
       <section className="py-16 bg-modern-primary-50">

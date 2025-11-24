@@ -53,12 +53,28 @@ export const getNews: RequestHandler = async (req, res) => {
 
     // Если передан take, используем старую логику для совместимости
     if (take) {
-      const news = await prisma.news.findMany({
-        orderBy: { createdAt: "desc" },
-        take: parseInt(take as string),
+      const allNews = await prisma.news.findMany({
+        take: parseInt(take as string) * 2, // Берём больше, чтобы хватило после фильтрации закрепленных
         where: { isPublished: true },
       });
-      res.status(200).json(news);
+
+      // Разделяем на закрепленные и обычные
+      const now = new Date();
+      const pinnedNews = allNews.filter(
+        (item) => item.isPinned && item.pinnedUntil && new Date(item.pinnedUntil) >= now
+      );
+      const regularNews = allNews.filter(
+        (item) => !item.isPinned || !item.pinnedUntil || new Date(item.pinnedUntil) < now
+      );
+
+      // Сортируем каждую группу по дате создания
+      pinnedNews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      regularNews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      // Объединяем: сначала закрепленные, затем обычные
+      const sortedNews = [...pinnedNews, ...regularNews].slice(0, parseInt(take as string));
+
+      res.status(200).json(sortedNews);
       return;
     }
 
@@ -89,14 +105,28 @@ export const getNews: RequestHandler = async (req, res) => {
       }
     }
 
-    const news = await prisma.news.findMany({
+    const allNews = await prisma.news.findMany({
       where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: takeNum,
     });
 
-    res.status(200).json(news);
+    // Разделяем на закрепленные и обычные
+    const now = new Date();
+    const pinnedNews = allNews.filter(
+      (item) => item.isPinned && item.pinnedUntil && new Date(item.pinnedUntil) >= now
+    );
+    const regularNews = allNews.filter(
+      (item) => !item.isPinned || !item.pinnedUntil || new Date(item.pinnedUntil) < now
+    );
+
+    // Сортируем каждую группу по дате создания
+    pinnedNews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    regularNews.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    // Объединяем и применяем пагинацию
+    const sortedNews = [...pinnedNews, ...regularNews];
+    const paginatedNews = sortedNews.slice(skip, skip + takeNum);
+
+    res.status(200).json(paginatedNews);
   } catch (error) {
     console.error("Error fetching news:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -166,6 +196,8 @@ export const createNews: RequestHandler = async (req, res) => {
     slug,
     metaTitle,
     metaDescription,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     const existingNews = await prisma.news.findUnique({ where: { slug } });
@@ -173,6 +205,15 @@ export const createNews: RequestHandler = async (req, res) => {
       res.status(400).json({ message: "Slug already exists" });
       return;
     }
+
+    // Обработка даты закрепа: устанавливаем время на конец дня (23:59:59)
+    let processedPinnedUntil = null;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const newNews = await prisma.news.create({
       data: {
         title,
@@ -182,6 +223,8 @@ export const createNews: RequestHandler = async (req, res) => {
         slug,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
+        isPinned: isPinned === "true" || isPinned === true || false,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(201).json(newNews);
@@ -200,6 +243,8 @@ export const updateNews: RequestHandler = async (req, res) => {
     isPublished,
     metaTitle,
     metaDescription,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     const existingNews = await prisma.news.findUnique({ where: { slug } });
@@ -207,6 +252,15 @@ export const updateNews: RequestHandler = async (req, res) => {
       res.status(404).json({ message: "News not found" });
       return;
     }
+
+    // Обработка даты закрепа: устанавливаем время на конец дня (23:59:59)
+    let processedPinnedUntil = null;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const updatedNews = await prisma.news.update({
       where: { slug },
       data: {
@@ -216,6 +270,8 @@ export const updateNews: RequestHandler = async (req, res) => {
         isPublished: isPublished === "true" || isPublished === true,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
+        isPinned: isPinned === "true" || isPinned === true || false,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(200).json(updatedNews);
@@ -235,6 +291,8 @@ export const updateNewsById: RequestHandler = async (req, res) => {
     metaTitle,
     metaDescription,
     slug,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     // Ищем новость по ID
@@ -256,6 +314,14 @@ export const updateNewsById: RequestHandler = async (req, res) => {
       }
     }
 
+    // Обработка даты закрепа: устанавливаем время на конец дня (23:59:59)
+    let processedPinnedUntil = pinnedUntil !== undefined ? null : existingNews.pinnedUntil;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const updatedNews = await prisma.news.update({
       where: { id: parseInt(id) },
       data: {
@@ -266,6 +332,8 @@ export const updateNewsById: RequestHandler = async (req, res) => {
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
         slug: slug || existingNews.slug,
+        isPinned: isPinned !== undefined ? (isPinned === "true" || isPinned === true) : existingNews.isPinned,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(200).json(updatedNews);

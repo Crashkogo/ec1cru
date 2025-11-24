@@ -40,14 +40,26 @@ export const getPromotions: RequestHandler = async (req, res) => {
 
     // Если передан take, используем старую логику для совместимости
     if (take) {
-      const promotions = await prisma.promotions.findMany({
-        orderBy: { createdAt: "desc" },
-        take: parseInt(take as string),
+      const allPromotions = await prisma.promotions.findMany({
+        take: parseInt(take as string) * 2,
         where: { isPublished: true },
       });
 
+      const now = new Date();
+      const pinnedPromotions = allPromotions.filter(
+        (item) => item.isPinned && item.pinnedUntil && new Date(item.pinnedUntil) >= now
+      );
+      const regularPromotions = allPromotions.filter(
+        (item) => !item.isPinned || !item.pinnedUntil || new Date(item.pinnedUntil) < now
+      );
+
+      pinnedPromotions.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+      regularPromotions.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+
+      const sortedPromotions = [...pinnedPromotions, ...regularPromotions].slice(0, parseInt(take as string));
+
       // Вычисляем актуальный статус для каждой акции
-      const promotionsWithActualStatus = promotions.map((promotion) => ({
+      const promotionsWithActualStatus = sortedPromotions.map((promotion) => ({
         ...promotion,
         status: calculatePromotionStatus(promotion.endDate),
       }));
@@ -89,15 +101,26 @@ export const getPromotions: RequestHandler = async (req, res) => {
       }
     }
 
-    const promotions = await prisma.promotions.findMany({
+    const allPromotions = await prisma.promotions.findMany({
       where,
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: takeNum,
     });
 
+    const now = new Date();
+    const pinnedPromotions = allPromotions.filter(
+      (item) => item.isPinned && item.pinnedUntil && new Date(item.pinnedUntil) >= now
+    );
+    const regularPromotions = allPromotions.filter(
+      (item) => !item.isPinned || !item.pinnedUntil || new Date(item.pinnedUntil) < now
+    );
+
+    pinnedPromotions.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+    regularPromotions.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+
+    const sortedPromotions = [...pinnedPromotions, ...regularPromotions];
+    const paginatedPromotions = sortedPromotions.slice(skip, skip + takeNum);
+
     // Вычисляем актуальный статус для каждой акции
-    const promotionsWithActualStatus = promotions.map((promotion) => ({
+    const promotionsWithActualStatus = paginatedPromotions.map((promotion) => ({
       ...promotion,
       status: calculatePromotionStatus(promotion.endDate),
     }));
@@ -186,6 +209,8 @@ export const createPromotion: RequestHandler = async (req, res) => {
     metaTitle,
     metaDescription,
     status,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     const existingPromotion = await prisma.promotions.findUnique({
@@ -195,6 +220,14 @@ export const createPromotion: RequestHandler = async (req, res) => {
       res.status(400).json({ message: "Slug already exists" });
       return;
     }
+
+    let processedPinnedUntil = null;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const newPromotion = await prisma.promotions.create({
       data: {
         title,
@@ -207,6 +240,8 @@ export const createPromotion: RequestHandler = async (req, res) => {
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
         status: status === "true" || status === true,
+        isPinned: isPinned === "true" || isPinned === true || false,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(201).json(newPromotion);
@@ -228,6 +263,8 @@ export const updatePromotion: RequestHandler = async (req, res) => {
     metaTitle,
     metaDescription,
     status,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     const existingPromotion = await prisma.promotions.findUnique({
@@ -237,6 +274,14 @@ export const updatePromotion: RequestHandler = async (req, res) => {
       res.status(404).json({ message: "Promotion not found" });
       return;
     }
+
+    let processedPinnedUntil = null;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const updatedPromotion = await prisma.promotions.update({
       where: { slug },
       data: {
@@ -250,6 +295,8 @@ export const updatePromotion: RequestHandler = async (req, res) => {
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
         status: status === "true" || status === true,
+        isPinned: isPinned === "true" || isPinned === true || false,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(200).json(updatedPromotion);
@@ -305,6 +352,8 @@ export const updatePromotionById: RequestHandler = async (req, res) => {
     slug,
     metaTitle,
     metaDescription,
+    isPinned,
+    pinnedUntil,
   } = req.body;
   try {
     // Ищем акцию по ID
@@ -328,6 +377,13 @@ export const updatePromotionById: RequestHandler = async (req, res) => {
       }
     }
 
+    let processedPinnedUntil = pinnedUntil !== undefined ? null : existingPromotion.pinnedUntil;
+    if (pinnedUntil) {
+      const date = new Date(pinnedUntil);
+      date.setHours(23, 59, 59, 999);
+      processedPinnedUntil = date;
+    }
+
     const updatedPromotion = await prisma.promotions.update({
       where: { id: parseInt(id) },
       data: {
@@ -343,6 +399,8 @@ export const updatePromotionById: RequestHandler = async (req, res) => {
         slug: slug || existingPromotion.slug,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
+        isPinned: isPinned !== undefined ? (isPinned === "true" || isPinned === true) : existingPromotion.isPinned,
+        pinnedUntil: processedPinnedUntil,
       },
     });
     res.status(200).json(updatedPromotion);
