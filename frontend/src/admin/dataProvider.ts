@@ -401,6 +401,44 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'employees') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'id',
+        _order: params.sort?.order || 'ASC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/employees?${stringify(query)}`;
+      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
+        url,
+        { headers }
+      );
+      return {
+        data: json,
+        total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+      };
+    }
+
+    if (resource === 'clients') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'id',
+        _order: params.sort?.order || 'ASC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/clients?${stringify(query)}`;
+      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
+        url,
+        { headers }
+      );
+      return {
+        data: json,
+        total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+      };
+    }
+
     return Promise.reject('Resource not supported');
   },
 
@@ -562,6 +600,32 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'employees') {
+      const url = `${apiUrl}/api/employees/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, { headers });
+        return { data: json };
+      } catch (error) {
+        console.error('GetOne employee error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch employee'
+        );
+      }
+    }
+
+    if (resource === 'clients') {
+      const url = `${apiUrl}/api/clients/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, { headers });
+        return { data: json };
+      } catch (error) {
+        console.error('GetOne client error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch client'
+        );
+      }
+    }
+
     return Promise.reject('Resource not supported');
   },
 
@@ -669,6 +733,24 @@ export const dataProvider: DataProvider = {
         ...json,
         id: json.id, // используем числовой ID
       }));
+      return { data };
+    }
+
+    if (resource === 'employees') {
+      const promises = params.ids.map((id) =>
+        fetchUtils.fetchJson(`${apiUrl}/api/employees/${id}`, { headers })
+      );
+      const results = await Promise.all(promises);
+      const data = results.map(({ json }) => json);
+      return { data };
+    }
+
+    if (resource === 'clients') {
+      const promises = params.ids.map((id) =>
+        fetchUtils.fetchJson(`${apiUrl}/api/clients/${id}`, { headers })
+      );
+      const results = await Promise.all(promises);
+      const data = results.map(({ json }) => json);
       return { data };
     }
 
@@ -814,6 +896,26 @@ export const dataProvider: DataProvider = {
 
     if (resource === 'tariff-plans') {
       const url = `${apiUrl}/api/admin/tariff-plans`;
+      const { json } = await fetchUtils.fetchJson(url, {
+        method: 'POST',
+        body: JSON.stringify(params.data),
+        headers,
+      });
+      return { data: json };
+    }
+
+    if (resource === 'employees') {
+      const url = `${apiUrl}/api/employees`;
+      const { json } = await fetchUtils.fetchJson(url, {
+        method: 'POST',
+        body: JSON.stringify(params.data),
+        headers,
+      });
+      return { data: json };
+    }
+
+    if (resource === 'clients') {
+      const url = `${apiUrl}/api/clients`;
       const { json } = await fetchUtils.fetchJson(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
@@ -1044,6 +1146,40 @@ export const dataProvider: DataProvider = {
         console.error('Update tariff plan error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to update tariff plan'
+        );
+      }
+    }
+
+    if (resource === 'employees') {
+      const url = `${apiUrl}/api/employees/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, {
+          method: 'PUT',
+          body: JSON.stringify(params.data),
+          headers,
+        });
+        return { data: json };
+      } catch (error) {
+        console.error('Update employee error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update employee'
+        );
+      }
+    }
+
+    if (resource === 'clients') {
+      const url = `${apiUrl}/api/clients/${params.id}`;
+      try {
+        const { json } = await fetchUtils.fetchJson(url, {
+          method: 'PUT',
+          body: JSON.stringify(params.data),
+          headers,
+        });
+        return { data: json };
+      } catch (error) {
+        console.error('Update client error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update client'
         );
       }
     }
@@ -1369,6 +1505,38 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'employees') {
+      const url = `${apiUrl}/api/employees/${params.id}`;
+      try {
+        await fetchUtils.fetchJson(url, {
+          method: 'DELETE',
+          headers,
+        });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete employee error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete employee'
+        );
+      }
+    }
+
+    if (resource === 'clients') {
+      const url = `${apiUrl}/api/clients/${params.id}`;
+      try {
+        await fetchUtils.fetchJson(url, {
+          method: 'DELETE',
+          headers,
+        });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete client error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete client'
+        );
+      }
+    }
+
     return Promise.reject('Resource not supported');
   },
 
@@ -1455,6 +1623,30 @@ export const dataProvider: DataProvider = {
               headers,
             }
           )
+        )
+      );
+      return { data: params.ids };
+    }
+
+    if (resource === 'employees') {
+      await Promise.all(
+        params.ids.map((id) =>
+          fetchUtils.fetchJson(`${apiUrl}/api/employees/${id}`, {
+            method: 'DELETE',
+            headers,
+          })
+        )
+      );
+      return { data: params.ids };
+    }
+
+    if (resource === 'clients') {
+      await Promise.all(
+        params.ids.map((id) =>
+          fetchUtils.fetchJson(`${apiUrl}/api/clients/${id}`, {
+            method: 'DELETE',
+            headers,
+          })
         )
       );
       return { data: params.ids };

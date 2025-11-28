@@ -56,6 +56,12 @@ import { TariffPlansEdit } from './TariffPlansEdit';
 import { CoursesList } from './CoursesList';
 import { CoursesCreate } from './CoursesCreate';
 import { CoursesEdit } from './CoursesEdit';
+import { EmployeesList } from './EmployeesList';
+import { EmployeesCreate } from './EmployeesCreate';
+import { EmployeesEdit } from './EmployeesEdit';
+import { ClientsList } from './ClientsList';
+import { ClientsCreate } from './ClientsCreate';
+import { ClientsEdit } from './ClientsEdit';
 import { i18nProvider } from '../../admin/i18nProvider';
 import LoginPage from './Login';
 
@@ -244,6 +250,8 @@ const Dashboard: React.FC = () => (
         show={UserShow}
         recordRepresentation="name"
       />
+      <Resource name="employees" list={EmployeesList} create={EmployeesCreate} edit={EmployeesEdit} />
+      <Resource name="clients" list={ClientsList} create={ClientsCreate} edit={ClientsEdit} />
       <CustomRoutes>
         <Route path="/events/:id/registrations" element={<EventRegistrationsList />} />
       </CustomRoutes>

@@ -229,3 +229,29 @@ model Testimonial {
 
   @@map("testimonials")
 }
+
+// Модель для сотрудников (справочник менеджеров для клиентов)
+model Employee {
+  id        Int      @id @default(autoincrement())
+  firstName String   // Имя
+  lastName  String   // Фамилия
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  clients   Client[] // Клиенты, прикрепленные к этому менеджеру
+
+  @@map("employees")
+}
+
+// Модель для клиентов (пользователей личного кабинета)
+model Client {
+  id           Int      @id @default(autoincrement())
+  inn          String   @unique // ИНН организации
+  name         String   // Наименование организации
+  passwordHash String   // Хеш пароля для входа
+  managerId    Int      // ID менеджера из таблицы Employee
+  manager      Employee @relation(fields: [managerId], references: [id]) // Связь с менеджером
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("clients")
+}

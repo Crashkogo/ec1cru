@@ -45,6 +45,9 @@ const TechMaintenance = React.lazy(() => import('./pages/TechMaintenance'));
 // Админка
 const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
 
+// Личный кабинет клиента
+const ClientCabinet = React.lazy(() => import('./pages/client/ClientCabinet'));
+
 // Создаем клиент для React Query
 const queryClient = new QueryClient();
 
@@ -75,6 +78,16 @@ function App() {
                 element={
                   <Suspense fallback={<PageLoading message="Загрузка админ-панели..." />}>
                     <Dashboard />
+                  </Suspense>
+                }
+              />
+
+              {/* Личный кабинет клиента */}
+              <Route
+                path="/client/*"
+                element={
+                  <Suspense fallback={<PageLoading message="Загрузка личного кабинета..." />}>
+                    <ClientCabinet />
                   </Suspense>
                 }
               />

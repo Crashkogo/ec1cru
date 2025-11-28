@@ -101,6 +101,16 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
       title: 'IT-Тарифы',
       path: '/admin/tariff-plans',
       icon: CogIcon
+    },
+    {
+      title: 'Сотрудники',
+      path: '/admin/employees',
+      icon: UsersIcon
+    },
+    {
+      title: 'Клиенты',
+      path: '/admin/clients',
+      icon: UserGroupIcon
     }
   ];
 
