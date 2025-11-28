@@ -3,6 +3,8 @@ import Header from './Header';
 import Footer from './Footer';
 import { NotificationProvider } from '../context/NotificationContext';
 import Notification from './Notification';
+import ScrollToTop from './ScrollToTop';
+import ScrollToTopOnRouteChange from './ScrollToTopOnRouteChange';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -19,6 +21,8 @@ const Layout: React.FC<LayoutProps> = ({ children, setShowLogin }) => {
                 </main>
                 <Footer />
                 <Notification />
+                <ScrollToTop />
+                <ScrollToTopOnRouteChange />
             </div>
         </NotificationProvider>
     );
