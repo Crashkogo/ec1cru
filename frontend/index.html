@@ -14,6 +14,8 @@
   <!-- БЕЗОПАСНОСТЬ: Content Security Policy (CSP) -->
   <!-- Защита от XSS атак через ограничение источников контента -->
   <!-- ПРИМЕЧАНИЕ: frame-ancestors в meta теге игнорируется браузером (должна быть в HTTP заголовке) -->
+  <!-- ВРЕМЕННО ОТКЛЮЧЕН ДЛЯ ТЕСТИРОВАНИЯ -->
+  <!--
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com;
@@ -26,6 +28,7 @@
     base-uri 'self';
     form-action 'self';
   " />
+  -->
 
   <!-- Preconnect для внешних ресурсов (быстрее подключение) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
