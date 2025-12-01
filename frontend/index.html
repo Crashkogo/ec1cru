@@ -14,21 +14,18 @@
   <!-- БЕЗОПАСНОСТЬ: Content Security Policy (CSP) -->
   <!-- Защита от XSS атак через ограничение источников контента -->
   <!-- ПРИМЕЧАНИЕ: frame-ancestors в meta теге игнорируется браузером (должна быть в HTTP заголовке) -->
-  <!-- ВРЕМЕННО ОТКЛЮЧЕН ДЛЯ ТЕСТИРОВАНИЯ -->
-  <!--
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com;
     img-src 'self' data: http: https: blob:;
-    connect-src 'self' http://localhost:* ws://localhost:* http://192.168.*:* ws://192.168.*:* https://www.google.com;
+    connect-src 'self' http: ws: https://www.google.com;
     frame-src 'self' https://www.google.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
   " />
-  -->
 
   <!-- Preconnect для внешних ресурсов (быстрее подключение) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
