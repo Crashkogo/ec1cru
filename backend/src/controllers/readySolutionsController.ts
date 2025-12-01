@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { prisma, slugify } from "../utils";
+import { sanitizeHTMLContent } from "../utils/sanitize.js";
 
 export const getPrograms: RequestHandler = async (req, res) => {
   try {
@@ -149,13 +150,16 @@ export const createReadySolution: RequestHandler = async (req, res) => {
       }
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedFullDescription = sanitizeHTMLContent(fullDescription);
+
     const solution = await prisma.readySolution.create({
       data: {
         type,
         freshSupport,
         title,
         shortDescription,
-        fullDescription,
+        fullDescription: sanitizedFullDescription,
         price: priceValue,
         images,
         isPublished,
@@ -207,6 +211,9 @@ export const updateReadySolution: RequestHandler = async (req, res) => {
       }
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedFullDescription = sanitizeHTMLContent(fullDescription);
+
     const solution = await prisma.readySolution.update({
       where: { slug },
       data: {
@@ -214,7 +221,7 @@ export const updateReadySolution: RequestHandler = async (req, res) => {
         freshSupport,
         title,
         shortDescription,
-        fullDescription,
+        fullDescription: sanitizedFullDescription,
         price: priceValue,
         images,
         isPublished,
@@ -395,6 +402,9 @@ export const updateReadySolutionById: RequestHandler = async (req, res) => {
       }
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedFullDescription = sanitizeHTMLContent(fullDescription);
+
     const solution = await prisma.readySolution.update({
       where: { id: parseInt(id) },
       data: {
@@ -402,7 +412,7 @@ export const updateReadySolutionById: RequestHandler = async (req, res) => {
         freshSupport,
         title,
         shortDescription,
-        fullDescription,
+        fullDescription: sanitizedFullDescription,
         price: priceValue,
         images,
         isPublished,

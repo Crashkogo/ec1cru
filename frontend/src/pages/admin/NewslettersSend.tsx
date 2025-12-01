@@ -117,8 +117,9 @@ const NewslettersSend: React.FC = () => {
 
     const fetchNewsletters = async () => {
         try {
+            // БЕЗОПАСНОСТЬ: HttpOnly cookies отправляются автоматически через withCredentials
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/posts/newsletters/all`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                withCredentials: true
             });
             setNewsletters(response.data);
         } catch (error) {
@@ -128,8 +129,9 @@ const NewslettersSend: React.FC = () => {
 
     const fetchQueueStatus = async () => {
         try {
+            // БЕЗОПАСНОСТЬ: HttpOnly cookies отправляются автоматически через withCredentials
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/posts/newsletters/queue/status`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                withCredentials: true
             });
             setQueueStatus(response.data);
         } catch (error) {
@@ -145,8 +147,9 @@ const NewslettersSend: React.FC = () => {
                 _sort: "createdAt",
                 _order: "DESC",
             };
+            // БЕЗОПАСНОСТЬ: HttpOnly cookies отправляются автоматически через withCredentials
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/posts/newsletters/campaigns?${stringify(query)}`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                withCredentials: true
             });
             setCampaigns(response.data);
         } catch (error) {
@@ -156,8 +159,9 @@ const NewslettersSend: React.FC = () => {
 
     const fetchRecentEvents = async () => {
         try {
+            // БЕЗОПАСНОСТЬ: HttpOnly cookies отправляются автоматически через withCredentials
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/posts/events/recent`, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                withCredentials: true
             });
             setEventsList(response.data);
         } catch (error) {
@@ -193,12 +197,11 @@ const NewslettersSend: React.FC = () => {
                 payload.scheduledAt = new Date(scheduledDate).toISOString();
             }
 
+            // БЕЗОПАСНОСТЬ: HttpOnly cookies отправляются автоматически через withCredentials
             const response = await axios.post(
                 `${import.meta.env.VITE_API_URL}/api/posts/newsletters/send`,
                 payload,
-                {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                }
+                { withCredentials: true }
             );
 
             setAlert({ type: 'success', message: response.data.message });
@@ -225,12 +228,11 @@ const NewslettersSend: React.FC = () => {
     const handleRetryCampaign = async (campaignId: number) => {
         setLoading(true);
         try {
+            // БЕЗОПАСНОСТЬ: HttpOnly cookies отправляются автоматически через withCredentials
             const response = await axios.post(
                 `${import.meta.env.VITE_API_URL}/api/posts/newsletters/campaigns/${campaignId}/retry`,
                 {},
-                {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                }
+                { withCredentials: true }
             );
 
             setAlert({ type: 'success', message: response.data.message });

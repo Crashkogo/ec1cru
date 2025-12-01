@@ -15,6 +15,7 @@ import { Editor } from '@tinymce/tinymce-react';
 import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import { transliterate } from '../../utils/transliterate';
+import { createTinyMCEUploadHandler } from '../../utils/tinymceUploadHandler';
 
 interface ContentInputProps {
     source: string;
@@ -89,8 +90,7 @@ const ContentInput = ({ source, label }: ContentInputProps) => {
                     base_url: '/tinymce',
                     suffix: '.min',
                     image_uploadtab: true,
-                    images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=company-life`,
-                    images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
+                    images_upload_handler: createTinyMCEUploadHandler('company-life'),
                     automatic_uploads: true,
                     file_picker_types: 'image',
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',

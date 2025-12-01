@@ -19,6 +19,7 @@ import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import axios from 'axios';
 import { transliterate } from '../../utils/transliterate';
+import { createTinyMCEUploadHandler } from '../../utils/tinymceUploadHandler';
 
 const ContentInput = ({ source, label, ...props }: any) => {
     const { setValue, watch } = useFormContext();
@@ -93,8 +94,7 @@ const ContentInput = ({ source, label, ...props }: any) => {
                     base_url: '/tinymce',
                     suffix: '.min',
                     image_uploadtab: true,
-                    images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=promotions`,
-                    images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
+                    images_upload_handler: createTinyMCEUploadHandler('promotions'),
                     automatic_uploads: true,
                     file_picker_types: 'image',
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
@@ -153,8 +153,6 @@ const PromotionsCreateToolbar = () => {
 
             // Если есть временные изображения, перемещаем их
             if (tempImages.length > 0) {
-                const token = localStorage.getItem('token');
-
                 // Обновляем контент, заменяя пути к изображениям
                 tempImages.forEach((tempUrl: string) => {
                     const newUrl = tempUrl.replace('/uploads/promotions/temp/', `/uploads/promotions/${data.slug}/`);
@@ -169,7 +167,7 @@ const PromotionsCreateToolbar = () => {
                         newSlug: data.slug,
                         entity: 'promotions',
                     },
-                    { headers: { Authorization: `Bearer ${token}` } }
+                    { withCredentials: true }
                 );
 
                 data.content = updatedContent;

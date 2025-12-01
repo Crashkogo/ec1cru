@@ -201,6 +201,19 @@ model TariffPlan {
   @@map("tariff_plans")
 }
 
+// Модель для тарифных планов 1С:ИТС (сопровождение 1С)
+model ItsTariffPlan {
+  id          Int      @id @default(autoincrement())
+  title       String   // Название тарифа (например "ПРОФ", "БАЗОВЫЙ")
+  rows        Json     // Массив строк: [{ text: string, color: string, isBold: boolean }]
+  order       Int      @default(0) // Порядок отображения
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("its_tariff_plans")
+}
+
 // Модель для курсов 1С
 model Course {
   id               Int      @id @default(autoincrement())

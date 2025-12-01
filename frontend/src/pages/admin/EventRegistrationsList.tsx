@@ -26,14 +26,10 @@ export const EventRegistrationsList = () => {
             if (!id) return;
 
             try {
-                const token = localStorage.getItem('token');
+                // БЕЗОПАСНОСТЬ: HttpOnly cookies отправляются автоматически через withCredentials
                 const response = await axios.get(
                     `${import.meta.env.VITE_API_URL}/api/posts/admin/events/registrations?eventId=${id}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
+                    { withCredentials: true }
                 );
                 console.log('Fetched registrations:', response.data);
                 setRegistrations(response.data);

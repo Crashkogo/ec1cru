@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import csImage from '../assets/cs.png';
 import { usePreloadOnHover, preloadOnIdle } from '../utils/preloadRoutes';
+import { sanitizeHTML } from '../utils/sanitize';
 import SubscribeForm from '../components/SubscribeForm';
 
 // Схема валидации Zod
@@ -803,7 +804,7 @@ const Home: React.FC = () => {
                 {/* Текст отзыва */}
                 <div
                   className="relative prose prose-lg max-w-none prose-headings:text-modern-gray-900 prose-p:text-modern-gray-700 prose-p:leading-relaxed mb-8"
-                  dangerouslySetInnerHTML={{ __html: randomTestimonial.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(randomTestimonial.content) }}
                 />
 
                 {/* Информация о компании */}

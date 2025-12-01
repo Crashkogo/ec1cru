@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../utils/index.js';
+import { sanitizeHTMLContent } from '../utils/sanitize.js';
 
 // Получить все отзывы (публичный доступ, только опубликованные)
 export const getTestimonials = async (req: Request, res: Response) => {
@@ -117,10 +118,13 @@ export const createTestimonial = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Slug already exists' });
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const testimonial = await prisma.testimonial.create({
       data: {
         companyName,
-        content,
+        content: sanitizedContent,
         slug,
         isPublished: isPublished ?? false,
       },
@@ -159,11 +163,14 @@ export const updateTestimonialById = async (req: Request, res: Response) => {
       }
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const testimonial = await prisma.testimonial.update({
       where: { id: parseInt(id) },
       data: {
         companyName,
-        content,
+        content: sanitizedContent,
         slug,
         isPublished,
       },

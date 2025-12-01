@@ -5,6 +5,7 @@ import { NotificationProvider } from '../context/NotificationContext';
 import Notification from './Notification';
 import ScrollToTop from './ScrollToTop';
 import ScrollToTopOnRouteChange from './ScrollToTopOnRouteChange';
+import CookieConsent from './CookieConsent';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -23,6 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children, setShowLogin }) => {
                 <Notification />
                 <ScrollToTop />
                 <ScrollToTopOnRouteChange />
+                <CookieConsent />
             </div>
         </NotificationProvider>
     );

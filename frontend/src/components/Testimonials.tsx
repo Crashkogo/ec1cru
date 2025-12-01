@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { sanitizeText } from '../utils/sanitize';
 import CallbackModal from './CallbackModal';
 
 /**
@@ -45,12 +46,9 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial }) => {
       </div>
 
       {/* Текст отзыва - показываем только первые 250 символов */}
-      <div
-        className="text-modern-gray-700 mb-6 line-clamp-6 leading-relaxed text-sm flex-grow"
-        dangerouslySetInnerHTML={{
-          __html: testimonial.content.replace(/<[^>]*>/g, '').substring(0, 250) + '...'
-        }}
-      />
+      <div className="text-modern-gray-700 mb-6 line-clamp-6 leading-relaxed text-sm flex-grow">
+        {sanitizeText(testimonial.content).substring(0, 250)}...
+      </div>
 
       {/* Информация о компании */}
       <div className="flex items-center justify-between">

@@ -55,7 +55,7 @@ class NewsletterService {
   }
 
   /**
-   * Преобразует картинки в Data URI (Base64) для встраивания в email
+   * БЕЗОПАСНОСТЬ: Преобразует картинки в Data URI (Base64) для встраивания в email
    * Это работает везде, включая localhost, так как картинки встроены в HTML
    */
   private convertImagesToDataUri(htmlContent: string): string {
@@ -66,12 +66,9 @@ class NewsletterService {
         // Путь к файлу на сервере
         const filePath = path.join(__dirname, "../../frontend/public/uploads", relativePath);
 
-        console.log(`[NewsletterService] Converting image to Data URI: ${relativePath}`);
-        console.log(`[NewsletterService] File path: ${filePath}`);
-
+        // БЕЗОПАСНОСТЬ: Удалено логирование путей файловой системы
         // Проверяем существование файла
         if (!fs.existsSync(filePath)) {
-          console.error(`[NewsletterService] Image file not found: ${filePath}`);
           // Возвращаем абсолютный URL как fallback
           return `${prefix}${quote}${FRONTEND_URL}/uploads/${relativePath}${quote}`;
         }
@@ -94,11 +91,10 @@ class NewsletterService {
 
         // Создаем Data URI
         const dataUri = `data:${mimeType};base64,${base64Image}`;
-        console.log(`[NewsletterService] Successfully converted to Data URI (${base64Image.length} bytes)`);
 
         return `${prefix}${quote}${dataUri}${quote}`;
       } catch (error) {
-        console.error(`[NewsletterService] Error converting image to Data URI:`, error);
+        // БЕЗОПАСНОСТЬ: Не логируем детали ошибок в production
         // В случае ошибки возвращаем абсолютный URL
         return `${prefix}${quote}${FRONTEND_URL}/uploads/${relativePath}${quote}`;
       }
@@ -108,7 +104,7 @@ class NewsletterService {
   }
 
   /**
-   * Преобразует относительные пути картинок в абсолютные URL
+   * БЕЗОПАСНОСТЬ: Преобразует относительные пути картинок в абсолютные URL
    * Используется как fallback или для предпросмотра
    */
   private convertImagesToAbsoluteUrls(htmlContent: string): string {
@@ -116,7 +112,7 @@ class NewsletterService {
 
     const updatedHtml = htmlContent.replace(imgRegex, (match, prefix, quote, path) => {
       const absoluteUrl = `${FRONTEND_URL}/uploads/${path}`;
-      console.log(`[NewsletterService] Converting image path: /uploads/${path} -> ${absoluteUrl}`);
+      // БЕЗОПАСНОСТЬ: Удалено логирование путей
       return `${prefix}${quote}${absoluteUrl}${quote}`;
     });
 

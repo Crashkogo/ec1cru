@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { ArrowRightIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
+import { ItsTariffPlan } from '../types/tariff';
 
 // Accordion компонент для длинных текстов
 const AccordionItem: React.FC<{
@@ -35,6 +36,30 @@ const AccordionItem: React.FC<{
 };
 
 const Support: React.FC = () => {
+  const [tariffs, setTariffs] = useState<ItsTariffPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Загрузка ИТС тарифов из API
+  useEffect(() => {
+    const fetchTariffs = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/its-tariff-plans`);
+        if (response.ok) {
+          const data = await response.json();
+          setTariffs(data);
+        } else {
+          console.error('Failed to fetch ITS tariffs, status:', response.status);
+        }
+      } catch (error) {
+        console.error('Failed to fetch ITS tariffs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTariffs();
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -157,24 +182,63 @@ const Support: React.FC = () => {
         </div>
       </section>
 
-      {/* Тарифные планы - плейсхолдер */}
+      {/* Тарифные планы ИТС */}
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-modern-primary-600 text-center mb-4">
             Тарифные планы
           </h2>
           <p className="text-center text-modern-gray-600 mb-10 max-w-3xl mx-auto">
-            Мы предлагаем гибкие тарифы для сопровождения 1С. Выберите оптимальный план для вашего бизнеса. Свяжитесь с нами для консультации.
+            Мы предлагаем гибкие тарифы для сопровождения 1С. Выберите оптимальный план для вашего бизнеса.
           </p>
 
-          <div className="max-w-5xl mx-auto bg-gradient-to-br from-modern-primary-50 to-modern-accent-50 rounded-xl p-8 text-center">
-            <p className="text-lg text-modern-gray-700 mb-6">
-              Раздел с детализацией тарифных планов находится в разработке.
-            </p>
-            <p className="text-modern-gray-600">
-              Для получения подробной информации о тарифах обращайтесь к нашим специалистам.
-            </p>
-          </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-modern-primary-600 mx-auto"></div>
+              <p className="mt-4 text-modern-gray-600">Загрузка тарифов...</p>
+            </div>
+          ) : tariffs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+              {tariffs.map((tariff) => (
+                <div
+                  key={tariff.id}
+                  className="bg-white rounded-xl shadow-modern hover:shadow-modern-lg transition-all duration-300 overflow-hidden border border-modern-gray-200"
+                >
+                  {/* Заголовок тарифа */}
+                  <div className="bg-gradient-to-r from-modern-primary-600 to-modern-primary-700 text-white p-4 text-center">
+                    <h3 className="text-xl font-bold">{tariff.title}</h3>
+                  </div>
+
+                  {/* Список строк тарифа */}
+                  <div className="p-4">
+                    <ul className="space-y-2">
+                      {tariff.rows.map((row, index) => (
+                        <li
+                          key={index}
+                          className="text-sm leading-relaxed"
+                          style={{
+                            color: row.color,
+                            fontWeight: row.isBold ? 'bold' : 'normal',
+                          }}
+                        >
+                          {row.text}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="max-w-5xl mx-auto bg-gradient-to-br from-modern-primary-50 to-modern-accent-50 rounded-xl p-8 text-center">
+              <p className="text-lg text-modern-gray-700 mb-6">
+                Тарифные планы пока не добавлены.
+              </p>
+              <p className="text-modern-gray-600">
+                Для получения подробной информации о тарифах обращайтесь к нашим специалистам.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 

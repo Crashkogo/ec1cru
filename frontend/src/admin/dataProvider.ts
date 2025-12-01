@@ -14,16 +14,21 @@ interface HttpError {
   body?: { message?: string };
 }
 
+// БЕЗОПАСНОСТЬ: HTTP fetch с автоматической отправкой HttpOnly cookies
+const httpClient = (url: string, options: any = {}) => {
+  // Добавляем credentials для отправки cookies с каждым запросом
+  const fetchOptions = {
+    ...options,
+    credentials: 'include', // ВАЖНО: Отправка HttpOnly cookies
+  };
+  return fetchUtils.fetchJson(url, fetchOptions);
+};
+
 export const dataProvider: DataProvider = {
   // Получение списка записей
   getList: async (resource, params) => {
     const pagination = params.pagination || { page: 1, perPage: 10 };
     const { page, perPage } = pagination;
-    const token = localStorage.getItem('token');
-    const headers = new Headers();
-    if (token) {
-      headers.append('Authorization', `Bearer ${token}`);
-    }
 
     if (resource === 'users') {
       const query = {
@@ -34,10 +39,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/users?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
       return {
         data: json,
         total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
@@ -53,10 +55,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/posts/admin/news?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
 
       // Оставляем оригинальный ID для React Admin
       const data = Array.isArray(json)
@@ -81,10 +80,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/admin/courses?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
 
       const data = Array.isArray(json)
         ? json.map((item) => ({
@@ -108,10 +104,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/posts/admin/events?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
 
       // Оставляем оригинальный ID для React Admin
       const data = Array.isArray(json)
@@ -136,10 +129,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/posts/admin/promotions?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
 
       // Оставляем оригинальный ID для React Admin
       const data = Array.isArray(json)
@@ -164,10 +154,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/posts/admin/company-life?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
 
       // Оставляем оригинальный ID для React Admin
       const data = Array.isArray(json)
@@ -192,10 +179,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/posts/admin/ready-solutions?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
 
       // Используем числовой ID для React Admin
       const data = Array.isArray(json)
@@ -220,10 +204,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/posts/admin/programs?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
 
       const data = Array.isArray(json) ? json : [json];
 
@@ -244,10 +225,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/posts/admin/newsletters?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
 
       const data = Array.isArray(json) ? json : [json];
 
@@ -266,10 +244,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/posts/admin/subscribers?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
 
       const data = Array.isArray(json) ? json : [json];
 
@@ -327,7 +302,7 @@ export const dataProvider: DataProvider = {
       console.log('Fetching from URL:', url);
 
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         console.log('Received data:', json);
 
         const data = Array.isArray(json) ? json : [json];
@@ -351,10 +326,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/posts/admin/testimonials?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
 
       const data = Array.isArray(json)
         ? json.map((item) => ({
@@ -381,10 +353,7 @@ export const dataProvider: DataProvider = {
       console.log('Fetching tariff-plans from:', url);
 
       try {
-        const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-          url,
-          { headers }
-        );
+        const { json, headers: responseHeaders } = await httpClient(url);
 
         console.log('Tariff-plans response:', json);
         console.log('X-Total-Count header:', responseHeaders.get('X-Total-Count'));
@@ -401,6 +370,35 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'its-tariff-plans') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'order',
+        _order: params.sort?.order || 'ASC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/admin/its-tariff-plans?${stringify(query)}`;
+      console.log('Fetching its-tariff-plans from:', url);
+
+      try {
+        const { json, headers: responseHeaders } = await httpClient(url);
+
+        console.log('ITS-tariff-plans response:', json);
+        console.log('X-Total-Count header:', responseHeaders.get('X-Total-Count'));
+
+        const data = Array.isArray(json) ? json : [json];
+
+        return {
+          data,
+          total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+        };
+      } catch (error) {
+        console.error('Error fetching its-tariff-plans:', error);
+        throw error;
+      }
+    }
+
     if (resource === 'employees') {
       const query = {
         _start: ((page - 1) * perPage).toString(),
@@ -410,10 +408,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/employees?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
       return {
         data: json,
         total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
@@ -429,10 +424,7 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
       const url = `${apiUrl}/api/clients?${stringify(query)}`;
-      const { json, headers: responseHeaders } = await fetchUtils.fetchJson(
-        url,
-        { headers }
-      );
+      const { json, headers: responseHeaders } = await httpClient(url);
       return {
         data: json,
         total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
@@ -444,15 +436,9 @@ export const dataProvider: DataProvider = {
 
   // Получение одной записи
   getOne: async (resource, params) => {
-    const token = localStorage.getItem('token');
-    const headers = new Headers();
-    if (token) {
-      headers.append('Authorization', `Bearer ${token}`);
-    }
-
     if (resource === 'users') {
       const url = `${apiUrl}/api/users/${params.id}`;
-      const { json } = await fetchUtils.fetchJson(url, { headers });
+      const { json } = await httpClient(url);
       return { data: json };
     }
 
@@ -460,7 +446,7 @@ export const dataProvider: DataProvider = {
       // Для админки получаем новость по slug через обычный маршрут
       const url = `${apiUrl}/api/posts/admin/news/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: { ...json, id: json.id } }; // используем оригинальный ID
       } catch (error) {
         console.error('GetOne news error:', error);
@@ -473,7 +459,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'courses') {
       const url = `${apiUrl}/api/admin/courses/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: { ...json, id: json.id } };
       } catch (error) {
         console.error('GetOne course error:', error);
@@ -486,7 +472,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'events') {
       const url = `${apiUrl}/api/posts/admin/events/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: { ...json, id: json.id } }; // используем оригинальный ID
       } catch (error) {
         console.error('GetOne event error:', error);
@@ -499,7 +485,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'promotions') {
       const url = `${apiUrl}/api/posts/admin/promotions/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: { ...json, id: json.id } }; // используем оригинальный ID
       } catch (error) {
         console.error('GetOne promotion error:', error);
@@ -512,7 +498,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'company-life') {
       const url = `${apiUrl}/api/posts/admin/company-life/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: { ...json, id: json.id } }; // используем оригинальный ID
       } catch (error) {
         console.error('GetOne company-life error:', error);
@@ -525,7 +511,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'ready-solutions') {
       const url = `${apiUrl}/api/posts/admin/ready-solutions/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: { ...json, id: json.id } }; // используем числовой ID
       } catch (error) {
         console.error('GetOne ready solution error:', error);
@@ -538,7 +524,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'programs') {
       const url = `${apiUrl}/api/posts/admin/programs/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: json };
       } catch (error) {
         console.error('GetOne program error:', error);
@@ -551,7 +537,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'newsletters') {
       const url = `${apiUrl}/api/posts/admin/newsletters/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: json };
       } catch (error) {
         console.error('GetOne newsletter error:', error);
@@ -564,7 +550,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'subscribers') {
       const url = `${apiUrl}/api/posts/admin/subscribers/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: json };
       } catch (error) {
         console.error('GetOne subscriber error:', error);
@@ -577,7 +563,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'testimonials') {
       const url = `${apiUrl}/api/posts/admin/testimonials/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: { ...json, id: json.id } };
       } catch (error) {
         console.error('GetOne testimonial error:', error);
@@ -590,7 +576,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'tariff-plans') {
       const url = `${apiUrl}/api/admin/tariff-plans/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: json };
       } catch (error) {
         console.error('GetOne tariff plan error:', error);
@@ -600,10 +586,23 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'its-tariff-plans') {
+      const url = `${apiUrl}/api/admin/its-tariff-plans/${params.id}`;
+      try {
+        const { json } = await httpClient(url);
+        return { data: json };
+      } catch (error) {
+        console.error('GetOne its-tariff plan error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch its-tariff plan'
+        );
+      }
+    }
+
     if (resource === 'employees') {
       const url = `${apiUrl}/api/employees/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: json };
       } catch (error) {
         console.error('GetOne employee error:', error);
@@ -616,7 +615,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'clients') {
       const url = `${apiUrl}/api/clients/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, { headers });
+        const { json } = await httpClient(url);
         return { data: json };
       } catch (error) {
         console.error('GetOne client error:', error);
@@ -631,25 +630,17 @@ export const dataProvider: DataProvider = {
 
   // Получение нескольких записей по ID
   getMany: async (resource, params) => {
-    const token = localStorage.getItem('token');
-    const headers = new Headers();
-    if (token) {
-      headers.append('Authorization', `Bearer ${token}`);
-    }
-
     if (resource === 'users') {
       const query = { id: params.ids.join(',') };
       const url = `${apiUrl}/api/users?${stringify(query)}`;
-      const { json } = await fetchUtils.fetchJson(url, { headers });
+      const { json } = await httpClient(url);
       return { data: Array.isArray(json) ? json : [json] };
     }
 
     if (resource === 'news') {
       // Для новостей получаем каждую по отдельности через админский маршрут
       const promises = params.ids.map((id) =>
-        fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/news/${id}`, {
-          headers,
-        })
+        httpClient(`${apiUrl}/api/posts/admin/news/${id}`)
       );
       const results = await Promise.all(promises);
       const data = results.map(({ json }) => ({
@@ -661,9 +652,7 @@ export const dataProvider: DataProvider = {
 
     if (resource === 'courses') {
       const promises = params.ids.map((id) =>
-        fetchUtils.fetchJson(`${apiUrl}/api/admin/courses/${id}`, {
-          headers,
-        })
+        httpClient(`${apiUrl}/api/admin/courses/${id}`)
       );
       const results = await Promise.all(promises);
       const data = results.map(({ json }) => ({
@@ -676,9 +665,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'events') {
       // Для мероприятий получаем каждое по отдельности через админский маршрут
       const promises = params.ids.map((id) =>
-        fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/events/${id}`, {
-          headers,
-        })
+        httpClient(`${apiUrl}/api/posts/admin/events/${id}`)
       );
       const results = await Promise.all(promises);
       const data = results.map(({ json }) => ({
@@ -691,9 +678,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'promotions') {
       // Для акций получаем каждую по отдельности через админский маршрут
       const promises = params.ids.map((id) =>
-        fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/promotions/${id}`, {
-          headers,
-        })
+        httpClient(`${apiUrl}/api/posts/admin/promotions/${id}`)
       );
       const results = await Promise.all(promises);
       const data = results.map(({ json }) => ({
@@ -706,9 +691,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'company-life') {
       // Для постов о жизни компании получаем каждый по отдельности через админский маршрут
       const promises = params.ids.map((id) =>
-        fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/company-life/${id}`, {
-          headers,
-        })
+        httpClient(`${apiUrl}/api/posts/admin/company-life/${id}`)
       );
       const results = await Promise.all(promises);
       const data = results.map(({ json }) => ({
@@ -721,12 +704,7 @@ export const dataProvider: DataProvider = {
     if (resource === 'ready-solutions') {
       // Для готовых решений получаем каждое по отдельности через админский маршрут
       const promises = params.ids.map((id) =>
-        fetchUtils.fetchJson(
-          `${apiUrl}/api/posts/admin/ready-solutions/${id}`,
-          {
-            headers,
-          }
-        )
+        httpClient(`${apiUrl}/api/posts/admin/ready-solutions/${id}`)
       );
       const results = await Promise.all(promises);
       const data = results.map(({ json }) => ({
@@ -738,7 +716,7 @@ export const dataProvider: DataProvider = {
 
     if (resource === 'employees') {
       const promises = params.ids.map((id) =>
-        fetchUtils.fetchJson(`${apiUrl}/api/employees/${id}`, { headers })
+        httpClient(`${apiUrl}/api/employees/${id}`)
       );
       const results = await Promise.all(promises);
       const data = results.map(({ json }) => json);
@@ -747,7 +725,7 @@ export const dataProvider: DataProvider = {
 
     if (resource === 'clients') {
       const promises = params.ids.map((id) =>
-        fetchUtils.fetchJson(`${apiUrl}/api/clients/${id}`, { headers })
+        httpClient(`${apiUrl}/api/clients/${id}`)
       );
       const results = await Promise.all(promises);
       const data = results.map(({ json }) => json);
@@ -761,11 +739,6 @@ export const dataProvider: DataProvider = {
   getManyReference: async (resource, params) => {
     const pagination = params.pagination || { page: 1, perPage: 10 };
     const { page, perPage } = pagination;
-    const token = localStorage.getItem('token');
-    const headers = new Headers();
-    if (token) {
-      headers.append('Authorization', `Bearer ${token}`);
-    }
 
     if (resource === 'users') {
       const query = {
@@ -774,7 +747,7 @@ export const dataProvider: DataProvider = {
         limit: perPage.toString(),
       };
       const url = `${apiUrl}/api/users?${stringify(query)}`;
-      const { json } = await fetchUtils.fetchJson(url, { headers });
+      const { json } = await httpClient(url);
       return { data: json, total: json.total || json.length };
     }
 
@@ -788,138 +761,128 @@ export const dataProvider: DataProvider = {
 
   // Создание новой записи
   create: async (resource, params) => {
-    const token = localStorage.getItem('token');
-    const headers = new Headers();
-    if (token) {
-      headers.append('Authorization', `Bearer ${token}`);
-    }
-
     if (resource === 'users') {
       const url = `${apiUrl}/api/users/register`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: json.user };
     }
 
     if (resource === 'news') {
       const url = `${apiUrl}/api/posts/news`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: { ...json, id: json.id } }; // используем оригинальный ID
     }
 
     if (resource === 'courses') {
       const url = `${apiUrl}/api/courses`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: { ...json, id: json.id } };
     }
 
     if (resource === 'events') {
       const url = `${apiUrl}/api/posts/events`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: { ...json, id: json.id } }; // используем оригинальный ID
     }
 
     if (resource === 'promotions') {
       const url = `${apiUrl}/api/posts/promotions`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: { ...json, id: json.id } }; // используем оригинальный ID
     }
 
     if (resource === 'company-life') {
       const url = `${apiUrl}/api/posts/company-life`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: { ...json, id: json.id } }; // используем оригинальный ID
     }
 
     if (resource === 'ready-solutions') {
       const url = `${apiUrl}/api/posts/admin/ready-solutions`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: { ...json, id: json.id } }; // используем числовой ID
     }
 
     if (resource === 'programs') {
       const url = `${apiUrl}/api/posts/admin/programs`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: json };
     }
 
     if (resource === 'newsletters') {
       const url = `${apiUrl}/api/posts/newsletters`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: json };
     }
 
     if (resource === 'testimonials') {
       const url = `${apiUrl}/api/posts/testimonials`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: { ...json, id: json.id } };
     }
 
     if (resource === 'tariff-plans') {
       const url = `${apiUrl}/api/admin/tariff-plans`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
+      });
+      return { data: json };
+    }
+
+    if (resource === 'its-tariff-plans') {
+      const url = `${apiUrl}/api/admin/its-tariff-plans`;
+      const { json } = await httpClient(url, {
+        method: 'POST',
+        body: JSON.stringify(params.data),
       });
       return { data: json };
     }
 
     if (resource === 'employees') {
       const url = `${apiUrl}/api/employees`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: json };
     }
 
     if (resource === 'clients') {
       const url = `${apiUrl}/api/clients`;
-      const { json } = await fetchUtils.fetchJson(url, {
+      const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
-        headers,
       });
       return { data: json };
     }
@@ -929,12 +892,6 @@ export const dataProvider: DataProvider = {
 
   // Обновление записи
   update: async (resource, params) => {
-    const token = localStorage.getItem('token');
-    const headers = new Headers();
-    if (token) {
-      headers.append('Authorization', `Bearer ${token}`);
-    }
-
     if (resource === 'users') {
       const url = `${apiUrl}/api/users/${params.id}`;
       const data = {
@@ -943,10 +900,9 @@ export const dataProvider: DataProvider = {
         ...(params.data.password ? { password: params.data.password } : {}),
       };
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PUT',
           body: JSON.stringify(data),
-          headers,
         });
         return { data: json.user };
       } catch (error) {
@@ -961,10 +917,9 @@ export const dataProvider: DataProvider = {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/news/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: { ...json, id: json.id } }; // используем оригинальный ID
       } catch (error) {
@@ -978,10 +933,9 @@ export const dataProvider: DataProvider = {
     if (resource === 'courses') {
       const url = `${apiUrl}/api/admin/courses/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: { ...json, id: json.id } };
       } catch (error) {
@@ -996,10 +950,9 @@ export const dataProvider: DataProvider = {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/events/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: { ...json, id: json.id } }; // используем оригинальный ID
       } catch (error) {
@@ -1014,10 +967,9 @@ export const dataProvider: DataProvider = {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/promotions/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: { ...json, id: json.id } }; // используем оригинальный ID
       } catch (error) {
@@ -1032,10 +984,9 @@ export const dataProvider: DataProvider = {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/company-life/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: { ...json, id: json.id } }; // используем оригинальный ID
       } catch (error) {
@@ -1050,10 +1001,9 @@ export const dataProvider: DataProvider = {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/ready-solutions/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: { ...json, id: json.id } }; // используем числовой ID
       } catch (error) {
@@ -1068,10 +1018,9 @@ export const dataProvider: DataProvider = {
     if (resource === 'programs') {
       const url = `${apiUrl}/api/posts/admin/programs/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: json };
       } catch (error) {
@@ -1085,10 +1034,9 @@ export const dataProvider: DataProvider = {
     if (resource === 'newsletters') {
       const url = `${apiUrl}/api/posts/admin/newsletters/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: json };
       } catch (error) {
@@ -1102,10 +1050,9 @@ export const dataProvider: DataProvider = {
     if (resource === 'subscribers') {
       const url = `${apiUrl}/api/posts/admin/subscribers/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: json };
       } catch (error) {
@@ -1119,10 +1066,9 @@ export const dataProvider: DataProvider = {
     if (resource === 'testimonials') {
       const url = `${apiUrl}/api/posts/admin/testimonials/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PATCH',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: { ...json, id: json.id } };
       } catch (error) {
@@ -1136,10 +1082,9 @@ export const dataProvider: DataProvider = {
     if (resource === 'tariff-plans') {
       const url = `${apiUrl}/api/admin/tariff-plans/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PUT',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: json };
       } catch (error) {
@@ -1150,13 +1095,28 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'its-tariff-plans') {
+      const url = `${apiUrl}/api/admin/its-tariff-plans/${params.id}`;
+      try {
+        const { json } = await httpClient(url, {
+          method: 'PUT',
+          body: JSON.stringify(params.data),
+        });
+        return { data: json };
+      } catch (error) {
+        console.error('Update its-tariff plan error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update its-tariff plan'
+        );
+      }
+    }
+
     if (resource === 'employees') {
       const url = `${apiUrl}/api/employees/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PUT',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: json };
       } catch (error) {
@@ -1170,10 +1130,9 @@ export const dataProvider: DataProvider = {
     if (resource === 'clients') {
       const url = `${apiUrl}/api/clients/${params.id}`;
       try {
-        const { json } = await fetchUtils.fetchJson(url, {
+        const { json } = await httpClient(url, {
           method: 'PUT',
           body: JSON.stringify(params.data),
-          headers,
         });
         return { data: json };
       } catch (error) {
@@ -1189,12 +1148,6 @@ export const dataProvider: DataProvider = {
 
   // Обновление нескольких записей
   updateMany: async (resource, params) => {
-    const token = localStorage.getItem('token');
-    const headers = new Headers();
-    if (token) {
-      headers.append('Authorization', `Bearer ${token}`);
-    }
-
     if (resource === 'users') {
       const data = {
         name: params.data.name,
@@ -1203,10 +1156,9 @@ export const dataProvider: DataProvider = {
       };
       const results = await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/users/${id}`, {
+          httpClient(`${apiUrl}/api/users/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
-            headers,
           })
         )
       );
@@ -1217,10 +1169,9 @@ export const dataProvider: DataProvider = {
       // Используем админские маршруты с ID
       const results = await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/news/${id}`, {
+          httpClient(`${apiUrl}/api/posts/admin/news/${id}`, {
             method: 'PATCH',
             body: JSON.stringify(params.data),
-            headers,
           })
         )
       );
@@ -1231,10 +1182,9 @@ export const dataProvider: DataProvider = {
       // Используем админские маршруты с ID
       const results = await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/events/${id}`, {
+          httpClient(`${apiUrl}/api/posts/admin/events/${id}`, {
             method: 'PATCH',
             body: JSON.stringify(params.data),
-            headers,
           })
         )
       );
@@ -1245,10 +1195,9 @@ export const dataProvider: DataProvider = {
       // Используем админские маршруты с ID
       const results = await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/promotions/${id}`, {
+          httpClient(`${apiUrl}/api/posts/admin/promotions/${id}`, {
             method: 'PATCH',
             body: JSON.stringify(params.data),
-            headers,
           })
         )
       );
@@ -1259,10 +1208,9 @@ export const dataProvider: DataProvider = {
       // Используем админские маршруты с ID
       const results = await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/company-life/${id}`, {
+          httpClient(`${apiUrl}/api/posts/admin/company-life/${id}`, {
             method: 'PATCH',
             body: JSON.stringify(params.data),
-            headers,
           })
         )
       );
@@ -1273,14 +1221,10 @@ export const dataProvider: DataProvider = {
       // Используем админские маршруты с ID
       const results = await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(
-            `${apiUrl}/api/posts/admin/ready-solutions/${id}`,
-            {
-              method: 'PATCH',
-              body: JSON.stringify(params.data),
-              headers,
-            }
-          )
+          httpClient(`${apiUrl}/api/posts/admin/ready-solutions/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(params.data),
+          })
         )
       );
       return { data: results.map(({ json }) => json.id) };
@@ -1294,19 +1238,11 @@ export const dataProvider: DataProvider = {
     resource: string,
     params: DeleteParams<RecordType>
   ): Promise<DeleteResult<RecordType>> => {
-    const token = localStorage.getItem('token');
-    const headers = new Headers();
-    if (token) {
-      headers.append('Authorization', `Bearer ${token}`);
-    }
-
     if (resource === 'users') {
       const url = `${apiUrl}/api/users/${params.id}`;
-      console.log('dataProvider.delete: token:', token);
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return {
           data: {
@@ -1327,9 +1263,8 @@ export const dataProvider: DataProvider = {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/news/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1343,9 +1278,8 @@ export const dataProvider: DataProvider = {
     if (resource === 'courses') {
       const url = `${apiUrl}/api/admin/courses/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1360,9 +1294,8 @@ export const dataProvider: DataProvider = {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/events/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1377,9 +1310,8 @@ export const dataProvider: DataProvider = {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/promotions/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1394,9 +1326,8 @@ export const dataProvider: DataProvider = {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/company-life/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1411,9 +1342,8 @@ export const dataProvider: DataProvider = {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/ready-solutions/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1428,9 +1358,8 @@ export const dataProvider: DataProvider = {
     if (resource === 'programs') {
       const url = `${apiUrl}/api/posts/admin/programs/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1444,9 +1373,8 @@ export const dataProvider: DataProvider = {
     if (resource === 'newsletters') {
       const url = `${apiUrl}/api/posts/admin/newsletters/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1460,9 +1388,8 @@ export const dataProvider: DataProvider = {
     if (resource === 'subscribers') {
       const url = `${apiUrl}/api/posts/admin/subscribers/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1476,9 +1403,8 @@ export const dataProvider: DataProvider = {
     if (resource === 'testimonials') {
       const url = `${apiUrl}/api/posts/admin/testimonials/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1492,9 +1418,8 @@ export const dataProvider: DataProvider = {
     if (resource === 'tariff-plans') {
       const url = `${apiUrl}/api/admin/tariff-plans/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1505,12 +1430,26 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'its-tariff-plans') {
+      const url = `${apiUrl}/api/admin/its-tariff-plans/${params.id}`;
+      try {
+        await httpClient(url, {
+          method: 'DELETE',
+        });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete its-tariff plan error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete its-tariff plan'
+        );
+      }
+    }
+
     if (resource === 'employees') {
       const url = `${apiUrl}/api/employees/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1524,9 +1463,8 @@ export const dataProvider: DataProvider = {
     if (resource === 'clients') {
       const url = `${apiUrl}/api/clients/${params.id}`;
       try {
-        await fetchUtils.fetchJson(url, {
+        await httpClient(url, {
           method: 'DELETE',
-          headers,
         });
         return { data: { id: params.id } as unknown as RecordType };
       } catch (error) {
@@ -1542,18 +1480,11 @@ export const dataProvider: DataProvider = {
 
   // Удаление нескольких записей
   deleteMany: async (resource, params) => {
-    const token = localStorage.getItem('token');
-    const headers = new Headers();
-    if (token) {
-      headers.append('Authorization', `Bearer ${token}`);
-    }
-
     if (resource === 'users') {
       await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/users/${id}`, {
+          httpClient(`${apiUrl}/api/users/${id}`, {
             method: 'DELETE',
-            headers,
           })
         )
       );
@@ -1564,9 +1495,8 @@ export const dataProvider: DataProvider = {
       // Используем админские маршруты с ID
       await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/news/${id}`, {
+          httpClient(`${apiUrl}/api/posts/admin/news/${id}`, {
             method: 'DELETE',
-            headers,
           })
         )
       );
@@ -1577,9 +1507,8 @@ export const dataProvider: DataProvider = {
       // Используем админские маршруты с ID
       await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/events/${id}`, {
+          httpClient(`${apiUrl}/api/posts/admin/events/${id}`, {
             method: 'DELETE',
-            headers,
           })
         )
       );
@@ -1590,9 +1519,8 @@ export const dataProvider: DataProvider = {
       // Используем админские маршруты с ID
       await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/promotions/${id}`, {
+          httpClient(`${apiUrl}/api/posts/admin/promotions/${id}`, {
             method: 'DELETE',
-            headers,
           })
         )
       );
@@ -1603,9 +1531,8 @@ export const dataProvider: DataProvider = {
       // Используем админские маршруты с ID
       await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/posts/admin/company-life/${id}`, {
+          httpClient(`${apiUrl}/api/posts/admin/company-life/${id}`, {
             method: 'DELETE',
-            headers,
           })
         )
       );
@@ -1616,13 +1543,9 @@ export const dataProvider: DataProvider = {
       // Используем админские маршруты с ID
       await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(
-            `${apiUrl}/api/posts/admin/ready-solutions/${id}`,
-            {
-              method: 'DELETE',
-              headers,
-            }
-          )
+          httpClient(`${apiUrl}/api/posts/admin/ready-solutions/${id}`, {
+            method: 'DELETE',
+          })
         )
       );
       return { data: params.ids };
@@ -1631,9 +1554,8 @@ export const dataProvider: DataProvider = {
     if (resource === 'employees') {
       await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/employees/${id}`, {
+          httpClient(`${apiUrl}/api/employees/${id}`, {
             method: 'DELETE',
-            headers,
           })
         )
       );
@@ -1643,9 +1565,8 @@ export const dataProvider: DataProvider = {
     if (resource === 'clients') {
       await Promise.all(
         params.ids.map((id) =>
-          fetchUtils.fetchJson(`${apiUrl}/api/clients/${id}`, {
+          httpClient(`${apiUrl}/api/clients/${id}`, {
             method: 'DELETE',
-            headers,
           })
         )
       );

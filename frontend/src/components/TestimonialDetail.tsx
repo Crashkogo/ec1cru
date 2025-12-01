@@ -8,6 +8,7 @@ import {
   ShareIcon,
   BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
+import { sanitizeHTML } from '../utils/sanitize';
 import CallbackModal from './CallbackModal';
 
 interface Testimonial {
@@ -205,7 +206,7 @@ const TestimonialDetail: React.FC = () => {
               <div className="px-8 lg:px-12 pb-12">
                 <div
                   className="prose prose-lg max-w-none prose-headings:text-modern-gray-900 prose-p:text-modern-gray-700 prose-a:text-modern-primary-600 prose-strong:text-modern-gray-900 prose-ul:text-modern-gray-700 prose-ol:text-modern-gray-700"
-                  dangerouslySetInnerHTML={{ __html: testimonial.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(testimonial.content) }}
                 />
               </div>
             </article>

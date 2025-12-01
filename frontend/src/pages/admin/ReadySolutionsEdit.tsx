@@ -17,6 +17,7 @@ import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography, Checkbox, FormGroup, FormControlLabel } from '@mui/material';
 import axios from 'axios';
 import { transliterate } from '../../utils/transliterate';
+import { createTinyMCEUploadHandler } from '../../utils/tinymceUploadHandler';
 
 const SERVER_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -94,8 +95,7 @@ const ContentInput = ({ source, label, ...props }: any) => {
                     base_url: '/tinymce',
                     suffix: '.min',
                     image_uploadtab: true,
-                    images_upload_url: `${SERVER_BASE_URL}/api/posts/upload-image?entity=ready-solutions`,
-                    images_upload_base_path: `${SERVER_BASE_URL}`,
+                    images_upload_handler: createTinyMCEUploadHandler('ready-solutions'),
                     automatic_uploads: true,
                     file_picker_types: 'image',
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
@@ -170,7 +170,6 @@ const ImageGalleryInput = ({ source, label, ...props }: any) => {
         const files = e.target.files;
         if (!files) return;
 
-        const token = localStorage.getItem('token');
         const uploadedImages: string[] = [];
 
         for (const file of Array.from(files)) {
@@ -183,9 +182,9 @@ const ImageGalleryInput = ({ source, label, ...props }: any) => {
                     formData,
                     {
                         headers: {
-                            Authorization: `Bearer ${token}`,
                             'Content-Type': 'multipart/form-data',
                         },
+                        withCredentials: true
                     }
                 );
                 // Сохраняем только относительный путь
@@ -281,10 +280,9 @@ const ProgramCheckboxes = ({ source, label, ...props }: any) => {
     const [selectedPrograms, setSelectedPrograms] = useState<number[]>([]);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
         axios
             .get(`${SERVER_BASE_URL}/api/posts/admin/programs`, {
-                headers: { Authorization: `Bearer ${token}` },
+                withCredentials: true
             })
             .then((response) => setPrograms(response.data))
             .catch((error) => console.error('Error fetching programs:', error));

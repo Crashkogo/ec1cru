@@ -24,3 +24,20 @@ export interface TariffPlan {
   createdAt: string;
   updatedAt: string;
 }
+
+// ИТС Тарифный план (для 1С:ИТС)
+export interface ItsTariffRow {
+  text: string;
+  color: string;
+  isBold: boolean;
+}
+
+export interface ItsTariffPlan {
+  id: number;
+  title: string;
+  rows: ItsTariffRow[];
+  order: number;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

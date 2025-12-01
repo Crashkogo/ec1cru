@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { prisma } from "../utils";
+import { sanitizeHTMLContent } from "../utils/sanitize.js";
 
 export const getCourseBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;
@@ -159,11 +160,15 @@ export const createCourse: RequestHandler = async (req, res) => {
       res.status(400).json({ message: "Slug already exists" });
       return;
     }
+
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const newCourse = await prisma.course.create({
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         isPublished: isPublished === "true" || isPublished === true,
         slug,
         metaTitle: metaTitle || null,
@@ -193,12 +198,16 @@ export const updateCourse: RequestHandler = async (req, res) => {
       res.status(404).json({ message: "Course not found" });
       return;
     }
+
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const updatedCourse = await prisma.course.update({
       where: { slug },
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         isPublished: isPublished === "true" || isPublished === true,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
@@ -242,12 +251,15 @@ export const updateCourseById: RequestHandler = async (req, res) => {
       }
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const updatedCourse = await prisma.course.update({
       where: { id: parseInt(id) },
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         isPublished: isPublished === "true" || isPublished === true,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,

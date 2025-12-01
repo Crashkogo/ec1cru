@@ -11,22 +11,27 @@ import * as subscribersController from "../controllers/subscribersController";
 import * as callbackController from '../controllers/callbackController';
 import { RequestHandler } from "express";
 import { authMiddleware } from "../middleware/authMiddleware";
+import { requireAdmin } from "../middleware/rbacMiddleware";
 
 const router = express.Router();
 
 // Маршрут для заказа обратного звонка
 router.post("/callback", callbackController.sendCallback as RequestHandler)
 
-
+// ========== БЕЗОПАСНОСТЬ: Загрузка файлов доступна только администраторам ==========
 // Маршруты для картинок в постах
-router.post("/upload-image", uploadController.uploadImage as RequestHandler);
-router.post("/move-images", uploadController.moveImagesAfterCreate);
+router.post("/upload-image", authMiddleware, requireAdmin, uploadController.uploadImage as RequestHandler);
+router.post("/move-images", authMiddleware, requireAdmin, uploadController.moveImagesAfterCreate);
 router.post(
   "/upload-gallery-image",
+  authMiddleware,
+  requireAdmin,
   uploadController.uploadGalleryImage as RequestHandler
 );
 router.post(
   "/move-gallery-images",
+  authMiddleware,
+  requireAdmin,
   uploadController.moveGalleryImagesAfterCreate
 );
 
@@ -37,50 +42,59 @@ router.post(
 router.get("/news", newsController.getNews as RequestHandler);
 router.get("/news/:slug", newsController.getNewsBySlug as RequestHandler);
 
-// Админские маршруты
+// БЕЗОПАСНОСТЬ: Админские маршруты доступны только администраторам
 router.get(
   "/admin/news",
   authMiddleware,
+  requireAdmin,
   newsController.getAllNews as RequestHandler
 );
 router.get(
   "/news/all",
   authMiddleware,
+  requireAdmin,
   newsController.getAllNews as RequestHandler
 );
 router.get(
   "/admin/news/:id",
   authMiddleware,
+  requireAdmin,
   newsController.getNewsById as RequestHandler
 );
 router.post(
   "/news",
   authMiddleware,
+  requireAdmin,
   newsController.createNews as RequestHandler
 );
 router.put(
   "/news/:slug",
   authMiddleware,
+  requireAdmin,
   newsController.updateNews as RequestHandler
 );
 router.put(
   "/news/id/:id",
   authMiddleware,
+  requireAdmin,
   newsController.updateNewsById as RequestHandler
 );
 router.patch(
   "/admin/news/:id",
   authMiddleware,
+  requireAdmin,
   newsController.updateNewsById as RequestHandler
 );
 router.delete(
   "/news/id/:id",
   authMiddleware,
+  requireAdmin,
   newsController.deleteNewsById as RequestHandler
 );
 router.delete(
   "/admin/news/:id",
   authMiddleware,
+  requireAdmin,
   newsController.deleteNewsById as RequestHandler
 );
 
@@ -91,50 +105,59 @@ router.delete(
 router.get("/company-life", companyLifeController.getCompanyLife as RequestHandler);
 router.get("/company-life/:slug", companyLifeController.getCompanyLifeBySlug as RequestHandler);
 
-// Админские маршруты
+// БЕЗОПАСНОСТЬ: Админские маршруты доступны только администраторам
 router.get(
   "/admin/company-life",
   authMiddleware,
+  requireAdmin,
   companyLifeController.getAllCompanyLife as RequestHandler
 );
 router.get(
   "/company-life/all",
   authMiddleware,
+  requireAdmin,
   companyLifeController.getAllCompanyLife as RequestHandler
 );
 router.get(
   "/admin/company-life/:id",
   authMiddleware,
+  requireAdmin,
   companyLifeController.getCompanyLifeById as RequestHandler
 );
 router.post(
   "/company-life",
   authMiddleware,
+  requireAdmin,
   companyLifeController.createCompanyLife as RequestHandler
 );
 router.put(
   "/company-life/:slug",
   authMiddleware,
+  requireAdmin,
   companyLifeController.updateCompanyLife as RequestHandler
 );
 router.put(
   "/company-life/id/:id",
   authMiddleware,
+  requireAdmin,
   companyLifeController.updateCompanyLifeById as RequestHandler
 );
 router.patch(
   "/admin/company-life/:id",
   authMiddleware,
+  requireAdmin,
   companyLifeController.updateCompanyLifeById as RequestHandler
 );
 router.delete(
   "/company-life/id/:id",
   authMiddleware,
+  requireAdmin,
   companyLifeController.deleteCompanyLifeById as RequestHandler
 );
 router.delete(
   "/admin/company-life/:id",
   authMiddleware,
+  requireAdmin,
   companyLifeController.deleteCompanyLifeById as RequestHandler
 );
 
@@ -150,56 +173,66 @@ router.post(
   eventsController.registerForEvent as RequestHandler
 );
 
-// Админские маршруты
+// БЕЗОПАСНОСТЬ: Админские маршруты доступны только администраторам
 router.get(
   "/admin/events",
   authMiddleware,
+  requireAdmin,
   eventsController.getAllEvents as RequestHandler
 );
 router.get(
   "/events/all",
   authMiddleware,
+  requireAdmin,
   eventsController.getAllEvents as RequestHandler
 );
 // ВАЖНО: этот роут должен быть ПЕРЕД /admin/events/:id
 router.get(
   "/admin/events/registrations",
   authMiddleware,
+  requireAdmin,
   eventsController.getEventRegistrationsByEventId as RequestHandler
 );
 router.get(
   "/admin/events/:id",
   authMiddleware,
+  requireAdmin,
   eventsController.getEventById as RequestHandler
 );
 router.get(
   "/events/:slug/registrations",
   authMiddleware,
+  requireAdmin,
   eventsController.getEventRegistrations as RequestHandler
 );
 router.post(
   "/events",
   authMiddleware,
+  requireAdmin,
   eventsController.createEvent as RequestHandler
 );
 router.put(
   "/events/id/:id",
   authMiddleware,
+  requireAdmin,
   eventsController.updateEventById as RequestHandler
 );
 router.patch(
   "/admin/events/:id",
   authMiddleware,
+  requireAdmin,
   eventsController.updateEventById as RequestHandler
 );
 router.delete(
   "/events/id/:id",
   authMiddleware,
+  requireAdmin,
   eventsController.deleteEventById as RequestHandler
 );
 router.delete(
   "/admin/events/:id",
   authMiddleware,
+  requireAdmin,
   eventsController.deleteEventById as RequestHandler
 );
 
@@ -213,45 +246,53 @@ router.get(
   promotionsController.getPromotionBySlug as RequestHandler
 );
 
-// Админские маршруты
+// БЕЗОПАСНОСТЬ: Админские маршруты доступны только администраторам
 router.get(
   "/admin/promotions",
   authMiddleware,
+  requireAdmin,
   promotionsController.getAllPromotions as RequestHandler
 );
 router.get(
   "/promotions/all",
   authMiddleware,
+  requireAdmin,
   promotionsController.getAllPromotions as RequestHandler
 );
 router.get(
   "/admin/promotions/:id",
   authMiddleware,
+  requireAdmin,
   promotionsController.getPromotionById as RequestHandler
 );
 router.post(
   "/promotions",
   authMiddleware,
+  requireAdmin,
   promotionsController.createPromotion as RequestHandler
 );
 router.put(
   "/promotions/id/:id",
   authMiddleware,
+  requireAdmin,
   promotionsController.updatePromotionById as RequestHandler
 );
 router.patch(
   "/admin/promotions/:id",
   authMiddleware,
+  requireAdmin,
   promotionsController.updatePromotionById as RequestHandler
 );
 router.delete(
   "/promotions/id/:id",
   authMiddleware,
+  requireAdmin,
   promotionsController.deletePromotionById as RequestHandler
 );
 router.delete(
   "/admin/promotions/:id",
   authMiddleware,
+  requireAdmin,
   promotionsController.deletePromotionById as RequestHandler
 );
 
@@ -268,50 +309,59 @@ router.get(
   readySolutionsController.getReadySolutionById as RequestHandler
 );
 
-// Админские маршруты
+// БЕЗОПАСНОСТЬ: Админские маршруты доступны только администраторам
 router.get(
   "/admin/ready-solutions",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.getAllReadySolutions as RequestHandler
 );
 router.get(
   "/ready-solutions/all",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.getAllReadySolutions as RequestHandler
 );
 router.get(
   "/admin/ready-solutions/:id",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.getReadySolutionById as RequestHandler
 );
 router.post(
   "/ready-solutions",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.createReadySolution as RequestHandler
 );
 router.post(
   "/admin/ready-solutions",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.createReadySolution as RequestHandler
 );
 router.put(
   "/ready-solutions/:id",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.updateReadySolution as RequestHandler
 );
 router.patch(
   "/admin/ready-solutions/:id",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.updateReadySolutionById as RequestHandler
 );
 router.delete(
   "/ready-solutions/:id",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.deleteReadySolution as RequestHandler
 );
 router.delete(
   "/admin/ready-solutions/:id",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.deleteReadySolutionById as RequestHandler
 );
 
@@ -321,50 +371,58 @@ router.delete(
 // Публичный эндпоинт для получения списка программ (без авторизации)
 router.get("/programs", readySolutionsController.getPrograms as RequestHandler);
 
-// Админские эндпоинты для программ (с авторизацией)
+// БЕЗОПАСНОСТЬ: Админские эндпоинты для программ (с авторизацией)
 router.get(
   "/admin/programs",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.getPrograms as RequestHandler
 );
 router.get(
   "/admin/programs/:id",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.getProgramById as RequestHandler
 );
 router.post(
   "/admin/programs",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.createProgram as RequestHandler
 );
 router.patch(
   "/admin/programs/:id",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.updateProgramById as RequestHandler
 );
 router.delete(
   "/admin/programs/:id",
   authMiddleware,
+  requireAdmin,
   readySolutionsController.deleteProgramById as RequestHandler
 );
 
 // =============================================================================
 // ШАБЛОНЫ РАССЫЛОК
 // =============================================================================
-// Публичные маршруты
+// БЕЗОПАСНОСТЬ: Все маршруты рассылок доступны только администраторам
 router.get(
   "/newsletters",
+  authMiddleware,
+  requireAdmin,
   newsletterController.getNewsletters as RequestHandler
 );
-
-// Админские маршруты
 router.get(
   "/admin/newsletters",
+  authMiddleware,
+  requireAdmin,
   newsletterController.getNewsletters as RequestHandler
 );
 router.get(
   "/newsletters/all",
   authMiddleware,
+  requireAdmin,
   newsletterController.getAllNewsletters as RequestHandler
 );
 
@@ -375,31 +433,37 @@ router.get(
 router.get(
   "/newsletters/campaigns",
   authMiddleware,
+  requireAdmin,
   newsletterController.getCampaigns as RequestHandler
 );
 router.post(
   "/newsletters/send",
   authMiddleware,
+  requireAdmin,
   newsletterController.sendNewsletter as RequestHandler
 );
 router.get(
   "/newsletters/queue/status",
   authMiddleware,
+  requireAdmin,
   newsletterController.getQueueStatus as RequestHandler
 );
 router.post(
   "/newsletters/process-scheduled",
   authMiddleware,
+  requireAdmin,
   newsletterController.processScheduledNewsletters as RequestHandler
 );
 router.post(
   "/newsletters/campaigns/:id/retry",
   authMiddleware,
+  requireAdmin,
   newsletterController.retryCampaign as RequestHandler
 );
 router.get(
   "/newsletters/:id/preview",
   authMiddleware,
+  requireAdmin,
   newsletterController.previewNewsletter as RequestHandler
 );
 
@@ -407,35 +471,43 @@ router.get(
 router.get(
   "/newsletters/:id",
   authMiddleware,
+  requireAdmin,
   newsletterController.getNewsletterById as RequestHandler
 );
 router.get(
   "/admin/newsletters/:id",
   authMiddleware,
+  requireAdmin,
   newsletterController.getNewsletterById as RequestHandler
 );
 router.post(
   "/newsletters",
+  authMiddleware,
+  requireAdmin,
   newsletterController.createNewsletter as RequestHandler
 );
 router.put(
   "/newsletters/:id",
   authMiddleware,
+  requireAdmin,
   newsletterController.updateNewsletterById as RequestHandler
 );
 router.patch(
   "/admin/newsletters/:id",
   authMiddleware,
+  requireAdmin,
   newsletterController.updateNewsletterById as RequestHandler
 );
 router.delete(
   "/newsletters/:id",
   authMiddleware,
+  requireAdmin,
   newsletterController.deleteNewsletterById as RequestHandler
 );
 router.delete(
   "/admin/newsletters/:id",
   authMiddleware,
+  requireAdmin,
   newsletterController.deleteNewsletterById as RequestHandler
 );
 
@@ -447,35 +519,39 @@ router.post(
   "/subscribers",
   subscribersController.subscribeEmail as RequestHandler
 );
-router.delete(
-  "/subscribers/:id",
-  subscribersController.unsubscribeEmail as RequestHandler
-);
 
-// Админские маршруты
+// БЕЗОПАСНОСТЬ: DELETE /subscribers/:id удален - используйте GET /unsubscribe?token=... для публичной отписки
+// Прямая отписка по ID доступна только администраторам через DELETE /subscribers/:id (см. ниже)
+
+// БЕЗОПАСНОСТЬ: Админские маршруты доступны только администраторам
 router.get(
   "/subscribers",
   authMiddleware,
+  requireAdmin,
   subscribersController.getSubscribers as RequestHandler
 );
 router.get(
   "/admin/subscribers",
   authMiddleware,
+  requireAdmin,
   subscribersController.getSubscribers as RequestHandler
 );
 router.get(
   "/admin/subscribers/:id",
   authMiddleware,
+  requireAdmin,
   subscribersController.getSubscriberById as RequestHandler
 );
 router.patch(
   "/admin/subscribers/:id",
   authMiddleware,
+  requireAdmin,
   subscribersController.updateSubscriber as RequestHandler
 );
 router.delete(
   "/admin/subscribers/:id",
   authMiddleware,
+  requireAdmin,
   subscribersController.deleteSubscriber as RequestHandler
 );
 
@@ -492,30 +568,35 @@ router.get(
 router.get("/testimonials", testimonialController.getTestimonials as RequestHandler);
 router.get("/testimonials/:slug", testimonialController.getTestimonialBySlug as RequestHandler);
 
-// Админские маршруты
+// БЕЗОПАСНОСТЬ: Админские маршруты доступны только администраторам
 router.get(
   "/admin/testimonials",
   authMiddleware,
+  requireAdmin,
   testimonialController.getAllTestimonials as RequestHandler
 );
 router.get(
   "/admin/testimonials/:id",
   authMiddleware,
+  requireAdmin,
   testimonialController.getTestimonialById as RequestHandler
 );
 router.post(
   "/testimonials",
   authMiddleware,
+  requireAdmin,
   testimonialController.createTestimonial as RequestHandler
 );
 router.patch(
   "/admin/testimonials/:id",
   authMiddleware,
+  requireAdmin,
   testimonialController.updateTestimonialById as RequestHandler
 );
 router.delete(
   "/admin/testimonials/:id",
   authMiddleware,
+  requireAdmin,
   testimonialController.deleteTestimonialById as RequestHandler
 );
 

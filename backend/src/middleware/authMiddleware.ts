@@ -7,26 +7,34 @@ interface AuthenticatedRequest extends Request {
   user?: { id: number; role: string };
 }
 
+// ========== БЕЗОПАСНОСТЬ: Проверка JWT токенов ==========
+// Middleware проверяет наличие и валидность JWT токена из HttpOnly cookie или заголовка Authorization
 export const authMiddleware: RequestHandler = (req: AuthenticatedRequest, res, next) => {
-  const authHeader = req.headers.authorization;
-  console.log('AuthMiddleware: authHeader:', authHeader); // Отладка: заголовок авторизации
+  // БЕЗОПАСНОСТЬ: Приоритет - HttpOnly cookie (защита от XSS)
+  // Fallback - Authorization header (для совместимости и API клиентов)
+  let token = req.cookies?.authToken;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log('AuthMiddleware: No token provided');
+  // Если токена нет в cookie, проверяем заголовок Authorization (для обратной совместимости)
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.replace('Bearer ', '');
+    }
+  }
+
+  if (!token) {
     res.status(401).json({ message: 'Access denied. No token provided.' });
     return;
   }
 
-  const token = authHeader.replace('Bearer ', '');
-  console.log('AuthMiddleware: token:', token); // Отладка: извлечённый токен
-
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { id: number; role: string };
-    console.log('AuthMiddleware: decoded:', decoded); // Отладка: декодированный токен
     req.user = decoded;
     next();
   } catch (error) {
-    console.error('AuthMiddleware: Invalid token:', error); // Отладка: ошибка верификации
+    // БЕЗОПАСНОСТЬ: Не логируем детали токена или ошибки в production
+    // В development можно раскомментировать для отладки:
+    // console.error('Invalid token:', error);
     res.status(401).json({ message: 'Invalid token.' });
     return;
   }

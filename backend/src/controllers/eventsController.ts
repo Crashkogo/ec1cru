@@ -1,32 +1,65 @@
 import { RequestHandler } from "express";
 import { prisma, transporter, axios } from "../utils";
+import { CAPTCHA_SECRET } from "../config";
+import { sanitizeHTMLContent } from "../utils/sanitize.js";
 
 export const registerForEvent: RequestHandler = async (req, res) => {
   const { slug } = req.params;
   const { name, phone, email, organization, privacyConsent, recaptchaToken } =
     req.body;
 
+  // ========== БЕЗОПАСНОСТЬ: Проверка reCAPTCHA v3 ==========
   try {
+    // Проверка наличия токена
+    if (!recaptchaToken) {
+      res.status(400).json({ message: "reCAPTCHA token is required" });
+      return;
+    }
+
     const recaptchaResponse = await axios.post(
       "https://www.google.com/recaptcha/api/siteverify",
       null,
       {
         params: {
-          secret: process.env.CAPTCHA_SECRET,
+          secret: CAPTCHA_SECRET, // Используем секрет из config.ts
           response: recaptchaToken,
         },
+        timeout: 5000, // Таймаут 5 секунд
       }
     );
-    const { success, score } = recaptchaResponse.data;
-    if (!success || score < 0.5) {
-      res
-        .status(400)
-        .json({ message: "Ошибка проверки reCAPTCHA: подозрение на бота" });
+
+    const { success, score, 'error-codes': errorCodes } = recaptchaResponse.data;
+
+    // Логирование для отладки (убрать в production)
+    if (!success) {
+      console.warn('reCAPTCHA verification failed:', errorCodes);
+    }
+
+    // БЕЗОПАСНОСТЬ: Повышен порог score с 0.5 до 0.7 для лучшей защиты от ботов
+    if (!success || score < 0.7) {
+      res.status(400).json({
+        message: "Ошибка проверки reCAPTCHA: подозрение на бота",
+        score // Можно убрать в production
+      });
       return;
     }
   } catch (error) {
-    console.error("Error verifying reCAPTCHA:", error);
-    res.status(500).json({ message: "Ошибка проверки reCAPTCHA" });
+    // БЕЗОПАСНОСТЬ: Обработка ошибок сети при обращении к Google
+    if (axios.isAxiosError(error)) {
+      if (error.code === 'ECONNABORTED') {
+        console.error("reCAPTCHA verification timeout");
+        res.status(500).json({ message: "Ошибка проверки reCAPTCHA: timeout" });
+      } else if (error.response) {
+        console.error("reCAPTCHA API error:", error.response.status);
+        res.status(500).json({ message: "Ошибка проверки reCAPTCHA: API error" });
+      } else {
+        console.error("reCAPTCHA network error:", error.message);
+        res.status(500).json({ message: "Ошибка проверки reCAPTCHA: network error" });
+      }
+    } else {
+      console.error("Unexpected error verifying reCAPTCHA:", error);
+      res.status(500).json({ message: "Ошибка проверки reCAPTCHA" });
+    }
     return;
   }
 
@@ -465,12 +498,15 @@ export const updateEventById: RequestHandler = async (req, res) => {
       processedPinnedUntil = date;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const updatedEvent = await prisma.events.update({
       where: { id: parseInt(id) },
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         startDate: updatedStartDate,
         isPublished: isPublished === "true" || isPublished === true,
         status: status === "true" || status === true,
@@ -553,11 +589,14 @@ export const createEvent: RequestHandler = async (req, res) => {
       processedPinnedUntil = date;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const newEvent = await prisma.events.create({
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         startDate: parsedStartDate,
         isPublished: isPublished === "true" || isPublished === true,
         status: status === "true" || status === true,
@@ -633,12 +672,15 @@ export const updateEvent: RequestHandler = async (req, res) => {
       processedPinnedUntil = date;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const updatedEvent = await prisma.events.update({
       where: { slug },
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         startDate: updatedStartDate,
         isPublished: isPublished === "true" || isPublished === true,
         status: status === "true" || status === true,

@@ -18,6 +18,7 @@ import {
   PaperAirplaneIcon,
   ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
+import logo from '../assets/logo.png';
 
 interface AdminMenuProps {
   role: string;
@@ -25,6 +26,9 @@ interface AdminMenuProps {
 
 const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [postsOpen, setPostsOpen] = useState(false);
+  const [pagesOpen, setPagesOpen] = useState(false);
+  const [newslettersOpen, setNewslettersOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const logout = useLogout();
 
@@ -32,13 +36,14 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
     logout();
   };
 
-  const menuItems = [
-    {
-      title: 'Dashboard',
-      path: '/admin',
-      icon: HomeIcon,
-      exact: true
-    },
+  const dashboardItem = {
+    title: 'Dashboard',
+    path: '/admin',
+    icon: HomeIcon,
+    exact: true
+  };
+
+  const postsItems = [
     {
       title: 'Новости',
       path: '/admin/news',
@@ -58,6 +63,14 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
       title: 'Акции',
       path: '/admin/promotions',
       icon: GiftIcon
+    }
+  ];
+
+  const pagesItems = [
+    {
+      title: 'Готовые решения',
+      path: '/admin/ready-solutions',
+      icon: BuildingOffice2Icon
     },
     {
       title: 'Курсы',
@@ -68,12 +81,10 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
       title: 'Отзывы клиентов',
       path: '/admin/testimonials',
       icon: ChatBubbleLeftRightIcon
-    },
-    {
-      title: 'Готовые решения',
-      path: '/admin/ready-solutions',
-      icon: BuildingOffice2Icon
-    },
+    }
+  ];
+
+  const newslettersItems = [
     {
       title: 'Рассылки',
       path: '/admin/newsletters',
@@ -93,13 +104,18 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
 
   const settingsItems = [
     {
-      title: 'Программы',
+      title: 'Программы ГР',
       path: '/admin/programs',
       icon: CogIcon
     },
     {
       title: 'IT-Тарифы',
       path: '/admin/tariff-plans',
+      icon: CogIcon
+    },
+    {
+      title: 'ИТС Тарифы',
+      path: '/admin/its-tariff-plans',
       icon: CogIcon
     },
     {
@@ -114,8 +130,9 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
     }
   ];
 
+  // Добавляем пункт Пользователи для ADMIN и MODERATOR
   if (['ADMIN', 'MODERATOR'].includes(role)) {
-    menuItems.push({
+    settingsItems.unshift({
       title: 'Пользователи',
       path: '/admin/users',
       icon: UsersIcon
@@ -143,7 +160,19 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-modern-gray-200">
-        <h2 className="text-xl font-bold text-modern-gray-900">1С Админ</h2>
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-center hover:opacity-80 transition-opacity duration-200"
+          aria-label="Перейти на главную страницу сайта"
+        >
+          <img
+            src={logo}
+            alt="1C Support Logo"
+            className="h-12 w-auto transition-transform duration-200 group-hover:scale-105"
+          />
+        </a>
         <button
           onClick={() => setIsMobileOpen(false)}
           className="lg:hidden p-1.5 rounded-lg hover:bg-modern-gray-100 transition-colors duration-200"
@@ -154,11 +183,76 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        {menuItems.map((item) => (
-          <MenuItem key={item.path} item={item} />
-        ))}
+        {/* Dashboard */}
+        <MenuItem item={dashboardItem} />
 
-        {/* Settings Section */}
+        {/* Посты Section */}
+        <div className="pt-2">
+          <button
+            onClick={() => setPostsOpen(!postsOpen)}
+            className="group flex items-center w-full px-3 py-2.5 text-sm font-medium text-modern-gray-700 rounded-lg hover:bg-modern-gray-100 hover:text-modern-primary-600 transition-all duration-200"
+          >
+            <NewspaperIcon className="h-5 w-5 flex-shrink-0 mr-3" />
+            <span className="flex-1 text-left">Посты</span>
+            <ChevronDownIcon
+              className={`h-4 w-4 transition-transform duration-200 ${postsOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {postsOpen && (
+            <div className="mt-2 space-y-1">
+              {postsItems.map((item) => (
+                <MenuItem key={item.path} item={item} isSettings />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Страницы Section */}
+        <div className="pt-2">
+          <button
+            onClick={() => setPagesOpen(!pagesOpen)}
+            className="group flex items-center w-full px-3 py-2.5 text-sm font-medium text-modern-gray-700 rounded-lg hover:bg-modern-gray-100 hover:text-modern-primary-600 transition-all duration-200"
+          >
+            <BuildingOffice2Icon className="h-5 w-5 flex-shrink-0 mr-3" />
+            <span className="flex-1 text-left">Страницы</span>
+            <ChevronDownIcon
+              className={`h-4 w-4 transition-transform duration-200 ${pagesOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {pagesOpen && (
+            <div className="mt-2 space-y-1">
+              {pagesItems.map((item) => (
+                <MenuItem key={item.path} item={item} isSettings />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Управление рассылками Section */}
+        <div className="pt-2">
+          <button
+            onClick={() => setNewslettersOpen(!newslettersOpen)}
+            className="group flex items-center w-full px-3 py-2.5 text-sm font-medium text-modern-gray-700 rounded-lg hover:bg-modern-gray-100 hover:text-modern-primary-600 transition-all duration-200"
+          >
+            <EnvelopeIcon className="h-5 w-5 flex-shrink-0 mr-3" />
+            <span className="flex-1 text-left">Управление рассылками</span>
+            <ChevronDownIcon
+              className={`h-4 w-4 transition-transform duration-200 ${newslettersOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+
+          {newslettersOpen && (
+            <div className="mt-2 space-y-1">
+              {newslettersItems.map((item) => (
+                <MenuItem key={item.path} item={item} isSettings />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Настройки Section */}
         <div className="pt-4 border-t border-modern-gray-200 mt-4">
           <button
             onClick={() => setSettingsOpen(!settingsOpen)}
@@ -167,8 +261,7 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
             <CogIcon className="h-5 w-5 flex-shrink-0 mr-3" />
             <span className="flex-1 text-left">Настройки</span>
             <ChevronDownIcon
-              className={`h-4 w-4 transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''
-                }`}
+              className={`h-4 w-4 transition-transform duration-200 ${settingsOpen ? 'rotate-180' : ''}`}
             />
           </button>
 

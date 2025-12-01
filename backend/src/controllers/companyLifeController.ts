@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { prisma } from "../utils/index.js";
+import { sanitizeHTMLContent } from "../utils/sanitize.js";
 
 export const getCompanyLifeBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;
@@ -207,11 +208,14 @@ export const createCompanyLife: RequestHandler = async (req, res) => {
       processedPinnedUntil = date;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const newCompanyLife = await prisma.companyLife.create({
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         isPublished: isPublished === "true" || isPublished === true,
         slug,
         metaTitle: metaTitle || null,
@@ -253,12 +257,15 @@ export const updateCompanyLife: RequestHandler = async (req, res) => {
       processedPinnedUntil = date;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const updatedCompanyLife = await prisma.companyLife.update({
       where: { slug },
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         isPublished: isPublished === "true" || isPublished === true,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
@@ -313,12 +320,15 @@ export const updateCompanyLifeById: RequestHandler = async (req, res) => {
       processedPinnedUntil = date;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const updatedCompanyLife = await prisma.companyLife.update({
       where: { id: parseInt(id) },
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         isPublished: isPublished === "true" || isPublished === true,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,

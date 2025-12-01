@@ -11,6 +11,7 @@ import {
   CheckCircleIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
+import { sanitizeHTML } from '../utils/sanitize';
 
 interface Promotion {
   id: number;
@@ -240,7 +241,7 @@ const PromotionsDetail: React.FC = () => {
                     prose-code:bg-modern-gray-100 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-modern-gray-800
                     prose-pre:bg-modern-gray-900 prose-pre:text-modern-gray-100 prose-pre:rounded-lg prose-pre:p-6
                     prose-img:rounded-lg prose-img:shadow-modern"
-                  dangerouslySetInnerHTML={{ __html: promotion.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(promotion.content) }}
                 />
               </div>
 

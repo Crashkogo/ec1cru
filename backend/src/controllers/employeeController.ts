@@ -68,9 +68,15 @@ export const getEmployeeById: RequestHandler = async (req, res) => {
   }
 };
 
-// Создать нового сотрудника
+// БЕЗОПАСНОСТЬ: Создание сотрудников доступно только администраторам
 export const createEmployee: RequestHandler = async (req, res) => {
   try {
+    // Проверка роли администратора
+    if (req.user?.role !== 'ADMIN') {
+      res.status(403).json({ message: 'Forbidden: Only admins can create employees' });
+      return;
+    }
+
     const validatedData = createEmployeeSchema.parse(req.body);
     const { firstName, lastName } = validatedData;
 
@@ -89,9 +95,15 @@ export const createEmployee: RequestHandler = async (req, res) => {
   }
 };
 
-// Обновить сотрудника
+// БЕЗОПАСНОСТЬ: Обновление сотрудников доступно только администраторам
 export const updateEmployee: RequestHandler = async (req, res) => {
   try {
+    // Проверка роли администратора
+    if (req.user?.role !== 'ADMIN') {
+      res.status(403).json({ message: 'Forbidden: Only admins can update employees' });
+      return;
+    }
+
     const { id } = req.params;
     const validatedData = updateEmployeeSchema.parse(req.body);
     const { firstName, lastName } = validatedData;
@@ -121,9 +133,15 @@ export const updateEmployee: RequestHandler = async (req, res) => {
   }
 };
 
-// Удалить сотрудника
+// БЕЗОПАСНОСТЬ: Удаление сотрудников доступно только администраторам
 export const deleteEmployee: RequestHandler = async (req, res) => {
   try {
+    // Проверка роли администратора
+    if (req.user?.role !== 'ADMIN') {
+      res.status(403).json({ message: 'Forbidden: Only admins can delete employees' });
+      return;
+    }
+
     const { id } = req.params;
 
     const employee = await prisma.employee.findUnique({

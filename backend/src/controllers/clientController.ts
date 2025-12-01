@@ -91,9 +91,15 @@ export const getClientById: RequestHandler = async (req, res) => {
   }
 };
 
-// Создать нового клиента
+// БЕЗОПАСНОСТЬ: Создание клиентов доступно только администраторам
 export const createClient: RequestHandler = async (req, res) => {
   try {
+    // Проверка роли администратора
+    if (req.user?.role !== 'ADMIN') {
+      res.status(403).json({ message: 'Forbidden: Only admins can create clients' });
+      return;
+    }
+
     const validatedData = createClientSchema.parse(req.body);
     const { inn, name, password, managerId } = validatedData;
 
@@ -138,9 +144,15 @@ export const createClient: RequestHandler = async (req, res) => {
   }
 };
 
-// Обновить клиента
+// БЕЗОПАСНОСТЬ: Обновление клиентов доступно только администраторам
 export const updateClient: RequestHandler = async (req, res) => {
   try {
+    // Проверка роли администратора
+    if (req.user?.role !== 'ADMIN') {
+      res.status(403).json({ message: 'Forbidden: Only admins can update clients' });
+      return;
+    }
+
     const { id } = req.params;
     const validatedData = updateClientSchema.parse(req.body);
     const { inn, name, password, managerId } = validatedData;
@@ -191,9 +203,15 @@ export const updateClient: RequestHandler = async (req, res) => {
   }
 };
 
-// Удалить клиента
+// БЕЗОПАСНОСТЬ: Удаление клиентов доступно только администраторам
 export const deleteClient: RequestHandler = async (req, res) => {
   try {
+    // Проверка роли администратора
+    if (req.user?.role !== 'ADMIN') {
+      res.status(403).json({ message: 'Forbidden: Only admins can delete clients' });
+      return;
+    }
+
     const { id } = req.params;
 
     const client = await prisma.client.findUnique({
@@ -225,26 +243,24 @@ export const loginClient: RequestHandler = async (req, res) => {
     });
 
     if (!client) {
-      console.log('⚠️  Client login failed: Client not found -', inn);
+      // БЕЗОПАСНОСТЬ: Не логируем ИНН при неудачной попытке входа
       res.status(400).json({ message: 'Invalid credentials' });
       return;
     }
 
     const isPasswordValid = await bcrypt.compare(password, client.passwordHash);
     if (!isPasswordValid) {
-      console.log('⚠️  Client login failed: Invalid password for INN -', inn);
+      // БЕЗОПАСНОСТЬ: Не логируем ИНН при неудачной попытке входа
       res.status(400).json({ message: 'Invalid credentials' });
       return;
     }
 
-    // Создаем JWT токен для клиента с ролью CLIENT
+    // БЕЗОПАСНОСТЬ: Сокращён срок жизни токена с 30 дней до 7 дней
     const token = jwt.sign(
       { id: client.id, role: 'CLIENT', type: 'client' },
       JWT_SECRET,
-      { expiresIn: '30d' }
+      { expiresIn: '7d' }
     );
-
-    console.log('✅ Client login successful:', client.name, '- INN:', inn);
 
     res.status(200).json({
       message: 'Login successful',

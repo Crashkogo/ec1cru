@@ -2,6 +2,56 @@ import { RequestHandler } from "express";
 import { UploadedFile } from "express-fileupload";
 import { path, fs, __dirname } from "../utils";
 
+// ========== БЕЗОПАСНОСТЬ: Валидация загружаемых файлов ==========
+
+// Whitelist допустимых типов файлов (только изображения)
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp'
+];
+
+// Whitelist допустимых сущностей для загрузки
+const ALLOWED_ENTITIES = [
+  'news',
+  'company-life',
+  'events',
+  'promotions',
+  'ready-solutions',
+  'courses',
+  'testimonials',
+  'newsletters'
+];
+
+// Валидация slug - только буквы, цифры, дефисы и 'temp'
+const isValidSlug = (slug: string): boolean => {
+  return slug === 'temp' || /^[a-z0-9-]+$/i.test(slug);
+};
+
+// Функция валидации загружаемого файла
+const validateUploadedFile = (file: UploadedFile): { valid: boolean; error?: string } => {
+  // Проверка MIME типа
+  if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    return {
+      valid: false,
+      error: `Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`
+    };
+  }
+
+  // Дополнительная проверка расширения файла
+  const ext = path.extname(file.name).toLowerCase();
+  const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+  if (!allowedExtensions.includes(ext)) {
+    return {
+      valid: false,
+      error: `Invalid file extension. Allowed: ${allowedExtensions.join(', ')}`
+    };
+  }
+
+  return { valid: true };
+};
+
 // Функция для создания безопасного имени файла
 const createSafeFileName = (originalName: string): string => {
   // Получаем расширение файла
@@ -62,12 +112,20 @@ const createSafeFileName = (originalName: string): string => {
   return `${Date.now()}-${baseName}${ext}`;
 };
 
+// БЕЗОПАСНОСТЬ: Загрузка изображений доступна только администраторам
 export const uploadImage: RequestHandler = async (req, res) => {
   if (!req.files || !req.files.file) {
     res.status(400).json({ message: "No file uploaded" });
     return;
   }
   const file = req.files.file as UploadedFile;
+
+  // БЕЗОПАСНОСТЬ: Валидация типа файла
+  const validation = validateUploadedFile(file);
+  if (!validation.valid) {
+    res.status(400).json({ message: validation.error });
+    return;
+  }
 
   // Получаем slug из query параметров или body, по умолчанию "temp"
   const slug = (typeof req.query.slug === "string" ? req.query.slug : req.body.slug) || "temp";
@@ -76,6 +134,21 @@ export const uploadImage: RequestHandler = async (req, res) => {
     typeof req.query.entity === "string"
       ? req.query.entity
       : req.body.entity || "news";
+
+  // БЕЗОПАСНОСТЬ: Валидация entity и slug для предотвращения path traversal
+  if (!ALLOWED_ENTITIES.includes(entity)) {
+    res.status(400).json({
+      message: `Invalid entity. Allowed: ${ALLOWED_ENTITIES.join(', ')}`
+    });
+    return;
+  }
+
+  if (!isValidSlug(slug)) {
+    res.status(400).json({
+      message: "Invalid slug format. Only letters, numbers, and hyphens allowed"
+    });
+    return;
+  }
 
   const uploadDir = path.join(
     __dirname,
@@ -133,12 +206,21 @@ export const moveImagesAfterCreate: RequestHandler = async (req, res) => {
   }
 };
 
+// БЕЗОПАСНОСТЬ: Загрузка изображений галереи доступна только администраторам
 export const uploadGalleryImage: RequestHandler = async (req, res) => {
   if (!req.files || !req.files.image) {
     res.status(400).json({ message: "No image uploaded" });
     return;
   }
   const image = req.files.image as UploadedFile;
+
+  // БЕЗОПАСНОСТЬ: Валидация типа файла
+  const validation = validateUploadedFile(image);
+  if (!validation.valid) {
+    res.status(400).json({ message: validation.error });
+    return;
+  }
+
   const entity = "ready-solutions";
   const slug = "temp";
   const uploadDir = path.join(

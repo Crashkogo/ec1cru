@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { prisma } from "../utils";
+import { sanitizeHTMLContent } from "../utils/sanitize";
 
 export const getNewsBySlug: RequestHandler = async (req, res) => {
   const { slug } = req.params;
@@ -206,6 +207,9 @@ export const createNews: RequestHandler = async (req, res) => {
       return;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     // Обработка даты закрепа: устанавливаем время на конец дня (23:59:59)
     let processedPinnedUntil = null;
     if (pinnedUntil) {
@@ -218,7 +222,7 @@ export const createNews: RequestHandler = async (req, res) => {
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         isPublished: isPublished === "true" || isPublished === true,
         slug,
         metaTitle: metaTitle || null,
@@ -253,6 +257,9 @@ export const updateNews: RequestHandler = async (req, res) => {
       return;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     // Обработка даты закрепа: устанавливаем время на конец дня (23:59:59)
     let processedPinnedUntil = null;
     if (pinnedUntil) {
@@ -266,7 +273,7 @@ export const updateNews: RequestHandler = async (req, res) => {
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         isPublished: isPublished === "true" || isPublished === true,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,
@@ -314,6 +321,9 @@ export const updateNewsById: RequestHandler = async (req, res) => {
       }
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     // Обработка даты закрепа: устанавливаем время на конец дня (23:59:59)
     let processedPinnedUntil = pinnedUntil !== undefined ? null : existingNews.pinnedUntil;
     if (pinnedUntil) {
@@ -327,7 +337,7 @@ export const updateNewsById: RequestHandler = async (req, res) => {
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         isPublished: isPublished === "true" || isPublished === true,
         metaTitle: metaTitle || null,
         metaDescription: metaDescription || null,

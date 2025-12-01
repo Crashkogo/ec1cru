@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { prisma } from "../utils";
+import { sanitizeHTMLContent } from "../utils/sanitize.js";
 
 // Функция для вычисления актуального статуса акции на основе даты
 const calculatePromotionStatus = (endDate: Date): boolean => {
@@ -228,11 +229,14 @@ export const createPromotion: RequestHandler = async (req, res) => {
       processedPinnedUntil = date;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const newPromotion = await prisma.promotions.create({
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         isPublished: isPublished === "true" || isPublished === true,
@@ -282,12 +286,15 @@ export const updatePromotion: RequestHandler = async (req, res) => {
       processedPinnedUntil = date;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const updatedPromotion = await prisma.promotions.update({
       where: { slug },
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         isPublished: isPublished === "true" || isPublished === true,
@@ -384,12 +391,15 @@ export const updatePromotionById: RequestHandler = async (req, res) => {
       processedPinnedUntil = date;
     }
 
+    // БЕЗОПАСНОСТЬ: Санитизация HTML контента для защиты от XSS
+    const sanitizedContent = sanitizeHTMLContent(content);
+
     const updatedPromotion = await prisma.promotions.update({
       where: { id: parseInt(id) },
       data: {
         title,
         shortDescription,
-        content,
+        content: sanitizedContent,
         startDate: startDate
           ? new Date(startDate)
           : existingPromotion.startDate,

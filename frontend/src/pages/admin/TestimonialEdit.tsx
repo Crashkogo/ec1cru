@@ -18,6 +18,7 @@ import { Editor } from '@tinymce/tinymce-react';
 import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import axios from 'axios';
+import { createTinyMCEUploadHandler } from '../../utils/tinymceUploadHandler';
 
 interface ContentInputProps {
     source: string;
@@ -96,8 +97,7 @@ const ContentInput = ({ source, label }: ContentInputProps) => {
                     base_url: '/tinymce',
                     suffix: '.min',
                     image_uploadtab: true,
-                    images_upload_url: `${import.meta.env.VITE_API_URL}/api/posts/upload-image?entity=testimonials`,
-                    images_upload_base_path: `${import.meta.env.VITE_API_URL}`,
+                    images_upload_handler: createTinyMCEUploadHandler('testimonials'),
                     automatic_uploads: true,
                     file_picker_types: 'image',
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
@@ -126,8 +126,6 @@ const TestimonialEditToolbar = () => {
             let updatedContent = data.content;
 
             if (tempImagesList.length > 0) {
-                const token = localStorage.getItem('token');
-
                 tempImagesList.forEach((tempUrl: string) => {
                     const newUrl = tempUrl.replace('/uploads/testimonials/temp/', `/uploads/testimonials/${data.slug}/`);
                     updatedContent = updatedContent.replace(tempUrl, newUrl);
@@ -140,7 +138,7 @@ const TestimonialEditToolbar = () => {
                         newSlug: data.slug,
                         entity: 'testimonials',
                     },
-                    { headers: { Authorization: `Bearer ${token}` } }
+                    { withCredentials: true }
                 );
 
                 data.content = updatedContent;

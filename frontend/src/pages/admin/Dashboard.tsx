@@ -15,7 +15,11 @@ import { CssBaseline, Card, CardContent } from '@mui/material';
 import {
   NewspaperIcon,
   CalendarDaysIcon,
-  GiftIcon
+  GiftIcon,
+  BuildingOffice2Icon,
+  EnvelopeIcon,
+  UserGroupIcon,
+  PaperAirplaneIcon
 } from '@heroicons/react/24/outline';
 import AdminMenu from '../../components/AdminMenu';
 import { UserList } from './UserList';
@@ -48,11 +52,14 @@ import { SubscribersList } from './SubscribersList';
 import { SubscribersEdit } from './SubscribersEdit';
 import { EventRegistrationsList } from './EventRegistrationsList';
 import { TariffPlansList } from './TariffPlansList';
+import { TariffPlansCreate } from './TariffPlansCreate';
+import { TariffPlansEdit } from './TariffPlansEdit';
+import { ItsTariffPlansList } from './ItsTariffPlansList';
+import { ItsTariffPlansCreate } from './ItsTariffPlansCreate';
+import { ItsTariffPlansEdit } from './ItsTariffPlansEdit';
 import { TestimonialList } from './TestimonialList';
 import { TestimonialCreate } from './TestimonialCreate';
 import { TestimonialEdit } from './TestimonialEdit';
-import { TariffPlansCreate } from './TariffPlansCreate';
-import { TariffPlansEdit } from './TariffPlansEdit';
 import { CoursesList } from './CoursesList';
 import { CoursesCreate } from './CoursesCreate';
 import { CoursesEdit } from './CoursesEdit';
@@ -142,6 +149,25 @@ const theme = createTheme({
 // Главный Dashboard компонент
 const DashboardContent: React.FC = () => {
   const redirect = useRedirect();
+  const [subscribersCount, setSubscribersCount] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    // Получаем количество активных подписчиков
+    const fetchSubscribersCount = async () => {
+      try {
+        const result = await dataProvider.getList('subscribers', {
+          pagination: { page: 1, perPage: 1 },
+          sort: { field: 'id', order: 'ASC' },
+          filter: { isActive: true },
+        });
+        setSubscribersCount(result.total);
+      } catch (error) {
+        console.error('Ошибка при загрузке количества подписчиков:', error);
+      }
+    };
+
+    fetchSubscribersCount();
+  }, []);
 
   const handleCreateNews = () => {
     redirect('/admin/news/create');
@@ -155,6 +181,10 @@ const DashboardContent: React.FC = () => {
     redirect('/admin/promotions/create');
   };
 
+  const handleCreateCompanyLife = () => {
+    redirect('/admin/company-life/create');
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -163,32 +193,81 @@ const DashboardContent: React.FC = () => {
         <p className="text-modern-gray-600">Добро пожаловать в панель администратора ООО «Инженер-центр»</p>
       </div>
 
-      {/* Quick Actions */}
-      <div className="max-w-lg">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Quick Actions */}
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-modern-gray-900 mb-4">Быстрые действия</h3>
+            <h3 className="text-lg font-semibold text-modern-gray-900 mb-4">Быстрые действия: Создать</h3>
             <div className="space-y-3">
               <button
                 onClick={handleCreateNews}
                 className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
               >
                 <NewspaperIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Добавить новость</span>
+                <span className="font-medium text-modern-gray-900">Новость</span>
               </button>
               <button
                 onClick={handleCreateEvent}
                 className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
               >
                 <CalendarDaysIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Создать мероприятие</span>
+                <span className="font-medium text-modern-gray-900">Мероприятие</span>
+              </button>
+              <button
+                onClick={handleCreateCompanyLife}
+                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
+              >
+                <BuildingOffice2Icon className="h-5 w-5 text-modern-primary-600 mr-3" />
+                <span className="font-medium text-modern-gray-900">Наша жизнь</span>
               </button>
               <button
                 onClick={handleCreatePromotion}
                 className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
               >
                 <GiftIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Добавить акцию</span>
+                <span className="font-medium text-modern-gray-900">Акция</span>
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Newsletter Management */}
+        <Card>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold text-modern-gray-900 mb-4">Управление рассылками</h3>
+            <div className="mb-4 p-3 bg-modern-primary-50 rounded-lg">
+              <p className="text-sm text-modern-gray-700">
+                Количество подписчиков: <span className="font-bold text-modern-primary-700">{subscribersCount}</span>
+              </p>
+            </div>
+            <div className="space-y-3">
+              <button
+                onClick={() => redirect('/admin/newsletters')}
+                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
+              >
+                <EnvelopeIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
+                <span className="font-medium text-modern-gray-900">Рассылки</span>
+              </button>
+              <button
+                onClick={() => redirect('/admin/newsletters/create')}
+                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
+              >
+                <EnvelopeIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
+                <span className="font-medium text-modern-gray-900">Создать рассылку</span>
+              </button>
+              <button
+                onClick={() => redirect('/admin/newsletters-send')}
+                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
+              >
+                <PaperAirplaneIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
+                <span className="font-medium text-modern-gray-900">Отправка</span>
+              </button>
+              <button
+                onClick={() => redirect('/admin/subscribers')}
+                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
+              >
+                <UserGroupIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
+                <span className="font-medium text-modern-gray-900">Подписчики</span>
               </button>
             </div>
           </CardContent>
@@ -242,6 +321,7 @@ const Dashboard: React.FC = () => (
       <Resource name="subscribers" list={SubscribersList} edit={SubscribersEdit} />
       <Resource name="testimonials" list={TestimonialList} create={TestimonialCreate} edit={TestimonialEdit} />
       <Resource name="tariff-plans" list={TariffPlansList} create={TariffPlansCreate} edit={TariffPlansEdit} />
+      <Resource name="its-tariff-plans" list={ItsTariffPlansList} create={ItsTariffPlansCreate} edit={ItsTariffPlansEdit} />
       <Resource
         name="users"
         list={UserList}
