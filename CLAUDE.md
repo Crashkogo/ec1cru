@@ -1,227 +1,272 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Этот файл содержит руководство для Claude Code (claude.ai/code) при работе с кодом в данном репозитории.
 
-## Language Preference
+## Языковые предпочтения
 
-**IMPORTANT: Always respond in Russian language (Русский язык) when working in this repository.**
+**ВАЖНО: Всегда отвечайте на русском языке при работе с этим репозиторием.**
 
-## Development Workflow
+## Рабочий процесс разработки
 
-**IMPORTANT: NEVER check if backend or frontend servers are running, and NEVER attempt to start, restart, or build them.**
+**ВАЖНО: НИКОГДА не проверяйте, запущены ли серверы backend или frontend, и НИКОГДА не пытайтесь запускать, перезапускать или собирать их.**
 
-- The developer controls all server processes manually in separate terminals
-- Backend uses `tsx watch` for automatic hot-reload on file changes
-- Frontend uses Vite dev server with automatic hot-reload
-- The developer will manually restart servers if needed
-- DO NOT run `npm run build`, `npm run dev`, or any server management commands
-- Focus only on code changes - the developer handles the runtime environment
+- Разработчик управляет всеми процессами серверов вручную в отдельных терминалах
+- Backend использует `tsx watch` для автоматической горячей перезагрузки при изменении файлов
+- Frontend использует dev-сервер Vite с автоматической горячей перезагрузкой
+- Разработчик вручную перезапустит серверы при необходимости
+- НЕ запускайте команды `npm run build`, `npm run dev` или любые другие команды управления серверами
+- Сосредоточьтесь только на изменениях кода - разработчик управляет runtime-окружением
 
-## External Documentation
+## Внешняя документация
 
-**IMPORTANT: Always use MCP server Context7 for fetching up-to-date library documentation.**
+**ВАЖНО: Всегда используйте MCP-сервер Context7 для получения актуальной документации библиотек.**
 
-- When working with external libraries (React, Prisma, TinyMCE, etc.), use Context7 MCP tools
-- Available tools: `mcp__context7__resolve-library-id` and `mcp__context7__get-library-docs`
-- This ensures you're using the latest API and best practices
-- Example: For React documentation, resolve library ID first, then fetch docs
+- При работе с внешними библиотеками (React, Prisma, TinyMCE и т.д.) используйте инструменты Context7 MCP
+- Доступные инструменты: `mcp__context7__resolve-library-id` и `mcp__context7__get-library-docs`
+- Это гарантирует использование последних API и лучших практик
+- Пример: Для документации React сначала получите library ID, затем загрузите документацию
 
-## Project Overview
+## Обзор проекта
 
-Full-stack web application for a 1C consulting company with a public website and admin panel. Built with React + TypeScript frontend and Node.js + Express + Prisma backend.
+Full-stack веб-приложение для компании, занимающейся консалтингом 1С, с публичным сайтом и админ-панелью. Построено на React + TypeScript фронтенде и Node.js + Express + Prisma бэкенде.
 
-## Commands
+## Команды
 
-### Backend Development
+### Разработка Backend
 ```bash
 cd backend
-npm install          # Install dependencies
-npm run dev          # Development server with hot reload (tsx watch)
-npm run build        # Compile TypeScript to dist/
-npm run start        # Run production build
-npx prisma migrate dev  # Run database migrations
-npx prisma studio    # Open Prisma Studio GUI
+npm install          # Установка зависимостей
+npm run dev          # Dev-сервер с hot reload (tsx watch)
+npm run build        # Компиляция TypeScript в dist/
+npm run start        # Запуск production-сборки
+npx prisma migrate dev  # Запуск миграций базы данных
+npx prisma studio    # Открыть GUI Prisma Studio
 ```
 
-### Frontend Development
+### Разработка Frontend
 ```bash
 cd frontend
-npm install          # Install dependencies
-npm run dev          # Start Vite dev server
-npm run build        # Build for production
-npm run preview      # Preview production build
-npm run test         # Run Vitest tests
-npm run test:ui      # Run tests with UI
-npm run test:coverage # Generate coverage report
-npm run lint         # Run ESLint
+npm install          # Установка зависимостей
+npm run dev          # Запуск Vite dev-сервера
+npm run build        # Сборка для production
+npm run preview      # Просмотр production-сборки
+npm run test         # Запуск тестов Vitest
+npm run test:ui      # Запуск тестов с UI
+npm run test:coverage # Генерация отчета о покрытии
+npm run lint         # Запуск ESLint
 ```
 
-### Database Migrations
-When modifying the Prisma schema:
-1. Update `backend/prisma/schema.prisma`
-2. Run `npx prisma migrate dev --name description_of_change`
-3. Prisma Client auto-regenerates
+### Миграции базы данных
+При изменении схемы Prisma:
+1. Обновите `backend/prisma/schema.prisma`
+2. Выполните `npx prisma migrate dev --name описание_изменения`
+3. Prisma Client автоматически перегенерируется
 
-### Scheduled Jobs
-The newsletter processor script should run via cron:
+### Запланированные задачи
+Скрипт обработки рассылок должен запускаться через cron:
 ```bash
 node backend/dist/scripts/processScheduledNewsletters.js
 ```
 
-## Architecture
+## Архитектура
 
-### Backend Structure
+### Структура Backend
 
-**Three-Layer Architecture:**
-- **Routes** (`backend/src/routes/`) - Define HTTP endpoints, apply middleware
-- **Controllers** (`backend/src/controllers/`) - Business logic, validation, Prisma queries
-- **Services** (`backend/src/services/`) - Complex operations (email queue with rate limiting)
+**Трёхслойная архитектура:**
+- **Routes** (`backend/src/routes/`) - Определение HTTP-эндпоинтов, применение middleware
+- **Controllers** (`backend/src/controllers/`) - Бизнес-логика, валидация, Prisma-запросы
+- **Services** (`backend/src/services/`) - Сложные операции (очередь email с rate limiting)
 
-**Key Routes:**
-- `userRoutes.ts` - Authentication and user management
-- `postRoutes.ts` - Unified routes for all content (news, events, promotions, solutions)
+**Основные маршруты:**
+- `userRoutes.ts` - Аутентификация и управление пользователями
+- `postRoutes.ts` - Унифицированные маршруты для всего контента (новости, события, акции, решения)
+- `courseRoutes.ts` - Управление курсами 1С
+- `employeeRoutes.ts` - Управление сотрудниками (менеджерами)
+- `clientRoutes.ts` - Управление клиентами и личным кабинетом
+- `tariffPlanRoutes.ts` - Тарифные планы IT-аутсорсинга
+- `itsTariffPlanRoutes.ts` - Тарифные планы 1С:ИТС
 
-**Authentication:**
-- JWT tokens in `Authorization: Bearer <token>` header
+**Аутентификация:**
+- JWT-токены в заголовке `Authorization: Bearer <token>`
 - Middleware: `backend/src/middleware/authMiddleware.ts`
-- Token payload: `{ id: number, role: string }`, 30-day expiry
-- Roles: ADMIN, MODERATOR, EVENTORG, CLINE, ITS, DEVDEP
+- Payload токена: `{ id: number, role: string }`, срок действия 30 дней
+- Роли: ADMIN, MODERATOR, EVENTORG, CLINE, ITS, DEVDEP
 
-**Database Models (Prisma):**
-- `User` - Admin users with role-based access
-- `News` - News articles with SEO metadata
-- `Events` - Events with registration system (one-to-many with EventsRegistration)
-- `Promotions` - Marketing promotions with time bounds
-- `ReadySolution` - 1C solutions catalog (many-to-many with Program via SolutionProgram)
-- `Program` - 1C software programs
-- `NewsletterTemplate` - HTML email templates
-- `NewsletterSubscriber` - Email subscribers with unsubscribe tokens
-- `NewsletterCampaign` - Email campaigns with tracking
+**Модели базы данных (Prisma):**
+- `User` - Пользователи админ-панели с ролевым доступом
+- `News` - Новости с SEO-метаданными
+- `CompanyLife` - Публикации "Жизнь компании"
+- `Events` - События с системой регистрации (one-to-many с EventsRegistration)
+- `Promotions` - Маркетинговые акции с временными рамками
+- `ReadySolution` - Каталог готовых решений 1С (many-to-many с Program через SolutionProgram)
+- `Program` - Программы 1С
+- `NewsletterTemplate` - HTML-шаблоны email-рассылок
+- `NewsletterSubscriber` - Подписчики на рассылку с токенами отписки
+- `NewsletterCampaign` - Email-кампании с отслеживанием
+- `TariffPlan` - Тарифные планы IT-аутсорсинга
+- `ItsTariffPlan` - Тарифные планы 1С:ИТС (сопровождение 1С)
+- `Course` - Курсы обучения 1С
+- `Testimonial` - Отзывы клиентов
+- `Employee` - Сотрудники компании (менеджеры)
+- `Client` - Клиенты с доступом к личному кабинету
 
-**File Upload System:**
-Two-stage process to handle images uploaded before entity creation:
-1. Upload to `/uploads/{entity}/temp/`
-2. Move to `/uploads/{entity}/{slug}/` after entity creation with known slug
-3. Filenames are transliterated (Cyrillic → Latin) with timestamps
+**Система загрузки файлов:**
+Двухэтапный процесс для обработки изображений, загруженных до создания сущности:
+1. Загрузка в `/uploads/{entity}/temp/`
+2. Перемещение в `/uploads/{entity}/{slug}/` после создания сущности с известным slug
+3. Имена файлов транслитерируются (кириллица → латиница) с временными метками
 
-### Frontend Structure
+### Структура Frontend
 
-**Routing:**
-- Public routes wrapped in `<Layout>` component with header/footer
-- Admin routes at `/admin/*` handled by React-Admin (hash-based internally)
-- Detail pages use lazy loading with React.lazy() for code splitting
+**Маршрутизация:**
+- Публичные маршруты обёрнуты в компонент `<Layout>` с header/footer
+- Админ-маршруты по адресу `/admin/*` обрабатываются React-Admin (внутри используется hash-based routing)
+- Личный кабинет клиента по адресу `/client/*` (защищён аутентификацией клиента)
+- Страницы деталей используют ленивую загрузку с React.lazy() для code splitting
 
-**React-Admin Integration:**
-- Main config: `frontend/src/pages/admin/Dashboard.tsx`
-- Custom data provider: `frontend/src/admin/dataProvider.ts` maps React-Admin methods to backend API
-- Auth provider: `frontend/src/admin/authProvider.ts` handles JWT storage and verification
-- Each resource follows pattern: List, Create, Edit components
-- TinyMCE integration for rich text content editing
+**Интеграция React-Admin:**
+- Основная конфигурация: `frontend/src/pages/admin/Dashboard.tsx`
+- Кастомный data provider: `frontend/src/admin/dataProvider.ts` отображает методы React-Admin на backend API
+- Auth provider: `frontend/src/admin/authProvider.ts` управляет хранением JWT и проверкой
+- Каждый ресурс следует паттерну: компоненты List, Create, Edit
+- Интеграция TinyMCE для редактирования rich text контента
 
-**State Management:**
-- React Query (TanStack Query) for server state on public pages
-- React-Admin built-in state management for admin panel
+**Управление состоянием:**
+- React Query (TanStack Query) для серверного состояния на публичных страницах
+- Встроенное управление состоянием React-Admin для админ-панели
 
-### Key Patterns
+**Личный кабинет клиента:**
+- Отдельная система аутентификации для клиентов (отличная от админов)
+- Вход по ИНН и паролю
+- Разделы: Профиль, Финансы, Поддержка, Договоры
+- Layout с боковым меню и шапкой
 
-**Slug-Based URLs:**
-- All public content uses slugs for SEO: `/news/obnovlenie-1c-buhgalteriya`
-- Slugs auto-generated from title using `slugify` library
-- Admin panel uses numeric IDs internally
+### Ключевые паттерны
+
+**URL на основе slug:**
+- Весь публичный контент использует slug для SEO: `/news/obnovlenie-1c-buhgalteriya`
+- Slug автоматически генерируется из заголовка с помощью библиотеки `slugify`
+- Админ-панель использует числовые ID внутри
 
 **Many-to-Many: ReadySolution ↔ Program**
-- Join table: `SolutionProgram` with composite key [solutionId, programId]
-- When creating/updating solution, receive `programIds[]` array
-- Use Prisma nested creates to populate join table
-- Admin UI has multi-select for programs
+- Join-таблица: `SolutionProgram` с составным ключом [solutionId, programId]
+- При создании/обновлении решения получаем массив `programIds[]`
+- Используем вложенные создания Prisma для заполнения join-таблицы
+- UI админки имеет мультиселект для программ
 
-**Event Registration Flow:**
-1. User submits form with reCAPTCHA v3 verification (score ≥ 0.5)
-2. Create EventsRegistration record (cascade delete with event)
-3. Send confirmation email with event details and broadcast link
-4. Admin views registrations in React-Admin
+**Поток регистрации на события:**
+1. Пользователь отправляет форму с проверкой reCAPTCHA v3 (score ≥ 0.5)
+2. Создаётся запись EventsRegistration (cascade delete при удалении события)
+3. Отправляется email-подтверждение с деталями события и ссылкой на трансляцию
+4. Админ просматривает регистрации в React-Admin
 
-**Newsletter System:**
-- Template-based campaigns with two audience types: SUBSCRIBERS or EVENT_GUESTS
-- Email queue in `newsletterService.ts` with rate limiting (30/min, 1000/hr)
-- Batch processing: 5 emails at a time
-- JWT-based unsubscribe tokens in email footers
-- Scheduled campaigns processed by cron job script
+**Система рассылок:**
+- Кампании на основе шаблонов с двумя типами аудитории: SUBSCRIBERS или EVENT_GUESTS
+- Очередь email в `newsletterService.ts` с rate limiting (30/мин, 1000/час)
+- Пакетная обработка: 5 email за раз
+- JWT-токены отписки в футерах писем
+- Запланированные кампании обрабатываются cron-скриптом
 
-## Important Conventions
+**Система тарифов:**
+- IT-аутсорсинг: JSON-структура с колонками и строками таблицы
+- 1С:ИТС: JSON-массив строк с цветом и выделением
+- Управление через админ-панель с порядком отображения
+
+**Личный кабинет клиента:**
+- Аутентификация по ИНН + пароль
+- JWT-токен хранится в localStorage (ключ `clientToken`)
+- Привязка клиента к менеджеру (модель Employee)
+- Защищённые маршруты через PrivateRoute
+
+## Важные соглашения
 
 **TypeScript:**
-- ES Modules (`"type": "module"` in package.json)
-- Strict mode enabled
-- Use `import type` for type-only imports
+- ES Modules (`"type": "module"` в package.json)
+- Включён strict mode
+- Используйте `import type` для импорта только типов
 
-**Database:**
-- Prisma handles all database operations
-- No raw SQL queries
-- Use `include` for relations, avoid N+1 queries
-- Cascade deletes configured for dependent records (e.g., EventsRegistration when Event deleted)
+**База данных:**
+- Prisma обрабатывает все операции с БД
+- Нет сырых SQL-запросов
+- Используйте `include` для связей, избегайте N+1 запросов
+- Cascade delete настроены для зависимых записей (например, EventsRegistration при удалении Event)
 
-**API Design:**
-- Public routes: GET requests, no auth required
-- Admin routes: POST/PUT/PATCH/DELETE with `authMiddleware`
-- Pagination: `_start` and `_end` query params, return `X-Total-Count` header
-- Response format: JSON with consistent error handling
+**Дизайн API:**
+- Публичные маршруты: GET-запросы, авторизация не требуется
+- Админ-маршруты: POST/PUT/PATCH/DELETE с `authMiddleware`
+- Пагинация: параметры запроса `_start` и `_end`, возврат заголовка `X-Total-Count`
+- Формат ответа: JSON с согласованной обработкой ошибок
 
-**Environment Configuration:**
-- Backend: Load from `.env` via `dotenv` in `backend/src/config.ts`
-- Frontend: Vite env vars prefixed with `VITE_`
-- Required vars: DATABASE_URL, JWT_SECRET, CAPTCHA_SECRET, EMAIL_USER, EMAIL_PASS, FRONTEND_URL
+**Конфигурация окружения:**
+- Backend: Загрузка из `.env` через `dotenv` в `backend/src/config.ts`
+- Frontend: Переменные окружения Vite с префиксом `VITE_`
+- Обязательные переменные: DATABASE_URL, JWT_SECRET, CAPTCHA_SECRET, EMAIL_USER, EMAIL_PASS, FRONTEND_URL, UNSUBSCRIBE_SECRET, EMAIL_CALL_IN, EMAIL_CALL_OUT, EMAIL_PASS_OUT
 
-**File Uploads:**
-- Use `express-fileupload` middleware
-- Save to `frontend/public/uploads/{entity}/{slug}/` for permanent storage
-- Temp uploads go to `frontend/public/uploads/{entity}/temp/`
-- Static serving configured in Express: `app.use('/uploads', express.static(...))`
+**Загрузка файлов:**
+- Используется middleware `express-fileupload`
+- Сохранение в `frontend/public/uploads/{entity}/{slug}/` для постоянного хранения
+- Временные загрузки в `frontend/public/uploads/{entity}/temp/`
+- Статическая раздача настроена в Express: `app.use('/uploads', express.static(...))`
+- Ограничение размера: 5MB
+- Безопасные имена файлов с сохранением расширений
 
-**Email Sending:**
-- Use `nodemailer` configured in `backend/src/utils/index.ts`
-- All emails include unsubscribe link (except transactional)
-- Respect rate limits: 30/min, 1000/hr
-- Queue system prevents overwhelming SMTP server
+**Отправка email:**
+- Используется `nodemailer`, настроенный в `backend/src/utils/index.ts`
+- Все письма включают ссылку отписки (кроме транзакционных)
+- Соблюдаются лимиты: 30/мин, 1000/час
+- Система очередей предотвращает перегрузку SMTP-сервера
+- Два email-аккаунта: для входящих заявок (EMAIL_CALL_IN) и исходящих писем (EMAIL_CALL_OUT)
 
-**Content Editing:**
-- TinyMCE for rich text (stores HTML in database)
-- Image uploads via TinyMCE go through `/api/posts/upload-image` endpoint
-- Content sanitization: Relies on TinyMCE's built-in XSS protection
+**Редактирование контента:**
+- TinyMCE для rich text (хранит HTML в базе данных)
+- Загрузка изображений через TinyMCE идёт через эндпоинт `/api/posts/upload-image`
+- Санитизация контента: полагается на встроенную XSS-защиту TinyMCE
+- Дополнительная санитизация с помощью библиотеки `sanitize-html` в некоторых контроллерах
 
-## Security Notes
+## Примечания по безопасности
 
-- Passwords hashed with bcrypt (10 salt rounds)
-- SQL injection protected by Prisma parameterized queries
-- XSS: React auto-escapes, but stored HTML rendered with `dangerouslySetInnerHTML`
-- reCAPTCHA v3 for event registration forms
-- CORS configured to allow only `FRONTEND_URL` origin
-- File upload: Filenames sanitized to prevent path traversal
+- Пароли хешируются с помощью bcrypt (10 раундов соли)
+- SQL-инъекции защищены параметризованными запросами Prisma
+- XSS: React автоматически экранирует, но сохранённый HTML рендерится через `dangerouslySetInnerHTML`
+- reCAPTCHA v3 для форм регистрации на события
+- CORS настроен на разрешение только origin из `FRONTEND_URL`
+- Загрузка файлов: имена файлов санитизируются для предотвращения path traversal
+- Security headers: X-XSS-Protection, X-Content-Type-Options, X-Frame-Options, CSP frame-ancestors, Referrer-Policy, Permissions-Policy
+- Ограничение размера загружаемых файлов: 5MB
+- Раздельная аутентификация для админов и клиентов
 
-## Testing
+## Тестирование
 
-Frontend tests use Vitest + React Testing Library. Run tests from `frontend/` directory:
-- `npm run test` - Run all tests
-- `npm run test:ui` - Interactive test UI
-- `npm run test:coverage` - Generate coverage report
+Фронтенд-тесты используют Vitest + React Testing Library. Запуск тестов из директории `frontend/`:
+- `npm run test` - Запустить все тесты
+- `npm run test:ui` - Интерактивный UI тестов
+- `npm run test:coverage` - Сгенерировать отчёт о покрытии
 
-Currently no backend tests configured.
+Backend-тесты в настоящее время не настроены.
 
-## Deployment Considerations
+## Соображения по развёртыванию
 
-**Database:**
-- PostgreSQL required (local or hosted)
-- Run migrations before deploying: `npx prisma migrate deploy`
-- Generate Prisma Client in build: `npx prisma generate`
+**База данных:**
+- Требуется PostgreSQL (локальная или хостинговая)
+- Запустите миграции перед развёртыванием: `npx prisma migrate deploy`
+- Сгенерируйте Prisma Client в сборке: `npx prisma generate`
 
-**Scheduled Jobs:**
-- Set up cron for newsletter processor: `*/5 * * * * node backend/dist/scripts/processScheduledNewsletters.js`
+**Запланированные задачи:**
+- Настройте cron для обработчика рассылок: `*/5 * * * * node backend/dist/scripts/processScheduledNewsletters.js`
 
 **SMTP:**
-- Configure EMAIL_USER and EMAIL_PASS for Nodemailer
-- Current setup uses Timeweb SMTP (smtp.timeweb.ru:465)
+- Настройте EMAIL_USER, EMAIL_PASS, EMAIL_CALL_OUT, EMAIL_PASS_OUT для Nodemailer
+- Текущая настройка использует SMTP Timeweb (smtp.timeweb.ru:465)
 
-**Static Files:**
-- Backend serves uploads from `frontend/public/uploads`
-- Ensure upload directories exist and are writable
-- Consider CDN for production image serving
+**Статические файлы:**
+- Backend раздаёт загрузки из `frontend/public/uploads`
+- Убедитесь, что директории загрузок существуют и доступны для записи
+- Рассмотрите использование CDN для раздачи изображений в production
+
+## Логирование
+
+Backend использует Winston для логирования:
+- Логи пишутся в консоль и в файл `backend/logs/combined.log`
+- Уровни логирования: error, warn, info, http, debug
+- Логи ошибок отдельно в `backend/logs/error.log`
+- Используйте импортированный logger из `backend/src/utils/logger.ts`

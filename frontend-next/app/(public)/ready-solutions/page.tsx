@@ -1,0 +1,472 @@
+'use client';
+
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import Link from 'next/link';
+import {
+  MagnifyingGlassIcon,
+  ComputerDesktopIcon,
+  DocumentTextIcon,
+  PrinterIcon,
+  ArrowRightIcon,
+  AdjustmentsHorizontalIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
+
+interface Program {
+  id: number;
+  shortName: string;
+}
+
+interface ReadySolution {
+  id: number;
+  title: string;
+  shortDescription: string;
+  price: number | null;
+  type: 'PROCESSING' | 'PRINT_FORM' | 'REPORT';
+  freshSupport: boolean;
+  programs: { program: Program }[];
+  slug: string;
+}
+
+export default function ReadySolutionsPage() {
+  const [solutions, setSolutions] = useState<ReadySolution[]>([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [programsLoading, setProgramsLoading] = useState(true);
+  const [programsError, setProgramsError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  // Фильтры
+  const [searchQuery, setSearchQuery] = useState('');
+  const [freshSupportFilter, setFreshSupportFilter] = useState<boolean | null>(null);
+  const [selectedPrograms, setSelectedPrograms] = useState<number[]>([]);
+  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const itemsPerPage = 20;
+
+  // Загрузка программ
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      setProgramsLoading(true);
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/programs`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch programs');
+        }
+
+        const data = await response.json();
+        setPrograms(data);
+        setProgramsError(null);
+      } catch (error) {
+        console.error('Error fetching programs:', error);
+        setProgramsError('Не удалось загрузить список программ');
+      } finally {
+        setProgramsLoading(false);
+      }
+    };
+
+    fetchPrograms();
+  }, []);
+
+  // Загрузка решений с фильтрами и пагинацией
+  const fetchSolutions = async (reset = false) => {
+    if (loading || (!hasMore && !reset)) return;
+    setLoading(true);
+
+    try {
+      const params = new URLSearchParams({
+        page: String(reset ? 1 : page),
+        limit: String(itemsPerPage),
+      });
+
+      if (searchQuery) params.append('search', searchQuery);
+      if (freshSupportFilter !== null) params.append('freshSupport', String(freshSupportFilter));
+      if (selectedPrograms.length > 0) {
+        selectedPrograms.forEach((id) => params.append('programIds', String(id)));
+      }
+      if (typeFilter) params.append('type', typeFilter);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/posts/ready-solutions?${params.toString()}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch solutions');
+      }
+
+      const newSolutions: ReadySolution[] = await response.json();
+      setSolutions((prev) => (reset ? newSolutions : [...prev, ...newSolutions]));
+      setHasMore(newSolutions.length === itemsPerPage);
+      if (!reset) setPage((prev) => prev + 1);
+    } catch (error) {
+      console.error('Error fetching solutions:', error);
+    } finally {
+      setLoading(false);
+      if (reset) setInitialLoading(false);
+    }
+  };
+
+  // Первоначальная загрузка и сброс при изменении фильтров
+  useEffect(() => {
+    setPage(1);
+    setSolutions([]);
+    setHasMore(true);
+    const timeoutId = setTimeout(() => {
+      fetchSolutions(true);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, freshSupportFilter, selectedPrograms, typeFilter]);
+
+  // Бесконечная подгрузка при скролле
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+          document.documentElement.offsetHeight - 200 &&
+        !loading &&
+        hasMore
+      ) {
+        fetchSolutions();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, hasMore]);
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'PROCESSING':
+        return <ComputerDesktopIcon className="h-5 w-5" />;
+      case 'PRINT_FORM':
+        return <PrinterIcon className="h-5 w-5" />;
+      case 'REPORT':
+        return <DocumentTextIcon className="h-5 w-5" />;
+      default:
+        return <DocumentTextIcon className="h-5 w-5" />;
+    }
+  };
+
+  const getTypeName = (type: string) => {
+    switch (type) {
+      case 'PROCESSING':
+        return 'Обработка';
+      case 'PRINT_FORM':
+        return 'Печатная форма';
+      case 'REPORT':
+        return 'Отчёт';
+      default:
+        return type;
+    }
+  };
+
+  const resetFilters = useCallback(() => {
+    setSearchQuery('');
+    setTypeFilter(null);
+    setFreshSupportFilter(null);
+    setSelectedPrograms([]);
+    setMobileFiltersOpen(false);
+  }, []);
+
+  // Обработчик изменения поиска с сохранением фокуса
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  }, []);
+
+  // Обработчик изменения чекбоксов программ
+  const handleProgramToggle = useCallback((programId: number, checked: boolean) => {
+    setSelectedPrograms((prev) =>
+      checked ? [...prev, programId] : prev.filter((p) => p !== programId)
+    );
+  }, []);
+
+  // Компонент фильтров
+  const FiltersContent = useMemo(
+    () => (
+      <>
+        {/* Поиск */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-modern-gray-700 mb-2">
+            Поиск по названию
+          </label>
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-modern-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Введите название..."
+              autoComplete="off"
+              className="w-full pl-10 pr-4 py-3 border border-modern-gray-300 rounded-lg focus:ring-2 focus:ring-modern-primary-500 focus:border-modern-primary-500 transition-all duration-200 text-modern-gray-900 placeholder-modern-gray-500"
+            />
+          </div>
+        </div>
+
+        {/* Фильтр по типу */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-modern-gray-700 mb-2">
+            Тип решения
+          </label>
+          <select
+            value={typeFilter || ''}
+            onChange={(e) => setTypeFilter(e.target.value || null)}
+            className="w-full px-3 py-2 border border-modern-gray-300 rounded-lg focus:ring-2 focus:ring-modern-primary-500 focus:border-modern-primary-500 text-modern-gray-900"
+          >
+            <option value="">Все типы</option>
+            <option value="PROCESSING">Обработка</option>
+            <option value="PRINT_FORM">Печатная форма</option>
+            <option value="REPORT">Отчёт</option>
+          </select>
+        </div>
+
+        {/* Фильтр по 1C:Fresh */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-modern-gray-700 mb-2">
+            Поддержка 1C:Fresh
+          </label>
+          <div className="space-y-2">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="freshSupport"
+                checked={freshSupportFilter === null}
+                onChange={() => setFreshSupportFilter(null)}
+                className="mr-2 text-modern-primary-600 focus:ring-modern-primary-500"
+              />
+              <span className="text-sm text-modern-gray-700">Все</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="freshSupport"
+                checked={freshSupportFilter === true}
+                onChange={() => setFreshSupportFilter(true)}
+                className="mr-2 text-modern-primary-600 focus:ring-modern-primary-500"
+              />
+              <span className="text-sm text-modern-gray-700">Поддерживается</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="freshSupport"
+                checked={freshSupportFilter === false}
+                onChange={() => setFreshSupportFilter(false)}
+                className="mr-2 text-modern-primary-600 focus:ring-modern-primary-500"
+              />
+              <span className="text-sm text-modern-gray-700">Не поддерживается</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Фильтр по программам */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-modern-gray-700 mb-2">
+            Программы 1С
+          </label>
+          <div className="max-h-40 overflow-y-auto space-y-2 border border-modern-gray-200 rounded-lg p-3">
+            {programsLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-modern-primary-600"></div>
+                <span className="ml-2 text-sm text-modern-gray-500">Загрузка...</span>
+              </div>
+            ) : programsError ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-red-600 mb-2">{programsError}</p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="text-xs text-modern-primary-600 hover:text-modern-primary-700 underline"
+                >
+                  Обновить страницу
+                </button>
+              </div>
+            ) : programs.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-sm text-modern-gray-500">Программы не найдены</p>
+              </div>
+            ) : (
+              programs.map((program) => (
+                <label
+                  key={program.id}
+                  className="flex items-center cursor-pointer hover:bg-modern-gray-50 p-1 rounded transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    value={program.id}
+                    checked={selectedPrograms.includes(program.id)}
+                    onChange={(e) => {
+                      handleProgramToggle(program.id, e.target.checked);
+                    }}
+                    className="mr-2 text-modern-primary-600 focus:ring-modern-primary-500 rounded"
+                  />
+                  <span className="text-sm text-modern-gray-700">{program.shortName}</span>
+                </label>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Кнопка сброса */}
+        <button
+          onClick={resetFilters}
+          className="w-full px-4 py-2 bg-modern-gray-100 text-modern-gray-700 rounded-lg hover:bg-modern-gray-200 transition-colors duration-200"
+        >
+          Сбросить фильтры
+        </button>
+      </>
+    ),
+    [
+      searchQuery,
+      handleSearchChange,
+      typeFilter,
+      freshSupportFilter,
+      programsLoading,
+      programsError,
+      programs,
+      selectedPrograms,
+      handleProgramToggle,
+      resetFilters,
+    ]
+  );
+
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-modern-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-modern-primary-600 mx-auto mb-4"></div>
+          <p className="text-modern-gray-600">Загрузка решений...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-modern-gray-50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Мобильная кнопка фильтров */}
+        <div className="lg:hidden mb-4">
+          <button
+            onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+            className="flex items-center justify-center w-full px-4 py-3 bg-modern-white border border-modern-gray-300 rounded-lg shadow-modern hover:shadow-modern-md transition-all duration-200"
+          >
+            <AdjustmentsHorizontalIcon className="h-5 w-5 mr-2 text-modern-primary-600" />
+            <span className="font-medium text-modern-gray-900">Фильтры</span>
+            {(searchQuery ||
+              typeFilter ||
+              freshSupportFilter !== null ||
+              selectedPrograms.length > 0) && (
+              <span className="ml-2 px-2 py-0.5 bg-modern-primary-100 text-modern-primary-700 rounded-full text-xs">
+                Активны
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Мобильные фильтры */}
+        {mobileFiltersOpen && (
+          <div className="lg:hidden mb-6 bg-modern-white rounded-xl shadow-modern p-6 relative">
+            <button
+              onClick={() => setMobileFiltersOpen(false)}
+              className="absolute top-4 right-4 p-1 text-modern-gray-400 hover:text-modern-gray-600"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
+            <h2 className="text-xl font-semibold text-modern-gray-900 mb-6">Фильтры</h2>
+            {FiltersContent}
+          </div>
+        )}
+
+        <div className="flex gap-6">
+          {/* Десктопные фильтры */}
+          <div className="hidden lg:block w-1/6 bg-modern-white rounded-xl shadow-modern p-6 h-fit">
+            <h2 className="text-xl font-semibold text-modern-gray-900 mb-6">Фильтры</h2>
+            {FiltersContent}
+          </div>
+
+          {/* Список решений */}
+          <div className="flex-1 lg:w-5/6">
+            <div className="space-y-4">
+              {solutions.map((solution) => (
+                <Link
+                  key={solution.id}
+                  href={`/ready-solutions/${solution.slug}`}
+                  className="block bg-modern-white rounded-lg shadow-modern hover:shadow-modern-md transition-all duration-200 p-6 group"
+                >
+                  <div className="flex items-start justify-between">
+                    {/* Основная информация */}
+                    <div className="flex-1 mr-6">
+                      <div className="flex items-center mb-2">
+                        <div className="p-2 bg-modern-primary-100 rounded-lg mr-3">
+                          {getTypeIcon(solution.type)}
+                        </div>
+                        <h3 className="text-xl font-semibold text-modern-gray-900 group-hover:text-modern-primary-600 transition-colors duration-200">
+                          {solution.title}
+                        </h3>
+                        {solution.freshSupport && (
+                          <span className="ml-3 px-2 py-1 bg-modern-accent-100 text-modern-accent-700 rounded-full text-xs font-medium">
+                            1C:Fresh
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-modern-gray-600 text-sm mb-3 line-clamp-2">
+                        {solution.shortDescription}
+                      </p>
+
+                      <div className="flex items-center space-x-4 text-sm text-modern-gray-500">
+                        <span className="font-medium">Тип: {getTypeName(solution.type)}</span>
+                        <span>•</span>
+                        <span>
+                          Программы: {solution.programs.map((p) => p.program.shortName).join(', ')}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Цена и стрелка */}
+                    <div className="flex items-center space-x-4">
+                      <div className="text-right">
+                        <span className="text-2xl font-bold text-modern-primary-600">
+                          {solution.price !== null && solution.price !== undefined
+                            ? `${solution.price.toLocaleString('ru-RU')} ₽`
+                            : 'Цена по запросу'}
+                        </span>
+                      </div>
+                      <ArrowRightIcon className="h-5 w-5 text-modern-gray-400 group-hover:text-modern-primary-600 group-hover:translate-x-1 transition-all duration-200" />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Индикатор загрузки */}
+            {loading && (
+              <div className="text-center mt-8">
+                <div className="inline-block w-6 h-6 border-2 border-modern-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-modern-gray-600 mt-2 text-sm">Загружаем ещё решения...</p>
+              </div>
+            )}
+
+            {/* Пустое состояние */}
+            {!loading && solutions.length === 0 && (
+              <div className="text-center py-16">
+                <ComputerDesktopIcon className="h-16 w-16 text-modern-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-modern-gray-900 mb-2">
+                  Решения не найдены
+                </h3>
+                <p className="text-modern-gray-600">
+                  Попробуйте изменить параметры поиска или фильтры
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

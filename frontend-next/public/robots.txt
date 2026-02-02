@@ -1,0 +1,17 @@
+# Разрешаем индексацию всего сайта
+User-agent: *
+Allow: /
+
+# Блокируем индексацию админ-панели
+Disallow: /admin
+Disallow: /admin/
+
+# Блокируем индексацию личного кабинета клиента
+Disallow: /client
+Disallow: /client/
+
+# Блокируем страницу логина
+Disallow: /login
+
+# Sitemap
+Sitemap: https://ec-1c.ru/sitemap.xml

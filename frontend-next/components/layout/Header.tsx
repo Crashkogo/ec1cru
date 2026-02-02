@@ -1,0 +1,471 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
+import { Bars3Icon, XMarkIcon, PhoneIcon, ComputerDesktopIcon, ChevronDownIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon } from '@heroicons/react/24/solid';
+import Image from 'next/image';
+import CallbackModal from '@/components/ui/CallbackModal';
+import { authProvider } from '@/admin/authProvider';
+
+interface MenuItemSimple {
+  title: string;
+  path: string;
+}
+
+interface SubItem {
+  name: string;
+  path: string;
+}
+
+interface MenuItemWithSubItems {
+  title: string;
+  items: SubItem[];
+}
+
+type MenuItem = MenuItemSimple | MenuItemWithSubItems;
+
+const menuItems: MenuItem[] = [
+  { title: 'Новости', path: '/news' },
+  { title: 'Мероприятия', path: '/events' },
+  {
+    title: 'Продукты',
+    items: [
+      { name: 'Программы 1С', path: '/1c-programs' },
+      { name: 'Сервисы 1С', path: '/1c-services' },
+      { name: 'Наши разработки', path: '/ready-solutions' },
+      { name: 'Zabbix', path: '/zabbix' },
+      { name: 'Оборудование', path: '/equipment' },
+    ],
+  },
+  {
+    title: 'Услуги',
+    items: [
+      { name: 'Сопровождение', path: '/support' },
+      { name: 'Внедрение', path: '/implementation' },
+      { name: 'IT-аутсорсинг', path: '/tech-maintenance' },
+    ],
+  },
+  {
+    title: 'Обучение',
+    items: [
+      { name: 'Курсы 1С', path: '/1c-courses' },
+      { name: 'Сертификация', path: '/certification' },
+    ],
+  },
+  {
+    title: 'О нас',
+    items: [
+      { name: 'О компании', path: '/about' },
+      { name: 'Отзывы', path: '/otzyvy' },
+      { name: 'Супер команда', path: '/team' },
+      { name: 'Работа у нас', path: 'https://career-ec.ru/' },
+      { name: 'Наша жизнь', path: '/life' },
+    ],
+  },
+];
+
+interface HeaderProps {
+  setShowLogin: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function Header({ setShowLogin }: HeaderProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isCallbackModalOpen, setIsCallbackModalOpen] = useState(false);
+  const dropdownRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const closeMenus = () => {
+    setOpenDropdown(null);
+    setIsMenuOpen(false);
+  };
+
+  const handleLoginClick = async () => {
+    try {
+      await authProvider.checkAuth();
+      const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
+      if (role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
+        window.location.href = '/admin#/';
+      } else if (role === 'CLINE') {
+        router.push('/client');
+      } else {
+        setShowLogin(true);
+      }
+    } catch {
+      setShowLogin(true);
+    }
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const clickedOutside = !Array.from(dropdownRefs.current.values()).some(
+        (ref) => ref && ref.contains(event.target as Node)
+      );
+      if (clickedOutside) {
+        setOpenDropdown(null);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const toggleDropdown = (title: string) => {
+    setOpenDropdown(openDropdown === title ? null : title);
+  };
+
+  return (
+    <>
+      <header
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out ${
+          isScrolled
+            ? 'backdrop-blur-lg bg-white/80 shadow-modern-md border-b border-modern-gray-200/50'
+            : 'bg-white/95 backdrop-blur-sm shadow-modern'
+        }`}
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center h-20">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <Link
+                href="/"
+                aria-label="Перейти на главную страницу"
+                className="group flex items-center"
+              >
+                <Image
+                  src="/logo.png"
+                  alt="1C Support Logo"
+                  width={80}
+                  height={64}
+                  className="h-16 w-auto transition-transform duration-200 group-hover:scale-105"
+                  priority
+                />
+              </Link>
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center justify-center flex-1 px-8">
+              <div className="flex items-center space-x-2">
+                {menuItems.map((item) => (
+                  <div
+                    key={item.title}
+                    className="relative"
+                    ref={(el) => {
+                      if (el) {
+                        dropdownRefs.current.set(item.title, el);
+                      } else {
+                        dropdownRefs.current.delete(item.title);
+                      }
+                    }}
+                  >
+                    {'items' in item ? (
+                      <>
+                        <button
+                          onClick={() => toggleDropdown(item.title)}
+                          className="group flex items-center px-4 py-2 text-modern-gray-700 hover:text-modern-primary-600 font-medium text-sm transition-all duration-200 rounded-lg hover:bg-modern-gray-50"
+                          aria-expanded={openDropdown === item.title}
+                          aria-label={`Открыть меню ${item.title}`}
+                        >
+                          <span>{item.title}</span>
+                          <ChevronDownIcon
+                            className={`ml-1 h-4 w-4 transition-transform duration-200 ${
+                              openDropdown === item.title ? 'rotate-180' : ''
+                            }`}
+                            aria-hidden="true"
+                          />
+                        </button>
+                        {openDropdown === item.title && (
+                          <div className="absolute left-0 mt-2 bg-white border border-modern-gray-200 shadow-modern-lg rounded-xl z-10 transition-all duration-200 ease-out animate-in slide-in-from-top-2">
+                            <div className="py-2 w-56">
+                              {item.items.map((subItem) =>
+                                subItem.path.startsWith('http') ? (
+                                  <a
+                                    key={subItem.name}
+                                    href={subItem.path}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="block px-4 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg mx-2 transition-all duration-150 text-sm"
+                                    onClick={closeMenus}
+                                  >
+                                    {subItem.name}
+                                  </a>
+                                ) : (
+                                  <Link
+                                    key={subItem.name}
+                                    href={subItem.path}
+                                    className="block px-4 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg mx-2 transition-all duration-150 text-sm"
+                                    onClick={closeMenus}
+                                  >
+                                    {subItem.name}
+                                  </Link>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <Link
+                        href={item.path}
+                        className="flex items-center px-4 py-2 text-modern-gray-700 hover:text-modern-primary-600 font-medium text-sm transition-all duration-200 rounded-lg hover:bg-modern-gray-50"
+                        onClick={closeMenus}
+                      >
+                        {item.title}
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </nav>
+
+            {/* Desktop Action Buttons */}
+            <div className="hidden lg:flex items-center space-x-4">
+              <button
+                onClick={() => setIsCallbackModalOpen(true)}
+                className="group flex items-center px-5 py-2.5 bg-modern-primary-50 text-modern-primary-700 rounded-xl hover:bg-modern-primary-100 transition-all duration-200 text-sm font-medium border border-modern-primary-200/50"
+                aria-label="Заказать звонок"
+              >
+                <PhoneIcon
+                  className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200"
+                  aria-hidden="true"
+                />
+                <span>Заказать звонок</span>
+              </button>
+
+              <button
+                className="group flex items-center px-5 py-2.5 bg-modern-accent-50 text-modern-accent-700 rounded-xl hover:bg-modern-accent-100 transition-all duration-200 text-sm font-medium border border-modern-accent-200/50"
+                aria-label="Удаленный доступ"
+              >
+                <ComputerDesktopIcon
+                  className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200"
+                  aria-hidden="true"
+                />
+                <span>Удаленный доступ</span>
+              </button>
+
+              {/* Contact Info */}
+              <div className="flex flex-col text-left px-3">
+                <a
+                  href="tel:+78443300200"
+                  className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                  aria-label="Позвонить по телефону 8(8443)300-200"
+                >
+                  <PhoneIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                  8 (8443) 300-200
+                </a>
+                <a
+                  href="mailto:it@enginf.ru"
+                  className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                  aria-label="Написать на email it@enginf.ru"
+                >
+                  <EnvelopeIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                  it@enginf.ru
+                </a>
+              </div>
+
+              <div className="flex flex-col text-left px-3">
+                <a
+                  href="tel:+78443300801"
+                  className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                  aria-label="Позвонить по телефону 8(8443)300-801"
+                >
+                  <PhoneIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                  8 (8443) 300-801
+                </a>
+                <a
+                  href="mailto:mail@ec-1c.ru"
+                  className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                  aria-label="Написать на email mail@ec-1c.ru"
+                >
+                  <EnvelopeIcon className="h-3 w-3 mr-1" aria-hidden="true" />
+                  mail@ec-1c.ru
+                </a>
+              </div>
+
+              <button
+                onClick={handleLoginClick}
+                className="group flex items-center justify-center w-10 h-10 bg-modern-gray-100 hover:bg-modern-gray-200 text-modern-gray-600 hover:text-modern-gray-800 rounded-xl transition-all duration-200"
+                aria-label="Открыть форму входа"
+              >
+                <UserCircleIcon className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="lg:hidden ml-auto">
+              <button
+                className="flex items-center justify-center w-10 h-10 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg transition-all duration-200 border border-modern-gray-200 hover:border-modern-primary-200"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? 'Закрыть меню' : 'Открыть меню'}
+              >
+                {isMenuOpen ? (
+                  <XMarkIcon className="h-6 w-6" />
+                ) : (
+                  <Bars3Icon className="h-6 w-6" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="lg:hidden bg-white border-t border-modern-gray-200">
+            <nav className="px-4 py-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
+              {menuItems.map((item) => (
+                <div
+                  key={item.title}
+                  className="py-1"
+                  ref={(el) => {
+                    if (el) {
+                      dropdownRefs.current.set(item.title, el);
+                    } else {
+                      dropdownRefs.current.delete(item.title);
+                    }
+                  }}
+                >
+                  {'items' in item ? (
+                    <>
+                      <button
+                        onClick={() => toggleDropdown(item.title)}
+                        className="w-full flex items-center justify-between px-3 py-3 text-modern-gray-700 hover:text-modern-primary-600 hover:bg-modern-gray-50 font-medium text-base rounded-lg transition-all duration-200"
+                        aria-expanded={openDropdown === item.title}
+                      >
+                        {item.title}
+                        <ChevronDownIcon
+                          className={`h-4 w-4 transition-transform duration-200 ${
+                            openDropdown === item.title ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+                      {openDropdown === item.title && (
+                        <div className="pl-4 pt-2 pb-3 space-y-1">
+                          {item.items.map((subItem) =>
+                            subItem.path.startsWith('http') ? (
+                              <a
+                                key={subItem.name}
+                                href={subItem.path}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block px-6 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg transition-all duration-150 text-sm"
+                                onClick={closeMenus}
+                              >
+                                {subItem.name}
+                              </a>
+                            ) : (
+                              <Link
+                                key={subItem.name}
+                                href={subItem.path}
+                                className="block px-6 py-2 text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50 rounded-lg transition-all duration-150 text-sm"
+                                onClick={closeMenus}
+                              >
+                                {subItem.name}
+                              </Link>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      href={item.path}
+                      className="block px-3 py-3 text-modern-gray-700 hover:text-modern-primary-600 hover:bg-modern-gray-50 font-medium rounded-lg transition-all duration-200"
+                      onClick={closeMenus}
+                    >
+                      {item.title}
+                    </Link>
+                  )}
+                </div>
+              ))}
+
+              {/* Mobile Action Buttons */}
+              <div className="pt-4 mt-4 border-t border-modern-gray-200/50 space-y-2">
+                <button
+                  onClick={() => {
+                    setIsCallbackModalOpen(true);
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center px-4 py-3 bg-modern-primary-50 text-modern-primary-700 rounded-xl hover:bg-modern-primary-100 transition-all duration-200 font-medium border border-modern-primary-200/50"
+                  aria-label="Заказать звонок"
+                >
+                  <PhoneIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+                  <span>Заказать звонок</span>
+                </button>
+
+                <button
+                  className="w-full flex items-center justify-center px-4 py-3 bg-modern-accent-50 text-modern-accent-700 rounded-xl hover:bg-modern-accent-100 transition-all duration-200 font-medium border border-modern-accent-200/50"
+                  aria-label="Удаленный доступ"
+                >
+                  <ComputerDesktopIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+                  <span>Удаленный доступ</span>
+                </button>
+
+                {/* Mobile Contact Info */}
+                <div className="flex flex-col items-center space-y-1 py-2">
+                  <a
+                    href="tel:+78443300200"
+                    className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                    aria-label="Позвонить по телефону 8(8443)300-200"
+                  >
+                    <PhoneIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+                    8(8443)300-200
+                  </a>
+                  <a
+                    href="mailto:it@enginf.ru"
+                    className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                    aria-label="Написать на email it@enginf.ru"
+                  >
+                    <EnvelopeIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+                    it@enginf.ru
+                  </a>
+                  <a
+                    href="tel:+78443300801"
+                    className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                    aria-label="Позвонить по телефону 8(8443)300-801"
+                  >
+                    <PhoneIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+                    8(8443)300-801
+                  </a>
+                  <a
+                    href="mailto:mail@ec-1c.ru"
+                    className="flex items-center text-modern-gray-700 hover:text-modern-primary-600 transition-colors duration-200 text-sm"
+                    aria-label="Написать на email mail@ec-1c.ru"
+                  >
+                    <EnvelopeIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+                    mail@ec-1c.ru
+                  </a>
+                </div>
+
+                <button
+                  onClick={() => {
+                    handleLoginClick();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center px-4 py-3 bg-modern-gray-100 text-modern-gray-700 rounded-xl hover:bg-modern-gray-200 transition-all duration-200 font-medium"
+                  aria-label="Открыть форму входа"
+                >
+                  <UserCircleIcon className="h-5 w-5 mr-2" aria-hidden="true" />
+                  <span>Личный кабинет</span>
+                </button>
+              </div>
+            </nav>
+          </div>
+        )}
+      </header>
+      <CallbackModal isOpen={isCallbackModalOpen} onClose={() => setIsCallbackModalOpen(false)} />
+    </>
+  );
+}
