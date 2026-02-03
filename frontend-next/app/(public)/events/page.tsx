@@ -324,7 +324,7 @@ export default function EventsPage() {
           <div className="flex-1 lg:w-5/6">
             <div className="space-y-4">
               {events.map((item) => {
-                const isPast = isEventPast(item.eventDate || item.startDate);
+                const isPast = isEventPast(item.startDate);
 
                 return (
                   <Link
@@ -357,13 +357,13 @@ export default function EventsPage() {
                           <div className="flex items-center text-sm text-modern-gray-500">
                             <CalendarIcon className="h-4 w-4 mr-2" />
                             <span>
-                              {new Date(item.eventDate || item.startDate).toLocaleDateString('ru-RU', {
+                              {new Date(item.startDate).toLocaleDateString('ru-RU', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',
                               })}{' '}
                               в{' '}
-                              {new Date(item.eventDate || item.startDate).toLocaleTimeString('ru-RU', {
+                              {new Date(item.startDate).toLocaleTimeString('ru-RU', {
                                 hour: '2-digit',
                                 minute: '2-digit',
                               })}

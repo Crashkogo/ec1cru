@@ -19,7 +19,7 @@ interface EventData {
   title: string;
   shortDescription: string;
   content: string;
-  eventDate: string;
+  startDate: string;
   createdAt: string;
   isPublished: boolean;
   ours: boolean;
@@ -76,7 +76,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
   }
 
   const sanitizeHTML = (html: string) => html;
-  const isPastEvent = new Date() > new Date(event.eventDate);
+  const isPastEvent = new Date() > new Date(event.startDate);
   const canRegister = event.registrationEnabled && !isPastEvent;
 
   return (
@@ -166,7 +166,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                       Дата
                     </div>
                     <div className="text-sm font-medium text-modern-gray-700">
-                      {new Date(event.eventDate).toLocaleDateString('ru-RU', {
+                      {new Date(event.startDate).toLocaleDateString('ru-RU', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric',
@@ -181,7 +181,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ sl
                       Время
                     </div>
                     <div className="text-sm font-medium text-modern-gray-700">
-                      {new Date(event.eventDate).toLocaleTimeString('ru-RU', {
+                      {new Date(event.startDate).toLocaleTimeString('ru-RU', {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
