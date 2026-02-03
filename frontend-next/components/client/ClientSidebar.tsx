@@ -13,9 +13,7 @@ import {
   ArrowRightOnRectangleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import Image from 'next/image';
-
-import logo from '@/public/logo.png'; 
+import Image from 'next/image'; 
 
 // Тип для данных клиента, вы можете вынести его в @/types/index.ts
 interface ClientData {
@@ -119,7 +117,7 @@ const ClientSidebar: React.FC<ClientSidebarProps> = ({ clientData, isSidebarOpen
       {/* Sidebar для десктопа */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-white border-r border-modern-gray-200 shadow-sm z-30 flex-col">
         <div className="p-6 border-b border-modern-gray-200">
-          <Image src={logo} alt="1C Support" className="h-12 w-auto" priority />
+          <Image src="/logo.png" alt="1C Support" width={120} height={48} className="h-12 w-auto" priority />
           <p className="text-xs text-modern-gray-500 mt-2">Личный кабинет</p>
         </div>
         <SidebarNav />
@@ -142,7 +140,7 @@ const ClientSidebar: React.FC<ClientSidebarProps> = ({ clientData, isSidebarOpen
       >
         <div className="p-6 border-b border-modern-gray-200 flex items-center justify-between">
           <div>
-            <Image src={logo} alt="1C Support" className="h-10 w-auto" />
+            <Image src="/logo.png" alt="1C Support" width={100} height={40} className="h-10 w-auto" />
             <p className="text-xs text-modern-gray-500 mt-1">Личный кабинет</p>
           </div>
           <button

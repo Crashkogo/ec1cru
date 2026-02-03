@@ -4,7 +4,6 @@
 import React from 'react';
 import { Bars3Icon, BellIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import logo from '@/public/logo.png';
 
 // Тип для данных клиента
 interface ClientData {
@@ -44,7 +43,7 @@ const ClientHeader: React.FC<ClientHeaderProps> = ({ clientData, onMenuButtonCli
         {/* Logo (mobile only, centered when menu button is on the left) */}
         <div className="lg:hidden">
             <div className="flex-1 flex justify-center">
-                 <Image src={logo} alt="1C Support" className="h-10 w-auto" />
+                 <Image src="/logo.png" alt="1C Support" width={100} height={40} className="h-10 w-auto" />
             </div>
         </div>
 
