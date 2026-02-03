@@ -4,17 +4,7 @@
 import React from 'react';
 import { Bars3Icon, BellIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-
-// Тип для данных клиента
-interface ClientData {
-  id: number;
-  inn: string;
-  name: string;
-  manager: {
-    firstName: string;
-    lastName: string;
-  };
-}
+import type { ClientData } from '@/types/client';
 
 interface ClientHeaderProps {
   clientData: ClientData;

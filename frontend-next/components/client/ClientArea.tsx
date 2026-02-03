@@ -5,16 +5,7 @@ import React, { useState } from 'react';
 import ClientHeader from './ClientHeader';
 import ClientSidebar from './ClientSidebar';
 
-// Тип для данных клиента
-interface ClientData {
-  id: number;
-  inn: string;
-  name: string;
-  manager: {
-    firstName: string;
-    lastName: string;
-  };
-}
+import type { ClientData } from '@/types/client';
 
 interface ClientAreaProps {
   clientData: ClientData;

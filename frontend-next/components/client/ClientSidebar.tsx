@@ -13,18 +13,8 @@ import {
   ArrowRightOnRectangleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import Image from 'next/image'; 
-
-// Тип для данных клиента, вы можете вынести его в @/types/index.ts
-interface ClientData {
-  id: number;
-  inn: string;
-  name: string;
-  manager: {
-    firstName: string;
-    lastName: string;
-  };
-}
+import Image from 'next/image';
+import type { ClientData } from '@/types/client';
 
 interface ClientSidebarProps {
   clientData: ClientData;
