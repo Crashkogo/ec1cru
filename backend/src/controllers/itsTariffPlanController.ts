@@ -52,7 +52,7 @@ export const getAllItsTariffPlans = async (req: Request, res: Response) => {
 };
 
 // GET /api/admin/its-tariff-plans/:id - Получить один ИТС тариф
-export const getItsTariffPlan = async (req: Request, res: Response) => {
+export const getItsTariffPlan = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const tariff = await prisma.itsTariffPlan.findUnique({
@@ -60,7 +60,8 @@ export const getItsTariffPlan = async (req: Request, res: Response) => {
     });
 
     if (!tariff) {
-      return res.status(404).json({ error: 'ITS Tariff plan not found' });
+      res.status(404).json({ error: 'ITS Tariff plan not found' });
+      return;
     }
 
     res.json(tariff);
@@ -71,17 +72,19 @@ export const getItsTariffPlan = async (req: Request, res: Response) => {
 };
 
 // POST /api/admin/its-tariff-plans - Создать ИТС тариф
-export const createItsTariffPlan = async (req: Request, res: Response) => {
+export const createItsTariffPlan = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('Creating ITS tariff plan with data:', JSON.stringify(req.body, null, 2));
     const { title, rows, order, isPublished } = req.body;
 
     // Валидация обязательных полей
     if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
+      res.status(400).json({ error: 'Title is required' });
+      return;
     }
     if (!rows || !Array.isArray(rows) || rows.length === 0) {
-      return res.status(400).json({ error: 'Rows array is required' });
+      res.status(400).json({ error: 'Rows array is required' });
+      return;
     }
 
     // БЕЗОПАСНОСТЬ: Санитизация текстов строк (удаляем HTML теги)
@@ -108,7 +111,7 @@ export const createItsTariffPlan = async (req: Request, res: Response) => {
 };
 
 // PUT /api/admin/its-tariff-plans/:id - Обновить ИТС тариф
-export const updateItsTariffPlan = async (req: Request, res: Response) => {
+export const updateItsTariffPlan = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     console.log(`Updating ITS tariff plan ${id} with data:`, JSON.stringify(req.body, null, 2));
@@ -116,10 +119,12 @@ export const updateItsTariffPlan = async (req: Request, res: Response) => {
 
     // Валидация обязательных полей
     if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
+      res.status(400).json({ error: 'Title is required' });
+      return;
     }
     if (!rows || !Array.isArray(rows) || rows.length === 0) {
-      return res.status(400).json({ error: 'Rows array is required' });
+      res.status(400).json({ error: 'Rows array is required' });
+      return;
     }
 
     // БЕЗОПАСНОСТЬ: Санитизация текстов строк (удаляем HTML теги)

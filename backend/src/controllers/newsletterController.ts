@@ -285,7 +285,8 @@ export const unsubscribeByToken: RequestHandler = async (req, res) => {
   const { token } = req.query;
 
   if (!token) {
-    return res.status(400).json({ message: "Token is required" });
+    res.status(400).json({ message: "Token is required" });
+    return;
   }
 
   try {
@@ -297,12 +298,14 @@ export const unsubscribeByToken: RequestHandler = async (req, res) => {
     });
 
     if (!subscriber) {
-      return res.status(404).json({ message: "Subscriber not found" });
+      res.status(404).json({ message: "Subscriber not found" });
+      return;
     }
 
     // Проверяем, не отписан ли уже
     if (!subscriber.isActive) {
-      return res.status(400).json({ message: "Already unsubscribed" });
+      res.status(400).json({ message: "Already unsubscribed" });
+      return;
     }
 
     // Отписываем
@@ -316,11 +319,13 @@ export const unsubscribeByToken: RequestHandler = async (req, res) => {
     console.error("Error unsubscribing:", error);
 
     if (error instanceof jwt.JsonWebTokenError) {
-      return res.status(400).json({ message: "Invalid token" });
+      res.status(400).json({ message: "Invalid token" });
+      return;
     }
 
     if (error instanceof jwt.TokenExpiredError) {
-      return res.status(400).json({ message: "Token expired" });
+      res.status(400).json({ message: "Token expired" });
+      return;
     }
 
     res.status(500).json({ message: "Internal server error" });

@@ -53,7 +53,7 @@ export const getAllTariffPlans = async (req: Request, res: Response) => {
 };
 
 // GET /api/admin/tariff-plans/:id - Получить один тариф
-export const getTariffPlan = async (req: Request, res: Response) => {
+export const getTariffPlan = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const tariff = await prisma.tariffPlan.findUnique({
@@ -61,7 +61,8 @@ export const getTariffPlan = async (req: Request, res: Response) => {
     });
 
     if (!tariff) {
-      return res.status(404).json({ error: 'Tariff plan not found' });
+      res.status(404).json({ error: 'Tariff plan not found' });
+      return;
     }
 
     res.json(tariff);
@@ -72,20 +73,23 @@ export const getTariffPlan = async (req: Request, res: Response) => {
 };
 
 // POST /api/admin/tariff-plans - Создать тариф
-export const createTariffPlan = async (req: Request, res: Response) => {
+export const createTariffPlan = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('Creating tariff plan with data:', JSON.stringify(req.body, null, 2));
     const { name, subtitle, columns, rows, footnote, order, isPublished } = req.body;
 
     // Валидация обязательных полей
     if (!name) {
-      return res.status(400).json({ error: 'Name is required' });
+      res.status(400).json({ error: 'Name is required' });
+      return;
     }
     if (!columns || !Array.isArray(columns) || columns.length === 0) {
-      return res.status(400).json({ error: 'Columns array is required' });
+      res.status(400).json({ error: 'Columns array is required' });
+      return;
     }
     if (!rows || !Array.isArray(rows) || rows.length === 0) {
-      return res.status(400).json({ error: 'Rows array is required' });
+      res.status(400).json({ error: 'Rows array is required' });
+      return;
     }
 
     const tariff = await prisma.tariffPlan.create({
@@ -109,7 +113,7 @@ export const createTariffPlan = async (req: Request, res: Response) => {
 };
 
 // PUT /api/admin/tariff-plans/:id - Обновить тариф
-export const updateTariffPlan = async (req: Request, res: Response) => {
+export const updateTariffPlan = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     console.log(`Updating tariff plan ${id} with data:`, JSON.stringify(req.body, null, 2));
@@ -117,13 +121,16 @@ export const updateTariffPlan = async (req: Request, res: Response) => {
 
     // Валидация обязательных полей
     if (!name) {
-      return res.status(400).json({ error: 'Name is required' });
+      res.status(400).json({ error: 'Name is required' });
+      return;
     }
     if (!columns || !Array.isArray(columns) || columns.length === 0) {
-      return res.status(400).json({ error: 'Columns array is required' });
+      res.status(400).json({ error: 'Columns array is required' });
+      return;
     }
     if (!rows || !Array.isArray(rows) || rows.length === 0) {
-      return res.status(400).json({ error: 'Rows array is required' });
+      res.status(400).json({ error: 'Rows array is required' });
+      return;
     }
 
     const tariff = await prisma.tariffPlan.update({

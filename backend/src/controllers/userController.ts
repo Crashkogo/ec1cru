@@ -34,7 +34,7 @@ export const registerUser: RequestHandler = async (req, res) => {
 
     const { name, password } = validatedData;
     // БЕЗОПАСНОСТЬ: Роль берём из запроса только если это админ, иначе USER
-    const role = isAdmin && 'role' in validatedData ? validatedData.role : "USER";
+    const role: string = isAdmin && 'role' in validatedData ? validatedData.role : "USER";
 
     const existingUser = await prisma.user.findUnique({ where: { name } });
     if (existingUser) {
