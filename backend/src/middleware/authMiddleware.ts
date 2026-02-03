@@ -1,6 +1,6 @@
 import { RequestHandler, Request } from 'express';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '../config';
+import { JWT_SECRET } from '../config.js';
 
 // Расширяем тип Request для добавления user
 interface AuthenticatedRequest extends Request {

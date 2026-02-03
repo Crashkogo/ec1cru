@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { UploadedFile } from "express-fileupload";
-import { path, fs, __dirname } from "../utils";
+import { path, fs, __dirname } from "../utils/index.js";
 
 // ========== БЕЗОПАСНОСТЬ: Валидация загружаемых файлов ==========
 

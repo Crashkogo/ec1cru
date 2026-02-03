@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
-import { prisma, transporter, axios } from "../utils";
-import { CAPTCHA_SECRET } from "../config";
+import { prisma, transporter, axios } from "../utils/index.js";
+import { CAPTCHA_SECRET } from "../config.js";
 import { sanitizeHTMLContent } from "../utils/sanitize.js";
 
 export const registerForEvent: RequestHandler = async (req, res) => {

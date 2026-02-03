@@ -1,17 +1,17 @@
 import express from "express";
-import * as newsController from "../controllers/newsController";
-import * as companyLifeController from "../controllers/companyLifeController";
-import * as eventsController from "../controllers/eventsController";
-import * as promotionsController from "../controllers/promotionsController";
-import * as readySolutionsController from "../controllers/readySolutionsController";
-import * as testimonialController from "../controllers/testimonialController";
-import * as uploadController from "../controllers/uploadController";
-import * as newsletterController from "../controllers/newsletterController";
-import * as subscribersController from "../controllers/subscribersController";
-import * as callbackController from '../controllers/callbackController';
+import * as newsController from "../controllers/newsController.js";
+import * as companyLifeController from "../controllers/companyLifeController.js";
+import * as eventsController from "../controllers/eventsController.js";
+import * as promotionsController from "../controllers/promotionsController.js";
+import * as readySolutionsController from "../controllers/readySolutionsController.js";
+import * as testimonialController from "../controllers/testimonialController.js";
+import * as uploadController from "../controllers/uploadController.js";
+import * as newsletterController from "../controllers/newsletterController.js";
+import * as subscribersController from "../controllers/subscribersController.js";
+import * as callbackController from '../controllers/callbackController.js';
 import { RequestHandler } from "express";
-import { authMiddleware } from "../middleware/authMiddleware";
-import { requireAdmin } from "../middleware/rbacMiddleware";
+import { authMiddleware } from "../middleware/authMiddleware.js";
+import { requireAdmin } from "../middleware/rbacMiddleware.js";
 
 const router = express.Router();
 

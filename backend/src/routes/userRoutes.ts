@@ -1,8 +1,8 @@
 // backend/src/routes/userRoutes.ts
 import express from 'express';
-import { registerUser, loginUser, logoutUser, getUsers, updateUser, getCurrentUser, getUserById, deleteUser } from '../controllers/userController';
-import { authMiddleware } from '../middleware/authMiddleware';
-import { requireAdmin } from '../middleware/rbacMiddleware';
+import { registerUser, loginUser, logoutUser, getUsers, updateUser, getCurrentUser, getUserById, deleteUser } from '../controllers/userController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
+import { requireAdmin } from '../middleware/rbacMiddleware.js';
 
 const router = express.Router();
 

@@ -1,9 +1,9 @@
 import { RequestHandler } from "express";
-import { prisma } from "../utils";
+import { prisma } from "../utils/index.js";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
-import { UNSUBSCRIBE_SECRET, FRONTEND_URL } from "../config";
-import { newsletterService } from "../services/newsletterService";
+import { UNSUBSCRIBE_SECRET, FRONTEND_URL } from "../config.js";
+import { newsletterService } from "../services/newsletterService.js";
 
 export const getNewsletterById: RequestHandler = async (req, res) => {
     const { id } = req.params;

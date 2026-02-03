@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { prisma } from "../utils";
+import { prisma } from "../utils/index.js";
 import { sanitizeHTMLContent } from "../utils/sanitize.js";
 
 export const getCourseBySlug: RequestHandler = async (req, res) => {

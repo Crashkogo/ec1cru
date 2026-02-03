@@ -1,6 +1,6 @@
-import { prisma, transporter, fs, path, __dirname } from "../utils";
+import { prisma, transporter, fs, path, __dirname } from "../utils/index.js";
 import jwt from "jsonwebtoken";
-import { UNSUBSCRIBE_SECRET, FRONTEND_URL, EMAIL_USER } from "../config";
+import { UNSUBSCRIBE_SECRET, FRONTEND_URL, EMAIL_USER } from "../config.js";
 
 // Типизация для аудитории
 export type Audience =

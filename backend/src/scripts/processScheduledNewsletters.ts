@@ -9,7 +9,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { newsletterService } from '../services/newsletterService';
+import { newsletterService } from '../services/newsletterService.js';
 import 'dotenv/config';
 
 const prisma = new PrismaClient();

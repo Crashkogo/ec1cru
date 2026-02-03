@@ -5,8 +5,8 @@ import {
   createEmployee,
   updateEmployee,
   deleteEmployee,
-} from '../controllers/employeeController';
-import { authMiddleware } from '../middleware/authMiddleware';
+} from '../controllers/employeeController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 

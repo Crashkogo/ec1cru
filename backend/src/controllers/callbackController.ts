@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import nodemailer from 'nodemailer';
-import { EMAIL_CALL_OUT, EMAIL_PASS_OUT, EMAIL_CALL_IN } from '../config';
+import { EMAIL_CALL_OUT, EMAIL_PASS_OUT, EMAIL_CALL_IN } from '../config.js';
 
 export const sendCallback = async (req: Request, res: Response) => {
   const { name, phone } = req.body;

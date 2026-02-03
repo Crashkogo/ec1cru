@@ -7,8 +7,8 @@ import {
   deleteClient,
   loginClient,
   getCurrentClient,
-} from '../controllers/clientController';
-import { authMiddleware } from '../middleware/authMiddleware';
+} from '../controllers/clientController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
