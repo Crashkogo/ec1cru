@@ -4,6 +4,8 @@ const nextConfig = {
 
   // Поддержка загруженных изображений из backend
   images: {
+    // Отключаем sharp для серверов без поддержки v2 микроархитектуры
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'http',
