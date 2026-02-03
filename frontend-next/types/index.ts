@@ -38,6 +38,8 @@ export interface EventItem {
   shortDescription: string;
   slug: string;
   startDate: string;
+  eventDate?: string;
+  eventLink?: string;
   isPublished: boolean;
   ours: boolean;
   status: boolean;

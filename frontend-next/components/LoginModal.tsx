@@ -30,7 +30,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ showLogin, setShowLogin }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await authProvider.checkAuth();
+        await authProvider.checkAuth({});
         const role = localStorage.getItem('role');
         if (role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
           window.location.href = '/admin#/';

@@ -13,10 +13,10 @@ import {
   CalendarIcon,
   LinkIcon,
 } from '@heroicons/react/24/outline';
-import type { EventsItem } from '@/types';
+import type { EventItem } from '@/types';
 
 export default function EventsPage() {
-  const [events, setEvents] = useState<EventsItem[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -55,7 +55,7 @@ export default function EventsPage() {
         throw new Error('Failed to fetch events');
       }
 
-      const newItems: EventsItem[] = await response.json();
+      const newItems: EventItem[] = await response.json();
       setEvents((prev) => (reset ? newItems : [...prev, ...newItems]));
       setHasMore(newItems.length === itemsPerPage);
       if (!reset) setPage((prev) => prev + 1);
@@ -324,7 +324,7 @@ export default function EventsPage() {
           <div className="flex-1 lg:w-5/6">
             <div className="space-y-4">
               {events.map((item) => {
-                const isPast = isEventPast(item.eventDate);
+                const isPast = isEventPast(item.eventDate || item.startDate);
 
                 return (
                   <Link
@@ -357,13 +357,13 @@ export default function EventsPage() {
                           <div className="flex items-center text-sm text-modern-gray-500">
                             <CalendarIcon className="h-4 w-4 mr-2" />
                             <span>
-                              {new Date(item.eventDate).toLocaleDateString('ru-RU', {
+                              {new Date(item.eventDate || item.startDate).toLocaleDateString('ru-RU', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',
                               })}{' '}
                               в{' '}
-                              {new Date(item.eventDate).toLocaleTimeString('ru-RU', {
+                              {new Date(item.eventDate || item.startDate).toLocaleTimeString('ru-RU', {
                                 hour: '2-digit',
                                 minute: '2-digit',
                               })}

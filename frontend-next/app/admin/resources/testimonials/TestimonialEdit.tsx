@@ -149,7 +149,7 @@ const TestimonialEditToolbar = () => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { tempImages: _tempImages, ...testimonialData } = data;
 
-            await update('testimonials', { id: record.id, data: testimonialData });
+            await update('testimonials', { id: record!.id, data: testimonialData });
             notify('Отзыв успешно обновлён');
             redirect('/admin#/testimonials');
         } catch (error) {

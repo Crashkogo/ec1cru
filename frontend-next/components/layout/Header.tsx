@@ -86,7 +86,7 @@ export default function Header({ setShowLogin }: HeaderProps) {
 
   const handleLoginClick = async () => {
     try {
-      await authProvider.checkAuth();
+      await authProvider.checkAuth({});
       const role = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
       if (role && ['ADMIN', 'MODERATOR', 'EVENTORG', 'ITS', 'DEVDEP'].includes(role)) {
         window.location.href = '/admin#/';

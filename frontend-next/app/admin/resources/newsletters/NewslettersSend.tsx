@@ -299,7 +299,7 @@ const NewslettersSend: React.FC = () => {
             )}
 
             <Grid container spacing={3}>
-                <Grid item xs={12} md={8}>
+                <Grid size={{ xs: 12, md: 8 }}>
                     <Card className="!shadow-sm !border !border-modern-gray-200 !rounded-xl p-6">
                         <Typography variant="h6" className="!font-semibold !text-modern-gray-900 mb-4">
                             Новая рассылка
@@ -407,7 +407,7 @@ const NewslettersSend: React.FC = () => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid size={{ xs: 12, md: 4 }}>
                     <Card className="!shadow-sm !border !border-modern-gray-200 !rounded-xl p-6">
                         <Typography variant="h6" className="!font-semibold !text-modern-gray-900 mb-4">
                             Статус очереди
@@ -463,7 +463,7 @@ const NewslettersSend: React.FC = () => {
                     </Card>
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid size={12}>
                     <Card className="!shadow-sm !border !border-modern-gray-200 !rounded-xl p-6">
                         <Typography variant="h6" className="!font-semibold !text-modern-gray-900 mb-4">
                             История рассылок

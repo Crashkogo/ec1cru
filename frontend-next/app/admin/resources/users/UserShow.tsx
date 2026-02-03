@@ -23,7 +23,7 @@ const UserTitle = () => {
     return record ? `Пользователь: ${record.name}` : 'Пользователь';
 };
 
-const RoleField = () => {
+const RoleField = ({ label: _label }: { label?: string }) => {
     const record = useRecordContext();
     if (!record) return null;
 

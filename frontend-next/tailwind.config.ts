@@ -126,7 +126,7 @@ const config: Config = {
     container: {
       center: true,
       padding: '2rem',
-      screens: false,
+      screens: {},
     },
   },
   plugins: [

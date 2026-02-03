@@ -178,7 +178,7 @@ const DashboardContent: React.FC = () => {
           sort: { field: 'id', order: 'ASC' },
           filter: { isActive: true },
         });
-        setSubscribersCount(result.total);
+        setSubscribersCount(result.total ?? 0);
       } catch (error) {
         console.error('Ошибка при загрузке количества подписчиков:', error);
       }
