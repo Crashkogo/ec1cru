@@ -9,6 +9,9 @@ import {
   fetchReadySolutions,
   fetchTestimonials,
 } from '@/lib/api';
+
+// Отключаем статическую генерацию для главной страницы (fetch данных с backend)
+export const dynamic = 'force-dynamic';
 import type {
   NewsItem,
   PromotionItem,

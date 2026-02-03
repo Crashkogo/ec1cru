@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session'; // Предполагаем, что у нас будет такой файл для работы с сессией
 import ClientArea from '@/components/client/ClientArea'; // Импортируем нашу новую оболочку
 
+// Отключаем статическую генерацию для страниц, использующих cookies
+export const dynamic = 'force-dynamic';
+
 // Эта часть будет выполняться на сервере
 export default async function ClientZoneLayout({
   children,
