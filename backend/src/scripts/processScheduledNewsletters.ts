@@ -3,9 +3,9 @@
 /**
  * Скрипт для обработки запланированных рассылок
  * Запускается по cron каждые 5 минут для проверки и отправки запланированных рассылок
- * 
+ *
  * Пример cron задачи (каждые 5 минут):
- * */5 * * * * /usr/bin/node /path/to/your/backend/dist/scripts/processScheduledNewsletters.js
+ * 0,5,10,15,20,25,30,35,40,45,50,55 * * * * /usr/bin/node /path/to/your/backend/dist/scripts/processScheduledNewsletters.js
  */
 
 import { PrismaClient } from '@prisma/client';
@@ -40,9 +40,9 @@ async function processCampaigns() {
 📤 Processing campaign: "${campaign.subject}"`);
       
       try {
-        const audience = campaign.audienceType === 'EVENT_GUESTS' && campaign.audienceEventId 
-            ? { type: 'EVENT_GUESTS', eventId: campaign.audienceEventId }
-            : { type: 'SUBSCRIBERS' };
+        const audience = campaign.audienceType === 'EVENT_GUESTS' && campaign.audienceEventId
+            ? { type: 'EVENT_GUESTS' as const, eventId: campaign.audienceEventId }
+            : { type: 'SUBSCRIBERS' as const };
 
         await newsletterService.sendNewsletter(
             campaign.templateId,
