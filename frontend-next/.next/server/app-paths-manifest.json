@@ -1,8 +1,0 @@
-{
-  "/(public)/about/page": "app/(public)/about/page.js",
-  "/(public)/page": "app/(public)/page.js",
-  "/(public)/zabbix/page": "app/(public)/zabbix/page.js",
-  "/(public)/1c-courses/page": "app/(public)/1c-courses/page.js",
-  "/(public)/otzyvy/page": "app/(public)/otzyvy/page.js",
-  "/(public)/otzyvy/[slug]/page": "app/(public)/otzyvy/[slug]/page.js"
-}

@@ -26,7 +26,10 @@
       "Bash(else echo \"TinyMCE not found in old frontend\")",
       "Bash(fi)",
       "Bash(mkdir:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nЗавершена миграция личного кабинета клиента на Next.js\n\nРеализован полный функционал личного кабинета с использованием:\n- Next.js 13+ App Router\n- Server Components и Server Actions\n- HTTP-only cookies для безопасной аутентификации\n- JWT верификация с jose\n- TypeScript типизация\n\nОсновные изменения:\n- Создана система сессий \\(lib/session.ts\\) с jose\n- Реализованы Server Actions для всех операций \\(actions/client-auth.ts\\)\n- Переделаны все страницы личного кабинета:\n  * Dashboard с реальной статистикой\n  * Профиль с функцией смены пароля\n  * Финансы со списком счетов\n  * Договоры со списком договоров\n  * Поддержка со списком заявок и формой создания\n- Созданы компоненты \\(ClientArea, модальные окна и т.д.\\)\n- Удалены старые файлы и дублирующийся код\n- Добавлена полная документация миграции \\(NextJs_migration.md\\)\n\nБезопасность:\n- HTTP-only cookies \\(защита от XSS\\)\n- SameSite strict \\(защита от CSRF\\)\n- Server-side JWT верификация\n- Разделение Server/Client логики\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git push:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []
