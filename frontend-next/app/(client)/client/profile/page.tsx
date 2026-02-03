@@ -65,6 +65,7 @@ export default async function ClientProfilePage() {
                 </div>
 
                 {/* Менеджер */}
+                {clientData.manager && (
                 <div className="bg-white rounded-xl shadow-lg p-6 border border-modern-gray-200">
                 <h2 className="text-xl font-bold text-modern-gray-900 mb-6">Ваш менеджер</h2>
 
@@ -89,6 +90,7 @@ export default async function ClientProfilePage() {
                     </button>
                 </div>
                 </div>
+                )}
             </div>
 
             {/* Безопасность */}
