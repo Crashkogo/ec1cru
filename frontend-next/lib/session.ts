@@ -1,19 +1,13 @@
 // lib/session.ts - Управление сессиями клиента
 import { cookies } from 'next/headers';
-import { jwtVerify } from 'jose';
 import type { SessionData, ClientData } from '@/types/client';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-// Получение секретного ключа в формате, который понимает jose
-function getSecretKey() {
-  return new TextEncoder().encode(JWT_SECRET);
-}
-
 /**
- * Получает данные сессии из HTTP-only cookie
- * Используется в Server Components и Server Actions
+ * Получает данные сессии из HTTP-only cookie.
+ * Верификация токена выполняется на бэкенде через /api/clients/me.
+ * Используется в Server Components и Server Actions.
  */
 export async function getSession(): Promise<SessionData | null> {
   try {
@@ -24,24 +18,7 @@ export async function getSession(): Promise<SessionData | null> {
       return null;
     }
 
-    // Верифицируем и декодируем JWT токен
-    const { payload } = await jwtVerify(token, getSecretKey());
-
-    // Проверяем роль - должен быть CLIENT
-    if (payload.role !== 'CLIENT') {
-      return null;
-    }
-
-    // Если в токене есть данные клиента — используем их
-    if (payload.client) {
-      return {
-        token,
-        role: 'CLIENT',
-        client: payload.client as ClientData,
-      };
-    }
-
-    // Иначе запрашиваем актуальные данные клиента с backend
+    // Проверяем токен и получаем данные клиента через бэкенд
     const response = await fetch(`${API_URL}/api/clients/me`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: 'no-store',
@@ -59,7 +36,6 @@ export async function getSession(): Promise<SessionData | null> {
       client: clientData,
     };
   } catch (error) {
-    // Токен истёк, невалиден или другая ошибка
     console.error('Session error:', error);
     return null;
   }

@@ -102,6 +102,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ showLogin, setShowLogin }) => {
         return;
       }
 
+      router.refresh(); // Обновляем кэш Next.js чтобы новый cookie был виден
       router.push('/client');
       closeModal();
     } catch (err: any) {
