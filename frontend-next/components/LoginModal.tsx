@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { XMarkIcon, UserCircleIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { authProvider } from '@/admin/authProvider';
-import { loginClient } from '@/actions/client-auth';
 
 interface LoginModalProps {
   showLogin: boolean;
@@ -95,18 +94,25 @@ const LoginModal: React.FC<LoginModalProps> = ({ showLogin, setShowLogin }) => {
     setIsLoading(true);
 
     try {
-      const result = await loginClient(clientData.inn, clientData.password);
+      const response = await fetch('/api/client-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inn: clientData.inn, password: clientData.password }),
+      });
+
+      const result = await response.json();
 
       if (!result.success) {
         setError(result.error || 'Неверный ИНН или пароль');
         return;
       }
 
-      router.refresh(); // Обновляем кэш Next.js чтобы новый cookie был виден
+      // Cookie установлен сервером, обновляем Next.js кэш и переходим в кабинет
+      router.refresh();
       router.push('/client');
       closeModal();
     } catch (err: any) {
-      setError(err.message || 'Неверный ИНН или пароль');
+      setError(err.message || 'Ошибка входа в систему');
     } finally {
       setIsLoading(false);
     }
