@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { XMarkIcon, UserCircleIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { authProvider } from '@/admin/authProvider';
+import { loginClient } from '@/actions/client-auth';
 
 interface LoginModalProps {
   showLogin: boolean;
@@ -94,34 +95,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ showLogin, setShowLogin }) => {
     setIsLoading(true);
 
     try {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        localStorage.removeItem('clientData');
-      }
+      const result = await loginClient(clientData.inn, clientData.password);
 
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/clients/login`,
-        { inn: clientData.inn, password: clientData.password }
-      );
-
-      const { token, role, client } = response.data;
-
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', token);
-        localStorage.setItem('role', role);
-        localStorage.setItem('clientData', JSON.stringify(client));
+      if (!result.success) {
+        setError(result.error || 'Неверный ИНН или пароль');
+        return;
       }
 
       router.push('/client');
       closeModal();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Неверный ИНН или пароль');
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        localStorage.removeItem('clientData');
-      }
+      setError(err.message || 'Неверный ИНН или пароль');
     } finally {
       setIsLoading(false);
     }

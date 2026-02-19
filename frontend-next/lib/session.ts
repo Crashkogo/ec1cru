@@ -4,6 +4,7 @@ import { jwtVerify } from 'jose';
 import type { SessionData, ClientData } from '@/types/client';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 // Получение секретного ключа в формате, который понимает jose
 function getSecretKey() {
@@ -31,8 +32,26 @@ export async function getSession(): Promise<SessionData | null> {
       return null;
     }
 
-    // Извлекаем данные клиента из токена
-    const clientData = payload.client as ClientData;
+    // Если в токене есть данные клиента — используем их
+    if (payload.client) {
+      return {
+        token,
+        role: 'CLIENT',
+        client: payload.client as ClientData,
+      };
+    }
+
+    // Иначе запрашиваем актуальные данные клиента с backend
+    const response = await fetch(`${API_URL}/api/clients/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const clientData: ClientData = await response.json();
 
     return {
       token,
