@@ -64,7 +64,7 @@ const ImplementationPage: React.FC = () => {
   };
 
   const onSubmit: SubmitHandler<CustomizationFormInputs> = async (data) => {
-    await submitCallback(data);
+    await submitCallback({ ...data, topic: 'Внедрение' });
   };
 
   return (
