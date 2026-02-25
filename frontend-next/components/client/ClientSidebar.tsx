@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   HomeIcon,
-  DocumentTextIcon,
   CurrencyDollarIcon,
   ChatBubbleLeftRightIcon,
   UserCircleIcon,
@@ -24,9 +23,8 @@ interface ClientSidebarProps {
 
 const menuItems = [
     { title: 'Главная', path: '/client', icon: HomeIcon, exact: true },
-    { title: 'Договоры', path: '/client/contracts', icon: DocumentTextIcon },
+    { title: 'Мои заявки', path: '/client/support', icon: ChatBubbleLeftRightIcon },
     { title: 'Финансы', path: '/client/finance', icon: CurrencyDollarIcon },
-    { title: 'Поддержка', path: '/client/support', icon: ChatBubbleLeftRightIcon },
     { title: 'Профиль', path: '/client/profile', icon: UserCircleIcon },
 ];
 

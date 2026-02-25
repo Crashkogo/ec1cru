@@ -29,16 +29,7 @@ type MenuItem = MenuItemSimple | MenuItemWithSubItems;
 const menuItems: MenuItem[] = [
   { title: 'Новости', path: '/news' },
   { title: 'Мероприятия', path: '/events' },
-  {
-    title: 'Продукты',
-    items: [
-      { name: 'Программы 1С', path: '/1c-programs' },
-      { name: 'Сервисы 1С', path: '/1c-services' },
-      { name: 'Наши разработки', path: '/ready-solutions' },
-      { name: 'Zabbix', path: '/zabbix' },
-      { name: 'Оборудование', path: '/equipment' },
-    ],
-  },
+  { title: 'Обучение', path: '/1c-courses' },
   {
     title: 'Услуги',
     items: [
@@ -48,10 +39,13 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
-    title: 'Обучение',
+    title: 'Продукты',
     items: [
-      { name: 'Курсы 1С', path: '/1c-courses' },
-      { name: 'Сертификация', path: '/certification' },
+      { name: 'Программы 1С', path: '/1c-programs' },
+      { name: 'Сервисы 1С', path: '/1c-services' },
+      { name: 'Наши разработки', path: '/ready-solutions' },
+      { name: 'Zabbix', path: '/zabbix' },
+      { name: 'Оборудование', path: '/equipment' },
     ],
   },
   {

@@ -7,6 +7,7 @@ import { useNotification } from '@/context/NotificationContext';
 interface CallbackFormData {
   name: string;
   phone: string;
+  topic: string;
 }
 
 export const useCallbackForm = () => {

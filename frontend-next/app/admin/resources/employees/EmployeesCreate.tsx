@@ -5,12 +5,18 @@ import {
   Create,
   SimpleForm,
   TextInput,
+  SelectInput,
   required,
   ListButton,
   TopToolbar,
   SaveButton,
   Toolbar
 } from 'react-admin';
+
+const departmentChoices = [
+  { id: '1C',   name: 'Сотрудник 1С' },
+  { id: 'TECH', name: 'Сотрудник технического отдела' },
+];
 import { Card, Typography, Box } from '@mui/material';
 
 const CreateActions = () => (
@@ -52,6 +58,14 @@ export const EmployeesCreate: React.FC = () => (
           validate={[required()]}
           fullWidth
           helperText="Введите фамилию сотрудника"
+          sx={{ mb: 2 }}
+        />
+        <SelectInput
+          source="department"
+          label="Направление"
+          choices={departmentChoices}
+          fullWidth
+          helperText="Выберите направление сотрудника"
           sx={{ mb: 2 }}
         />
       </SimpleForm>

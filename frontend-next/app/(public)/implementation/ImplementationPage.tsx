@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +9,7 @@ import Link from 'next/link';
 import WorkflowTimeline from '@/components/WorkflowTimeline';
 import ProjectsCarousel from '@/components/ProjectsCarousel';
 import { useCallbackForm } from '@/hooks/useCallbackForm';
+import CallbackModal from '@/components/ui/CallbackModal';
 
 // Схема валидации для формы доработок
 const customizationSchema = z.object({
@@ -22,6 +23,7 @@ const customizationSchema = z.object({
 type CustomizationFormInputs = z.infer<typeof customizationSchema>;
 
 const ImplementationPage: React.FC = () => {
+  const [callbackOpen, setCallbackOpen] = useState(false);
   const { isSubmitting, submitCallback } = useCallbackForm();
   const {
     register,
@@ -111,6 +113,21 @@ const ImplementationPage: React.FC = () => {
                 </div>
                 <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
+
+              <button
+                onClick={() => setCallbackOpen(true)}
+                className="group bg-modern-primary-600 rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg hover:bg-modern-primary-700 transition-all duration-200 w-full text-left"
+              >
+                <div>
+                  <div className="text-lg font-bold text-white mb-1">Заказать звонок</div>
+                  <div className="text-xs font-medium text-modern-primary-100">
+                    Хочу подробности<br />Подберём решение для вас
+                  </div>
+                </div>
+                <PhoneIcon className="h-6 w-6 text-white flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+              </button>
+
+              <CallbackModal isOpen={callbackOpen} onClose={() => setCallbackOpen(false)} />
             </div>
 
             {/* Правая часть - ~75% ширины с тремя информационными блоками в общей обёртке */}
@@ -183,27 +200,24 @@ const ImplementationPage: React.FC = () => {
                     Мы обеспечим сквозную автоматизацию для вашей отрасли
                   </h2>
                   <div className="space-y-2 text-base">
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Производство
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Розничная торговля
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Оптовая торговля
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Сельское хозяйство
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Общепит
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      ЖКХ
-                    </div>
-                    <div className="py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 transition-colors duration-200 cursor-pointer">
-                      Услуги
-                    </div>
+                    {[
+                      { label: 'Производство', slug: 'proizvodstvo' },
+                      { label: 'Розничная торговля', slug: 'roznichnaya' },
+                      { label: 'Оптовая торговля', slug: 'optovaya' },
+                      { label: 'Сельское хозяйство', slug: 'selskoe-hozyajstvo' },
+                      { label: 'Общепит', slug: 'obshchepit' },
+                      { label: 'ЖКХ', slug: 'zhkkh' },
+                      { label: 'Услуги', slug: 'uslugi' },
+                    ].map(({ label, slug }) => (
+                      <Link
+                        key={slug}
+                        href={`/implementation/${slug}`}
+                        className="flex items-center justify-between py-2 px-3 bg-modern-primary-50 rounded-lg font-medium text-modern-gray-900 hover:bg-modern-primary-100 hover:text-modern-primary-700 transition-colors duration-200 group"
+                      >
+                        <span>{label}</span>
+                        <ArrowRightIcon className="h-4 w-4 text-modern-primary-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      </Link>
+                    ))}
                   </div>
                 </div>
               </div>

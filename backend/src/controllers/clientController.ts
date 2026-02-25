@@ -7,20 +7,28 @@ import { z } from 'zod';
 
 const prisma = new PrismaClient();
 
+// Общий include для запросов, возвращающих клиента с менеджерами
+const clientInclude = {
+  manager:     true,
+  managerTech: true,
+} as const;
+
 // Схема валидации для создания клиента
 const createClientSchema = z.object({
-  inn: z.string().min(10, 'ИНН должен содержать минимум 10 цифр').max(12, 'ИНН не должен превышать 12 цифр'),
-  name: z.string().min(1, 'Наименование обязательно'),
-  password: z.string().min(6, 'Пароль должен содержать минимум 6 символов'),
-  managerId: z.number().int().positive('Менеджер обязателен'),
+  inn:           z.string().min(10, 'ИНН должен содержать минимум 10 цифр').max(12, 'ИНН не должен превышать 12 цифр'),
+  name:          z.string().min(1, 'Наименование обязательно'),
+  password:      z.string().min(6, 'Пароль должен содержать минимум 6 символов'),
+  managerId:     z.number().int().positive().optional(),
+  managerTechId: z.number().int().positive().optional(),
 });
 
 // Схема валидации для обновления клиента
 const updateClientSchema = z.object({
-  inn: z.string().min(10).max(12).optional(),
-  name: z.string().min(1).optional(),
-  password: z.string().min(6).optional(),
-  managerId: z.number().int().positive().optional(),
+  inn:           z.string().min(10).max(12).optional(),
+  name:          z.string().min(1).optional(),
+  password:      z.string().min(6).optional(),
+  managerId:     z.number().int().positive().nullable().optional(),
+  managerTechId: z.number().int().positive().nullable().optional(),
 });
 
 // Схема валидации для логина клиента
@@ -45,9 +53,7 @@ export const getClients: RequestHandler = async (req, res) => {
 
     const [clients, total] = await Promise.all([
       prisma.client.findMany({
-        include: {
-          manager: true, // Включаем данные менеджера
-        },
+        include: clientInclude,
         orderBy,
         skip,
         take,
@@ -73,9 +79,7 @@ export const getClientById: RequestHandler = async (req, res) => {
     const { id } = req.params;
     const client = await prisma.client.findUnique({
       where: { id: Number(id) },
-      include: {
-        manager: true,
-      },
+      include: clientInclude,
     });
 
     if (!client) {
@@ -101,7 +105,7 @@ export const createClient: RequestHandler = async (req, res) => {
     }
 
     const validatedData = createClientSchema.parse(req.body);
-    const { inn, name, password, managerId } = validatedData;
+    const { inn, name, password, managerId, managerTechId } = validatedData;
 
     // Проверяем, существует ли клиент с таким ИНН
     const existingClient = await prisma.client.findUnique({ where: { inn } });
@@ -110,11 +114,14 @@ export const createClient: RequestHandler = async (req, res) => {
       return;
     }
 
-    // Проверяем, существует ли менеджер
-    const manager = await prisma.employee.findUnique({ where: { id: managerId } });
-    if (!manager) {
-      res.status(400).json({ message: 'Менеджер не найден' });
-      return;
+    // Проверяем менеджеров, если указаны
+    if (managerId) {
+      const manager = await prisma.employee.findUnique({ where: { id: managerId } });
+      if (!manager) { res.status(400).json({ message: 'Менеджер 1С не найден' }); return; }
+    }
+    if (managerTechId) {
+      const managerTech = await prisma.employee.findUnique({ where: { id: managerTechId } });
+      if (!managerTech) { res.status(400).json({ message: 'Менеджер ТО не найден' }); return; }
     }
 
     // Хешируем пароль
@@ -125,11 +132,10 @@ export const createClient: RequestHandler = async (req, res) => {
         inn,
         name,
         passwordHash,
-        managerId,
+        managerId:     managerId ?? null,
+        managerTechId: managerTechId ?? null,
       },
-      include: {
-        manager: true,
-      },
+      include: clientInclude,
     });
 
     const { passwordHash: _, ...clientWithoutPassword } = newClient;
@@ -155,7 +161,7 @@ export const updateClient: RequestHandler = async (req, res) => {
 
     const { id } = req.params;
     const validatedData = updateClientSchema.parse(req.body);
-    const { inn, name, password, managerId } = validatedData;
+    const { inn, name, password, managerId, managerTechId } = validatedData;
 
     const existingClient = await prisma.client.findUnique({
       where: { id: Number(id) },
@@ -166,19 +172,21 @@ export const updateClient: RequestHandler = async (req, res) => {
       return;
     }
 
-    // Если менеджер указан, проверяем его существование
+    // Проверяем менеджеров, если указаны (не null — при null сбрасываем)
     if (managerId) {
       const manager = await prisma.employee.findUnique({ where: { id: managerId } });
-      if (!manager) {
-        res.status(400).json({ message: 'Менеджер не найден' });
-        return;
-      }
+      if (!manager) { res.status(400).json({ message: 'Менеджер 1С не найден' }); return; }
+    }
+    if (managerTechId) {
+      const managerTech = await prisma.employee.findUnique({ where: { id: managerTechId } });
+      if (!managerTech) { res.status(400).json({ message: 'Менеджер ТО не найден' }); return; }
     }
 
     const updateData: any = {};
     if (inn) updateData.inn = inn;
     if (name) updateData.name = name;
-    if (managerId) updateData.managerId = managerId;
+    if (managerId !== undefined)     updateData.managerId     = managerId;      // null сбрасывает связь
+    if (managerTechId !== undefined) updateData.managerTechId = managerTechId;
     if (password) {
       updateData.passwordHash = await bcrypt.hash(password, 10);
     }
@@ -186,9 +194,7 @@ export const updateClient: RequestHandler = async (req, res) => {
     const updatedClient = await prisma.client.update({
       where: { id: Number(id) },
       data: updateData,
-      include: {
-        manager: true,
-      },
+      include: clientInclude,
     });
 
     const { passwordHash, ...clientWithoutPassword } = updatedClient;
@@ -239,7 +245,7 @@ export const loginClient: RequestHandler = async (req, res) => {
 
     const client = await prisma.client.findUnique({
       where: { inn },
-      include: { manager: true },
+      include: clientInclude,
     });
 
     if (!client) {
@@ -267,13 +273,25 @@ export const loginClient: RequestHandler = async (req, res) => {
       token,
       role: 'CLIENT',
       client: {
-        id: client.id,
-        inn: client.inn,
-        name: client.name,
-        manager: {
-          firstName: client.manager.firstName,
-          lastName: client.manager.lastName,
-        },
+        id:           client.id,
+        inn:          client.inn,
+        name:         client.name,
+        managerId:    client.managerId,
+        manager:      client.manager ? {
+          id:         client.manager.id,
+          firstName:  client.manager.firstName,
+          lastName:   client.manager.lastName,
+          department: client.manager.department,
+          photoUrl:   client.manager.photoUrl,
+        } : null,
+        managerTechId: client.managerTechId,
+        managerTech:   client.managerTech ? {
+          id:         client.managerTech.id,
+          firstName:  client.managerTech.firstName,
+          lastName:   client.managerTech.lastName,
+          department: client.managerTech.department,
+          photoUrl:   client.managerTech.photoUrl,
+        } : null,
       },
     });
   } catch (error) {
@@ -284,6 +302,98 @@ export const loginClient: RequestHandler = async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   }
+};
+
+// ===== Клиентские эндпоинты личного кабинета =====
+
+// Профиль текущего клиента (GET /profile)
+export const getClientProfile: RequestHandler = async (req, res) => {
+  try {
+    const clientId = req.user?.id;
+    if (!clientId) { res.status(401).json({ message: 'Не авторизован' }); return; }
+
+    const client = await prisma.client.findUnique({
+      where: { id: clientId },
+      include: clientInclude,
+    });
+    if (!client) { res.status(404).json({ message: 'Клиент не найден' }); return; }
+
+    const { passwordHash, ...data } = client;
+    res.json(data);
+  } catch (error) {
+    console.error('Ошибка профиля клиента:', error);
+    res.status(500).json({ message: 'Ошибка сервера' });
+  }
+};
+
+// Выход клиента (POST /logout) — токен удаляется на клиенте
+export const logoutClientAction: RequestHandler = (_req, res) => {
+  res.status(200).json({ message: 'Logged out' });
+};
+
+// Смена пароля (POST /change-password)
+export const changeClientPassword: RequestHandler = async (req, res) => {
+  try {
+    const clientId = req.user?.id;
+    if (!clientId) { res.status(401).json({ message: 'Не авторизован' }); return; }
+
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      res.status(400).json({ message: 'Требуется старый и новый пароль' });
+      return;
+    }
+    if (typeof newPassword !== 'string' || newPassword.length < 6) {
+      res.status(400).json({ message: 'Новый пароль должен содержать минимум 6 символов' });
+      return;
+    }
+
+    const client = await prisma.client.findUnique({ where: { id: clientId } });
+    if (!client) { res.status(404).json({ message: 'Клиент не найден' }); return; }
+
+    const isValid = await bcrypt.compare(oldPassword, client.passwordHash);
+    if (!isValid) {
+      res.status(400).json({ message: 'Неверный текущий пароль' });
+      return;
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await prisma.client.update({ where: { id: clientId }, data: { passwordHash: newHash } });
+
+    res.status(200).json({ message: 'Пароль успешно изменён' });
+  } catch (error) {
+    console.error('Ошибка смены пароля:', error);
+    res.status(500).json({ message: 'Ошибка сервера' });
+  }
+};
+
+// Счета (GET /invoices) — заглушка до интеграции с 1С
+export const getClientInvoices: RequestHandler = (_req, res) => {
+  res.status(200).json([]);
+};
+
+// Договоры (GET /contracts) — заглушка до интеграции с 1С
+export const getClientContracts: RequestHandler = (_req, res) => {
+  res.status(200).json([]);
+};
+
+// Заявки (GET /tickets) — заглушка до создания модели
+export const getClientTickets: RequestHandler = (_req, res) => {
+  res.status(200).json([]);
+};
+
+// Создание заявки (POST /tickets) — заглушка
+export const createClientTicket: RequestHandler = (_req, res) => {
+  res.status(503).json({ message: 'Функционал находится в разработке' });
+};
+
+// Статистика дашборда (GET /dashboard)
+export const getClientDashboard: RequestHandler = (_req, res) => {
+  res.status(200).json({
+    contractsCount: 0,
+    activeTicketsCount: 0,
+    balance: 0,
+    pendingInvoicesCount: 0,
+  });
 };
 
 // Получить текущего клиента (для ЛК)
@@ -297,9 +407,7 @@ export const getCurrentClient: RequestHandler = async (req, res) => {
 
     const client = await prisma.client.findUnique({
       where: { id: clientId },
-      include: {
-        manager: true,
-      },
+      include: clientInclude,
     });
 
     if (!client) {

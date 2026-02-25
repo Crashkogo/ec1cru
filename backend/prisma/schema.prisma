@@ -245,26 +245,31 @@ model Testimonial {
 
 // Модель для сотрудников (справочник менеджеров для клиентов)
 model Employee {
-  id        Int      @id @default(autoincrement())
-  firstName String   // Имя
-  lastName  String   // Фамилия
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  clients   Client[] // Клиенты, прикрепленные к этому менеджеру
+  id           Int      @id @default(autoincrement())
+  firstName    String   // Имя
+  lastName     String   // Фамилия
+  department   String?  // Направление: "1C" или "TECH"
+  photoUrl     String?  // URL фотографии сотрудника
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  clients1c    Client[] @relation("Manager1C")   // Клиенты, где этот сотрудник — менеджер по 1С
+  clientsTech  Client[] @relation("ManagerTech") // Клиенты, где этот сотрудник — менеджер ТО
 
   @@map("employees")
 }
 
 // Модель для клиентов (пользователей личного кабинета)
 model Client {
-  id           Int      @id @default(autoincrement())
-  inn          String   @unique // ИНН организации
-  name         String   // Наименование организации
-  passwordHash String   // Хеш пароля для входа
-  managerId    Int      // ID менеджера из таблицы Employee
-  manager      Employee @relation(fields: [managerId], references: [id]) // Связь с менеджером
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             Int       @id @default(autoincrement())
+  inn            String    @unique // ИНН организации
+  name           String    // Наименование организации
+  passwordHash   String    // Хеш пароля для входа
+  managerId      Int?      // ID менеджера 1С (необязательно)
+  manager        Employee? @relation("Manager1C", fields: [managerId], references: [id])
+  managerTechId  Int?      // ID менеджера технического отдела (необязательно)
+  managerTech    Employee? @relation("ManagerTech", fields: [managerTechId], references: [id])
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@map("clients")
 }

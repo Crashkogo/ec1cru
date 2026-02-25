@@ -27,28 +27,25 @@ export function WelcomeHeader({ clientName }: WelcomeHeaderProps) {
     };
 
     return (
-        <div className="bg-gradient-to-r from-modern-primary-500 to-modern-primary-600 rounded-2xl p-8 text-white shadow-xl">
-            <div className="flex items-start justify-between">
+        <div className="bg-gradient-to-r from-modern-primary-500 to-modern-primary-600 rounded-2xl p-5 text-white shadow-xl">
+            <div className="flex items-center justify-between">
                 <div className="flex-1">
-                    <h1 className="text-3xl font-bold mb-2">
+                    <h1 className="text-2xl font-bold">
                     Добро пожаловать, {clientName}!
                     </h1>
-                    <p className="text-modern-primary-100">
-                    Здесь вы можете управлять договорами, финансами и заявками
-                    </p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="text-right">
+                    <p className="text-xs text-modern-primary-100">Обновлено:</p>
+                    <p className="text-xs font-semibold">{formatDate(lastUpdate)}</p>
+                    </div>
                     <button
                         onClick={handleRefresh}
-                        className="p-3 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200"
+                        className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200"
                         aria-label="Обновить данные"
                     >
-                    <ArrowPathIcon className="h-6 w-6 text-white" />
+                    <ArrowPathIcon className="h-5 w-5 text-white" />
                     </button>
-                    <div className="text-right">
-                    <p className="text-sm text-modern-primary-100">Дата обновления данных:</p>
-                    <p className="text-sm font-semibold">{formatDate(lastUpdate)}</p>
-                    </div>
                 </div>
             </div>
       </div>

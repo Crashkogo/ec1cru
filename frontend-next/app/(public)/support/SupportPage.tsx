@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, PhoneIcon } from '@heroicons/react/24/outline';
+import CallbackModal from '@/components/ui/CallbackModal';
 import { ItsTariffPlan } from '@/types/tariff';
 import AccordionItem from '@/components/AccordionItem';
 
 const SupportPage: React.FC = () => {
   const [tariffs, setTariffs] = useState<ItsTariffPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [callbackOpen, setCallbackOpen] = useState(false);
 
   // Загрузка ИТС тарифов из API
   useEffect(() => {
@@ -75,6 +77,21 @@ const SupportPage: React.FC = () => {
                 </div>
                 <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
+
+              <button
+                onClick={() => setCallbackOpen(true)}
+                className="group bg-modern-primary-600 rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg hover:bg-modern-primary-700 transition-all duration-200 w-full text-left"
+              >
+                <div>
+                  <div className="text-lg font-bold text-white mb-1">Заказать звонок</div>
+                  <div className="text-xs font-medium text-modern-primary-100">
+                    Хочу подробности<br />Подберём решение для вас
+                  </div>
+                </div>
+                <PhoneIcon className="h-6 w-6 text-white flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+              </button>
+
+              <CallbackModal isOpen={callbackOpen} onClose={() => setCallbackOpen(false)} />
             </div>
 
             {/* Правая часть - основной контент */}

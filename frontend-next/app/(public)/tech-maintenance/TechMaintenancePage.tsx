@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, CheckIcon, PhoneIcon } from '@heroicons/react/24/outline';
 import { TariffPlan } from '@/types/tariff';
+import CallbackModal from '@/components/ui/CallbackModal';
 
 const TechMaintenancePage: React.FC = () => {
     const [tariffs, setTariffs] = useState<TariffPlan[]>([]);
     const [loading, setLoading] = useState(true);
+    const [callbackOpen, setCallbackOpen] = useState(false);
 
     // Загрузка тарифов из API
     useEffect(() => {
@@ -86,7 +88,22 @@ const TechMaintenancePage: React.FC = () => {
                                 </div>
                                 <ArrowRightIcon className="h-6 w-6 text-modern-primary-600 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
                             </Link>
+
+                            <button
+                                onClick={() => setCallbackOpen(true)}
+                                className="group bg-modern-primary-600 rounded-xl p-4 shadow-modern flex items-center justify-between cursor-pointer hover:shadow-modern-lg hover:bg-modern-primary-700 transition-all duration-200 w-full text-left"
+                            >
+                                <div>
+                                    <div className="text-lg font-bold text-white mb-1">Заказать звонок</div>
+                                    <div className="text-xs font-medium text-modern-primary-100">
+                                        Хочу подробности<br />Подберём решение для вас
+                                    </div>
+                                </div>
+                                <PhoneIcon className="h-6 w-6 text-white flex-shrink-0 transition-transform duration-200 group-hover:scale-110" />
+                            </button>
                         </div>
+
+                        <CallbackModal isOpen={callbackOpen} onClose={() => setCallbackOpen(false)} />
 
                         {/* Правая часть - основной контент */}
                         <div className="flex-1 bg-modern-white/80 backdrop-blur-sm rounded-xl p-8 shadow-modern">

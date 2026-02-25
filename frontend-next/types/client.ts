@@ -1,20 +1,26 @@
 // Типы для личного кабинета клиента
 
+export interface ManagerData {
+  id: number;
+  firstName: string;
+  lastName: string;
+  department?: string | null;  // "1C" | "TECH"
+  photoUrl?: string | null;
+  position?: string;
+  phone?: string;
+  email?: string;
+}
+
 export interface ClientData {
   id: number;
   inn: string;
   name: string;
   email?: string;
   phone?: string;
-  managerId?: number;
-  manager?: {
-    id: number;
-    firstName: string;
-    lastName: string;
-    position?: string;
-    phone?: string;
-    email?: string;
-  };
+  managerId?: number | null;
+  manager?: ManagerData | null;
+  managerTechId?: number | null;
+  managerTech?: ManagerData | null;
   createdAt?: string;
   updatedAt?: string;
 }

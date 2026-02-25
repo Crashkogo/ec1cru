@@ -7,6 +7,14 @@ import {
   deleteClient,
   loginClient,
   getCurrentClient,
+  getClientProfile,
+  logoutClientAction,
+  changeClientPassword,
+  getClientInvoices,
+  getClientContracts,
+  getClientTickets,
+  createClientTicket,
+  getClientDashboard,
 } from '../controllers/clientController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
@@ -15,14 +23,22 @@ const router = express.Router();
 // Публичный роут для логина клиентов
 router.post('/login', loginClient);
 
-// Защищенный роут для получения текущего клиента (в ЛК)
-router.get('/me', authMiddleware, getCurrentClient);
+// Личный кабинет — фиксированные маршруты ПЕРЕД /:id
+router.get('/me',              authMiddleware, getCurrentClient);
+router.get('/profile',         authMiddleware, getClientProfile);
+router.post('/logout',         logoutClientAction);
+router.post('/change-password', authMiddleware, changeClientPassword);
+router.get('/invoices',        authMiddleware, getClientInvoices);
+router.get('/contracts',       authMiddleware, getClientContracts);
+router.get('/tickets',         authMiddleware, getClientTickets);
+router.post('/tickets',        authMiddleware, createClientTicket);
+router.get('/dashboard',       authMiddleware, getClientDashboard);
 
 // Админские роуты для управления клиентами (требуют авторизации)
-router.get('/', authMiddleware, getClients);
-router.get('/:id', authMiddleware, getClientById);
-router.post('/', authMiddleware, createClient);
-router.put('/:id', authMiddleware, updateClient);
+router.get('/',      authMiddleware, getClients);
+router.get('/:id',   authMiddleware, getClientById);
+router.post('/',     authMiddleware, createClient);
+router.put('/:id',   authMiddleware, updateClient);
 router.delete('/:id', authMiddleware, deleteClient);
 
 export default router;

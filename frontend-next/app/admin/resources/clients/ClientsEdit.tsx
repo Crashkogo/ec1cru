@@ -79,12 +79,19 @@ export const ClientsEdit: React.FC = () => (
           helperText="Оставьте пустым, чтобы не менять пароль"
           sx={{ mb: 2 }}
         />
-        <ReferenceInput source="managerId" reference="employees" label="Менеджер">
+        <ReferenceInput source="managerId" reference="employees" label="Менеджер 1С" filter={{ department: '1C' }}>
           <SelectInput
             optionText={(record: any) => `${record.firstName} ${record.lastName}`}
-            validate={[required()]}
             fullWidth
-            helperText="Закрепленный менеджер"
+            helperText="Менеджер по направлению 1С (оставьте пустым для сброса)"
+            sx={{ mb: 2 }}
+          />
+        </ReferenceInput>
+        <ReferenceInput source="managerTechId" reference="employees" label="Менеджер технического отдела" filter={{ department: 'TECH' }}>
+          <SelectInput
+            optionText={(record: any) => `${record.firstName} ${record.lastName}`}
+            fullWidth
+            helperText="Менеджер технического отдела (оставьте пустым для сброса)"
             sx={{ mb: 2 }}
           />
         </ReferenceInput>

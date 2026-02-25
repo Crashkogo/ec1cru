@@ -67,12 +67,19 @@ export const ClientsCreate: React.FC = () => (
           helperText="Пароль для входа в личный кабинет (минимум 6 символов)"
           sx={{ mb: 2 }}
         />
-        <ReferenceInput source="managerId" reference="employees" label="Менеджер">
+        <ReferenceInput source="managerId" reference="employees" label="Менеджер 1С" filter={{ department: '1C' }}>
           <SelectInput
             optionText={(record: any) => `${record.firstName} ${record.lastName}`}
-            validate={[required()]}
             fullWidth
-            helperText="Выберите закрепленного менеджера"
+            helperText="Менеджер по направлению 1С (необязательно)"
+            sx={{ mb: 2 }}
+          />
+        </ReferenceInput>
+        <ReferenceInput source="managerTechId" reference="employees" label="Менеджер технического отдела" filter={{ department: 'TECH' }}>
+          <SelectInput
+            optionText={(record: any) => `${record.firstName} ${record.lastName}`}
+            fullWidth
+            helperText="Менеджер технического отдела (необязательно)"
             sx={{ mb: 2 }}
           />
         </ReferenceInput>

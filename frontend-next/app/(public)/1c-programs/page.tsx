@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { MagnifyingGlassIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { programs, categoriesRow1, categoriesRow2, getCategoryColors } from './programsData';
 
 export default function ProgramsPage() {
@@ -116,15 +116,6 @@ export default function ProgramsPage() {
                     {program.description}
                   </p>
 
-                  <a
-                    href={program.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center text-modern-primary-600 hover:text-modern-primary-700 font-medium text-sm transition-colors duration-200"
-                  >
-                    Подробнее
-                    <ArrowTopRightOnSquareIcon className="h-4 w-4 ml-1" />
-                  </a>
                 </div>
               </div>
             );

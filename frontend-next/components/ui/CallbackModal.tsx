@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { XMarkIcon, PhoneIcon, UserIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, PhoneIcon, UserIcon, ArrowRightIcon, TagIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useCallbackForm } from '@/hooks/useCallbackForm';
 
@@ -12,6 +12,7 @@ import { useCallbackForm } from '@/hooks/useCallbackForm';
 const callbackSchema = z.object({
   name: z.string().min(2, 'Имя должно содержать не менее 2 символов'),
   phone: z.string().regex(/^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/, 'Неверный формат номера телефона'),
+  topic: z.string().min(1, 'Выберите направление обращения'),
   consent: z.boolean().refine((val) => val === true, {
     message: 'Необходимо дать согласие на обработку персональных данных',
   }),
@@ -36,6 +37,7 @@ const CallbackModal: React.FC<CallbackModalProps> = ({ isOpen, onClose }) => {
     resolver: zodResolver(callbackSchema),
     defaultValues: {
       phone: '+7 ',
+      topic: '',
       consent: false,
     },
   });
@@ -155,6 +157,29 @@ const CallbackModal: React.FC<CallbackModalProps> = ({ isOpen, onClose }) => {
               />
             </div>
             {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone.message}</p>}
+          </div>
+
+          {/* Направление обращения */}
+          <div>
+            <label htmlFor="topic" className="sr-only">Направление обращения</label>
+            <div className="relative">
+              <TagIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-modern-gray-400 pointer-events-none" />
+              <select
+                id="topic"
+                {...register('topic')}
+                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-modern-primary-500 focus:border-modern-primary-500 transition-colors duration-200 bg-white appearance-none ${
+                  errors.topic ? 'border-red-300' : 'border-modern-gray-300'
+                }`}
+              >
+                <option value="">Выберите направление</option>
+                <option value="1С">1С</option>
+                <option value="Технический отдел">Технический отдел</option>
+                <option value="IT-аутсорсинг">IT-аутсорсинг</option>
+                <option value="Внедрение">Внедрение</option>
+                <option value="Другое">Другое</option>
+              </select>
+            </div>
+            {errors.topic && <p className="text-red-600 text-sm mt-1">{errors.topic.message}</p>}
           </div>
 
           {/* Согласие на обработку данных */}

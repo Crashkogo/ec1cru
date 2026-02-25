@@ -5,6 +5,7 @@ import {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  uploadEmployeePhoto,
 } from '../controllers/employeeController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
@@ -15,6 +16,7 @@ router.get('/', authMiddleware, getEmployees);
 router.get('/:id', authMiddleware, getEmployeeById);
 router.post('/', authMiddleware, createEmployee);
 router.put('/:id', authMiddleware, updateEmployee);
+router.post('/:id/photo', authMiddleware, uploadEmployeePhoto);
 router.delete('/:id', authMiddleware, deleteEmployee);
 
 export default router;

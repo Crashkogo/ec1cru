@@ -64,7 +64,7 @@ export default function SupportClient({ tickets }: SupportClientProps) {
       {/* Заголовок */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-modern-gray-900">Поддержка</h1>
+          <h1 className="text-3xl font-bold text-modern-gray-900">Мои заявки</h1>
           <p className="text-modern-gray-600 mt-2">Управление заявками и обращениями</p>
         </div>
         <button

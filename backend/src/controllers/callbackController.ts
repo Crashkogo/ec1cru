@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 import { EMAIL_CALL_OUT, EMAIL_PASS_OUT, EMAIL_CALL_IN } from '../config.js';
 
 export const sendCallback = async (req: Request, res: Response) => {
-  const { name, phone } = req.body;
+  const { name, phone, topic } = req.body;
 
   if (!name || !phone) {
     return res.status(400).json({ message: 'Имя и телефон обязательны для заполнения' });
@@ -33,6 +33,7 @@ export const sendCallback = async (req: Request, res: Response) => {
         <h2 style="color: #1D4ED8;">Новая заявка на обратный звонок</h2>
         <p><strong>Имя:</strong> ${name}</p>
         <p><strong>Телефон:</strong> ${phone}</p>
+        ${topic ? `<p><strong>Направление:</strong> ${topic}</p>` : ''}
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
         <p style="font-size: 12px; color: #64748B;">Это письмо было отправлено автоматически с вашего сайта.</p>
       </div>

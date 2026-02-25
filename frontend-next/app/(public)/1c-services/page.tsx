@@ -144,7 +144,7 @@ export default function ServicesPage() {
         )}
 
         {/* Дополнительная информация */}
-        <div className="mt-16 text-center">
+        <div className="mt-10 text-center">
           <div className="bg-modern-primary-50 rounded-xl p-8">
             <h2 className="text-2xl font-bold text-modern-primary-900 mb-4">
               Нужна помощь с выбором сервиса?

@@ -134,14 +134,6 @@ export default function Footer() {
                   Курсы 1С
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/certification"
-                  className="hover:text-white transition-colors duration-200"
-                >
-                  Сертификация
-                </Link>
-              </li>
             </ul>
           </div>
 
