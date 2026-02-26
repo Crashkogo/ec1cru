@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import LoginModal from '@/components/LoginModal';
+import CookieBanner from '@/components/ui/CookieBanner';
+import ScrollToTopButton from '@/components/ui/ScrollToTopButton';
 
 export default function PublicLayout({
   children,
@@ -18,6 +20,8 @@ export default function PublicLayout({
       <main className="pt-20 min-h-screen">{children}</main>
       <Footer />
       <LoginModal showLogin={showLogin} setShowLogin={setShowLogin} />
+      <CookieBanner />
+      <ScrollToTopButton />
     </>
   );
 }
