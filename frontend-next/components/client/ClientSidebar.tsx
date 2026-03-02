@@ -9,6 +9,7 @@ import {
   CurrencyDollarIcon,
   ChatBubbleLeftRightIcon,
   UserCircleIcon,
+  UsersIcon,
   ArrowRightOnRectangleIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
@@ -24,6 +25,7 @@ interface ClientSidebarProps {
 const menuItems = [
     { title: 'Главная', path: '/client', icon: HomeIcon, exact: true },
     { title: 'Мои заявки', path: '/client/support', icon: ChatBubbleLeftRightIcon },
+    { title: 'Сотрудники', path: '/client/employees', icon: UsersIcon },
     { title: 'Финансы', path: '/client/finance', icon: CurrencyDollarIcon },
     { title: 'Профиль', path: '/client/profile', icon: UserCircleIcon },
 ];

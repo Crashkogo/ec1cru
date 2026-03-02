@@ -15,6 +15,10 @@ import {
   getClientTickets,
   createClientTicket,
   getClientDashboard,
+  getClientEmployees,
+  createClientEmployee,
+  updateClientEmployee,
+  deleteClientEmployee,
 } from '../controllers/clientController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
@@ -33,6 +37,12 @@ router.get('/contracts',       authMiddleware, getClientContracts);
 router.get('/tickets',         authMiddleware, getClientTickets);
 router.post('/tickets',        authMiddleware, createClientTicket);
 router.get('/dashboard',       authMiddleware, getClientDashboard);
+
+// Сотрудники клиента (для создания заявок)
+router.get('/employees',        authMiddleware, getClientEmployees);
+router.post('/employees',       authMiddleware, createClientEmployee);
+router.put('/employees/:id',    authMiddleware, updateClientEmployee);
+router.delete('/employees/:id', authMiddleware, deleteClientEmployee);
 
 // Админские роуты для управления клиентами (требуют авторизации)
 router.get('/',      authMiddleware, getClients);

@@ -268,8 +268,25 @@ model Client {
   manager        Employee? @relation("Manager1C", fields: [managerId], references: [id])
   managerTechId  Int?      // ID менеджера технического отдела (необязательно)
   managerTech    Employee? @relation("ManagerTech", fields: [managerTechId], references: [id])
+  employees      ClientEmployee[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   @@map("clients")
+}
+
+// Модель для сотрудников клиента (для создания заявок)
+model ClientEmployee {
+  id        Int      @id @default(autoincrement())
+  clientId  Int
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  name      String   // Имя сотрудника
+  position  String   // Должность
+  phone     String?  // Телефон (необязательно)
+  email     String?  // E-mail (необязательно)
+  isDefault Boolean  @default(false) // Сотрудник по умолчанию в форме заявки
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("client_employees")
 }

@@ -422,3 +422,153 @@ export const getCurrentClient: RequestHandler = async (req, res) => {
     res.status(500).json({ message: 'Ошибка сервера' });
   }
 };
+
+// Схема для создания/обновления сотрудника клиента
+const clientEmployeeSchema = z.object({
+  name:      z.string().min(1, 'Имя обязательно'),
+  position:  z.string().min(1, 'Должность обязательна'),
+  phone:     z.string().optional(),
+  email:     z.string().email('Некорректный email').optional().or(z.literal('')),
+  isDefault: z.boolean().optional(),
+});
+
+// Получить всех сотрудников текущего клиента
+export const getClientEmployees: RequestHandler = async (req, res) => {
+  try {
+    if (req.user?.role !== 'CLIENT') {
+      res.status(403).json({ message: 'Forbidden' });
+      return;
+    }
+
+    const employees = await prisma.clientEmployee.findMany({
+      where: { clientId: req.user.id },
+      orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
+    });
+
+    res.status(200).json(employees);
+  } catch (error) {
+    console.error('Error getting client employees:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Создать сотрудника клиента
+export const createClientEmployee: RequestHandler = async (req, res) => {
+  try {
+    if (req.user?.role !== 'CLIENT') {
+      res.status(403).json({ message: 'Forbidden' });
+      return;
+    }
+
+    const validatedData = clientEmployeeSchema.parse(req.body);
+    const clientId = req.user.id;
+
+    const employee = await prisma.$transaction(async (tx) => {
+      if (validatedData.isDefault) {
+        await tx.clientEmployee.updateMany({
+          where: { clientId },
+          data: { isDefault: false },
+        });
+      }
+
+      return tx.clientEmployee.create({
+        data: {
+          clientId,
+          name:      validatedData.name,
+          position:  validatedData.position,
+          phone:     validatedData.phone || null,
+          email:     validatedData.email || null,
+          isDefault: validatedData.isDefault ?? false,
+        },
+      });
+    });
+
+    res.status(201).json(employee);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ message: 'Validation error', errors: error.errors });
+    } else {
+      console.error('Error creating client employee:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+};
+
+// Обновить сотрудника клиента
+export const updateClientEmployee: RequestHandler = async (req, res) => {
+  try {
+    if (req.user?.role !== 'CLIENT') {
+      res.status(403).json({ message: 'Forbidden' });
+      return;
+    }
+
+    const employeeId = Number(req.params.id);
+    const clientId = req.user.id;
+
+    const existing = await prisma.clientEmployee.findFirst({
+      where: { id: employeeId, clientId },
+    });
+    if (!existing) {
+      res.status(404).json({ message: 'Employee not found' });
+      return;
+    }
+
+    const validatedData = clientEmployeeSchema.parse(req.body);
+
+    const employee = await prisma.$transaction(async (tx) => {
+      if (validatedData.isDefault) {
+        await tx.clientEmployee.updateMany({
+          where: { clientId, id: { not: employeeId } },
+          data: { isDefault: false },
+        });
+      }
+
+      return tx.clientEmployee.update({
+        where: { id: employeeId },
+        data: {
+          name:      validatedData.name,
+          position:  validatedData.position,
+          phone:     validatedData.phone || null,
+          email:     validatedData.email || null,
+          isDefault: validatedData.isDefault ?? false,
+        },
+      });
+    });
+
+    res.status(200).json(employee);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ message: 'Validation error', errors: error.errors });
+    } else {
+      console.error('Error updating client employee:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+};
+
+// Удалить сотрудника клиента
+export const deleteClientEmployee: RequestHandler = async (req, res) => {
+  try {
+    if (req.user?.role !== 'CLIENT') {
+      res.status(403).json({ message: 'Forbidden' });
+      return;
+    }
+
+    const employeeId = Number(req.params.id);
+    const clientId = req.user.id;
+
+    const existing = await prisma.clientEmployee.findFirst({
+      where: { id: employeeId, clientId },
+    });
+    if (!existing) {
+      res.status(404).json({ message: 'Employee not found' });
+      return;
+    }
+
+    await prisma.clientEmployee.delete({ where: { id: employeeId } });
+    res.status(200).json({ message: 'Employee deleted', id: employeeId });
+  } catch (error) {
+    console.error('Error deleting client employee:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

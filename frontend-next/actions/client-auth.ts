@@ -4,7 +4,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import axios from 'axios';
-import type { ClientData, Invoice, Contract, Ticket, DashboardStats } from '@/types/client';
+import type { ClientData, Invoice, Contract, Ticket, DashboardStats, ClientEmployee } from '@/types/client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -204,7 +204,8 @@ export async function getTickets(): Promise<Ticket[]> {
 export async function createTicket(
   title: string,
   description: string,
-  priority: 'low' | 'medium' | 'high'
+  department: string,
+  employeeId: number
 ): Promise<{ success: boolean; error?: string; ticket?: Ticket }> {
   try {
     const cookieStore = await cookies();
@@ -216,7 +217,7 @@ export async function createTicket(
 
     const response = await axios.post(
       `${API_URL}/api/clients/tickets`,
-      { title, description, priority },
+      { title, description, department, employeeId },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -256,5 +257,87 @@ export async function getDashboardStats(): Promise<DashboardStats | null> {
   } catch (error) {
     console.error('Get dashboard stats error:', error);
     return null;
+  }
+}
+
+/**
+ * Получение списка сотрудников клиента
+ */
+export async function getClientEmployees(): Promise<ClientEmployee[]> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('clientToken')?.value;
+    if (!token) return [];
+
+    const response = await axios.get(`${API_URL}/api/clients/employees`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Get employees error:', error);
+    return [];
+  }
+}
+
+/**
+ * Создание сотрудника клиента
+ */
+export async function createClientEmployee(data: {
+  name: string;
+  position: string;
+  phone?: string;
+  email?: string;
+  isDefault?: boolean;
+}): Promise<{ success: boolean; error?: string; employee?: ClientEmployee }> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('clientToken')?.value;
+    if (!token) return { success: false, error: 'Не авторизован' };
+
+    const response = await axios.post(`${API_URL}/api/clients/employees`, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return { success: true, employee: response.data };
+  } catch (error: any) {
+    return { success: false, error: error.response?.data?.message || 'Ошибка создания сотрудника' };
+  }
+}
+
+/**
+ * Обновление сотрудника клиента
+ */
+export async function updateClientEmployee(
+  id: number,
+  data: { name: string; position: string; phone?: string; email?: string; isDefault?: boolean }
+): Promise<{ success: boolean; error?: string; employee?: ClientEmployee }> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('clientToken')?.value;
+    if (!token) return { success: false, error: 'Не авторизован' };
+
+    const response = await axios.put(`${API_URL}/api/clients/employees/${id}`, data, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return { success: true, employee: response.data };
+  } catch (error: any) {
+    return { success: false, error: error.response?.data?.message || 'Ошибка обновления сотрудника' };
+  }
+}
+
+/**
+ * Удаление сотрудника клиента
+ */
+export async function deleteClientEmployee(id: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('clientToken')?.value;
+    if (!token) return { success: false, error: 'Не авторизован' };
+
+    await axios.delete(`${API_URL}/api/clients/employees/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.response?.data?.message || 'Ошибка удаления сотрудника' };
   }
 }

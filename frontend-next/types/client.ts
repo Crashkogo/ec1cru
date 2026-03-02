@@ -79,3 +79,15 @@ export interface DashboardStats {
   balance: number;
   pendingInvoicesCount: number;
 }
+
+export interface ClientEmployee {
+  id: number;
+  clientId: number;
+  name: string;
+  position: string;
+  phone?: string | null;
+  email?: string | null;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
