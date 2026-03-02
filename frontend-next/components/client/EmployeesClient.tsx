@@ -34,20 +34,20 @@ export default function EmployeesClient({ employees: initial }: EmployeesClientP
 
   const handleSetDefault = async (emp: ClientEmployee) => {
     if (emp.isDefault) return;
-    await updateClientEmployee(emp.id, {
+    const result = await updateClientEmployee(emp.id, {
       name: emp.name,
       position: emp.position,
-      phone: emp.phone ?? '',
-      email: emp.email ?? '',
+      phone: emp.phone ?? undefined,
+      email: emp.email ?? undefined,
       isDefault: true,
     });
-    refresh();
+    if (result.success) refresh();
   };
 
   const handleDelete = async (emp: ClientEmployee) => {
     if (!confirm(`Удалить сотрудника «${emp.name}»?`)) return;
-    await deleteClientEmployee(emp.id);
-    refresh();
+    const result = await deleteClientEmployee(emp.id);
+    if (result.success) refresh();
   };
 
   const openCreate = () => {

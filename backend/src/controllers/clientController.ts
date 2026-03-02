@@ -503,6 +503,10 @@ export const updateClientEmployee: RequestHandler = async (req, res) => {
     }
 
     const employeeId = Number(req.params.id);
+    if (!Number.isInteger(employeeId) || employeeId <= 0) {
+      res.status(400).json({ message: 'Invalid employee ID' });
+      return;
+    }
     const clientId = req.user.id;
 
     const existing = await prisma.clientEmployee.findFirst({
@@ -555,6 +559,10 @@ export const deleteClientEmployee: RequestHandler = async (req, res) => {
     }
 
     const employeeId = Number(req.params.id);
+    if (!Number.isInteger(employeeId) || employeeId <= 0) {
+      res.status(400).json({ message: 'Invalid employee ID' });
+      return;
+    }
     const clientId = req.user.id;
 
     const existing = await prisma.clientEmployee.findFirst({
