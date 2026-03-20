@@ -899,7 +899,7 @@ export const industriesData: Record<string, IndustryData> = {
       },
       {
         icon: '⏱️',
-        metric: '-40%',
+        metric: 'до 40%',
         label: 'меньше административной работы',
         description:
           'Автоматическое выставление счетов, напоминания и шаблоны документов освобождают время специалистов',
