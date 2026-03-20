@@ -117,9 +117,9 @@ export default async function IndustryPage({ params }: PageProps) {
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {industry.results.map((r, i) => (
+              {industry.results.map((r) => (
                 <div
-                  key={i}
+                  key={r.label}
                   className="bg-white rounded-xl p-6 border border-modern-gray-200 shadow-sm hover:shadow-modern hover:border-modern-primary-200 transition-all duration-200"
                 >
                   <div className="text-3xl mb-3">{r.icon}</div>
@@ -282,9 +282,9 @@ export default async function IndustryPage({ params }: PageProps) {
               </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {industry.cases.map((c, i) => (
+              {industry.cases.map((c) => (
                 <div
-                  key={i}
+                  key={c.tag}
                   className="bg-white rounded-xl border border-modern-gray-200 overflow-hidden shadow-sm hover:shadow-modern transition-all duration-200"
                 >
                   <div className="bg-modern-primary-50 border-b border-modern-primary-100 px-5 py-3">
