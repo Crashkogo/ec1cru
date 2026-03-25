@@ -290,3 +290,18 @@ model ClientEmployee {
 
   @@map("client_employees")
 }
+
+// Модель для страницы команды — независима от Employee (менеджеры клиентов)
+model TeamMember {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  position  String              // Должность: "Менеджер", "Специалист ИТС" и т.д.
+  section   String              // MANAGERS | CONSULTATION | ITS | IMPLEMENTATION | TECH
+  photoUrl  String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("team_members")
+}
