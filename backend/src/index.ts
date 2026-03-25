@@ -8,6 +8,7 @@ import tariffPlanRoutes from './routes/tariffPlanRoutes.js';
 import itsTariffPlanRoutes from './routes/itsTariffPlanRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import employeeRoutes from './routes/employeeRoutes.js';
+import teamMemberRoutes from './routes/teamMemberRoutes.js';
 import clientRoutes from './routes/clientRoutes.js';
 import fileUpload from 'express-fileupload';
 import path from 'path';
@@ -77,6 +78,7 @@ app.use('/api', tariffPlanRoutes);
 app.use('/api', itsTariffPlanRoutes);
 app.use('/api', courseRoutes);
 app.use('/api/employees', employeeRoutes);
+app.use('/api/team-members', teamMemberRoutes);
 app.use('/api/clients', clientRoutes);
 
 app.get('/', (req, res) => {
