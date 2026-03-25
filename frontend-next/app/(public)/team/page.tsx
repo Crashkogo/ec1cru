@@ -43,7 +43,7 @@ const BACKEND_URL =
 async function getTeamMembers(): Promise<TeamMember[]> {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/team-members?_start=0&_end=500&_sort=sortOrder&_order=asc`,
+      `${BACKEND_URL}/api/team-members?_start=0&_end=500`,
       { cache: 'no-store' }
     );
     if (!res.ok) return [];
@@ -91,7 +91,9 @@ export default async function TeamPage() {
   const members = await getTeamMembers();
 
   const grouped = SECTION_ORDER.reduce<Record<string, TeamMember[]>>((acc, key) => {
-    acc[key] = members.filter((m) => m.section === key);
+    acc[key] = members
+      .filter((m) => m.section === key)
+      .sort((a, b) => a.sortOrder - b.sortOrder);
     return acc;
   }, {} as Record<string, TeamMember[]>);
 
