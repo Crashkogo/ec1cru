@@ -395,6 +395,22 @@ export const dataProvider: DataProvider = {
       };
     }
 
+    if (resource === 'team-members') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'sortOrder',
+        _order: params.sort?.order || 'ASC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/team-members?${stringify(query)}`;
+      const { json, headers: responseHeaders } = await httpClient(url);
+      return {
+        data: json,
+        total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+      };
+    }
+
     if (resource === 'clients') {
       const query = {
         _start: ((page - 1) * perPage).toString(),
@@ -592,6 +608,19 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'team-members') {
+      const url = `${apiUrl}/api/team-members/${params.id}`;
+      try {
+        const { json } = await httpClient(url);
+        return { data: json };
+      } catch (error) {
+        console.error('GetOne team-member error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch team member'
+        );
+      }
+    }
+
     if (resource === 'clients') {
       const url = `${apiUrl}/api/clients/${params.id}`;
       try {
@@ -697,6 +726,15 @@ export const dataProvider: DataProvider = {
     if (resource === 'employees') {
       const promises = params.ids.map((id) =>
         httpClient(`${apiUrl}/api/employees/${id}`)
+      );
+      const results = await Promise.all(promises);
+      const data = results.map(({ json }) => json);
+      return { data };
+    }
+
+    if (resource === 'team-members') {
+      const promises = params.ids.map((id) =>
+        httpClient(`${apiUrl}/api/team-members/${id}`)
       );
       const results = await Promise.all(promises);
       const data = results.map(({ json }) => json);
@@ -851,6 +889,15 @@ export const dataProvider: DataProvider = {
 
     if (resource === 'employees') {
       const url = `${apiUrl}/api/employees`;
+      const { json } = await httpClient(url, {
+        method: 'POST',
+        body: JSON.stringify(params.data),
+      });
+      return { data: json };
+    }
+
+    if (resource === 'team-members') {
+      const url = `${apiUrl}/api/team-members`;
       const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
@@ -1103,6 +1150,22 @@ export const dataProvider: DataProvider = {
         console.error('Update employee error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to update employee'
+        );
+      }
+    }
+
+    if (resource === 'team-members') {
+      const url = `${apiUrl}/api/team-members/${params.id}`;
+      try {
+        const { json } = await httpClient(url, {
+          method: 'PUT',
+          body: JSON.stringify(params.data),
+        });
+        return { data: json };
+      } catch (error) {
+        console.error('Update team-member error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update team member'
         );
       }
     }
@@ -1440,6 +1503,21 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'team-members') {
+      const url = `${apiUrl}/api/team-members/${params.id}`;
+      try {
+        await httpClient(url, {
+          method: 'DELETE',
+        });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete team-member error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete team member'
+        );
+      }
+    }
+
     if (resource === 'clients') {
       const url = `${apiUrl}/api/clients/${params.id}`;
       try {
@@ -1535,6 +1613,17 @@ export const dataProvider: DataProvider = {
       await Promise.all(
         params.ids.map((id) =>
           httpClient(`${apiUrl}/api/employees/${id}`, {
+            method: 'DELETE',
+          })
+        )
+      );
+      return { data: params.ids };
+    }
+
+    if (resource === 'team-members') {
+      await Promise.all(
+        params.ids.map((id) =>
+          httpClient(`${apiUrl}/api/team-members/${id}`, {
             method: 'DELETE',
           })
         )
