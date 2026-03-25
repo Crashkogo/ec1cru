@@ -126,6 +126,11 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
       icon: UsersIcon
     },
     {
+      title: 'Команда сайта',
+      path: '/admin#/team-members',
+      icon: UsersIcon
+    },
+    {
       title: 'Клиенты',
       path: '/admin#/clients',
       icon: UserGroupIcon

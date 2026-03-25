@@ -82,6 +82,10 @@ import { EmployeesList } from './resources/employees/EmployeesList';
 import { EmployeesCreate } from './resources/employees/EmployeesCreate';
 import { EmployeesEdit } from './resources/employees/EmployeesEdit';
 
+import { TeamMembersList }   from './resources/team-members/TeamMembersList';
+import { TeamMembersCreate } from './resources/team-members/TeamMembersCreate';
+import { TeamMembersEdit }   from './resources/team-members/TeamMembersEdit';
+
 import { ClientsList } from './resources/clients/ClientsList';
 import { ClientsCreate } from './resources/clients/ClientsCreate';
 import { ClientsEdit } from './resources/clients/ClientsEdit';
@@ -357,6 +361,7 @@ const AdminDashboard: React.FC = () => (
         recordRepresentation="name"
       />
       <Resource name="employees" list={EmployeesList} create={EmployeesCreate} edit={EmployeesEdit} />
+      <Resource name="team-members" list={TeamMembersList} create={TeamMembersCreate} edit={TeamMembersEdit} />
       <Resource name="clients" list={ClientsList} create={ClientsCreate} edit={ClientsEdit} />
       <CustomRoutes>
         <Route path="/events/:id/registrations" element={<EventRegistrationsList />} />
