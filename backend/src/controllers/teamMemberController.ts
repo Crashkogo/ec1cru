@@ -32,10 +32,12 @@ export const getTeamMembers: RequestHandler = async (req, res) => {
   try {
     const start = parseInt(req.query._start as string) || 0;
     const end   = parseInt(req.query._end   as string) || 500;
-    const sortField = (req.query._sort  as string) || 'sortOrder';
+    const ALLOWED_SORT_FIELDS = ['sortOrder', 'firstName', 'lastName', 'section', 'createdAt', 'id'];
+    const rawSortField = (req.query._sort as string) || 'sortOrder';
+    const sortField = ALLOWED_SORT_FIELDS.includes(rawSortField) ? rawSortField : 'sortOrder';
     const sortOrder = (req.query._order as string)?.toLowerCase() === 'asc' ? 'asc' : 'desc';
 
-    const orderBy: any = {};
+    const orderBy: Record<string, string> = {};
     orderBy[sortField] = sortOrder;
 
     const [members, total] = await Promise.all([
@@ -131,6 +133,9 @@ export const uploadTeamMemberPhoto: RequestHandler = async (req, res) => {
       res.status(403).json({ message: 'Forbidden' }); return;
     }
     const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      res.status(400).json({ message: 'Invalid id' }); return;
+    }
     const member = await prisma.teamMember.findUnique({ where: { id } });
     if (!member) { res.status(404).json({ message: 'Not found' }); return; }
 
