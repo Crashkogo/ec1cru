@@ -35,10 +35,7 @@ const SECTION_LABELS: Record<string, string> = {
   TECH:           'Технический отдел',
 };
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ||
-  '';
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 async function getTeamMembers(): Promise<TeamMember[]> {
   try {
