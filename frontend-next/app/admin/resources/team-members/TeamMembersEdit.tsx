@@ -27,7 +27,7 @@ const sectionChoices = [
   { id: 'TECH',           name: 'Технический отдел' },
 ];
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
 const TeamMemberPhotoUpload = () => {
   const record     = useRecordContext();
