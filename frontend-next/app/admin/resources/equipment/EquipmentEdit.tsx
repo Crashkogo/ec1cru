@@ -21,6 +21,7 @@ import { Card, Box, Typography, Button, CircularProgress } from '@mui/material';
 import { CameraIcon } from '@heroicons/react/24/outline';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -180,8 +181,8 @@ const SlugInput = ({ source, label, ...props }: { source: string; label: string;
 };
 
 export const EquipmentEdit = () => (
-    <Edit title="Редактирование товара" actions={<TopToolbar><ListButton /></TopToolbar>}>
-        <Card className="p-6">
+    <Edit title="Редактирование товара" actions={<TopToolbar className={toolbarClass}><ListButton /></TopToolbar>}>
+        <Card sx={formCard}>
             <SimpleForm toolbar={<Toolbar><SaveButton /></Toolbar>}>
                 <EquipmentImageUpload />
                 <TextInput source="title" label="Название" validate={required()} fullWidth />

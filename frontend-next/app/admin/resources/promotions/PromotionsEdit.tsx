@@ -18,6 +18,7 @@ import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const ContentInput = ({ source, label, ...props }: any) => {
     const { setValue, watch } = useFormContext();
@@ -139,7 +140,7 @@ const SlugInput = ({ source, label, ...props }: any) => {
 };
 
 const PromotionsEditActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -152,7 +153,7 @@ const PromotionsEditToolbar = () => (
 
 export const PromotionsEdit = () => (
     <Edit title="Редактирование акции" actions={<PromotionsEditActions />}>
-        <Card className="p-6">
+        <Card sx={formCard}>
             <SimpleForm toolbar={<PromotionsEditToolbar />}>
                 <TextInput
                     source="title"

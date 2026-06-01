@@ -13,6 +13,7 @@ import {
     useRecordContext,
 } from 'react-admin';
 import { Card, Typography, Box } from '@mui/material';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const ProgramEditToolbar = () => (
     <Toolbar>
@@ -21,7 +22,7 @@ const ProgramEditToolbar = () => (
 );
 
 const ProgramEditActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -36,7 +37,7 @@ export const ProgramsEdit = () => (
         title={<ProgramTitle />}
         actions={<ProgramEditActions />}
     >
-        <Card className="p-6">
+        <Card sx={formCard}>
             <Box sx={{ mb: 3 }}>
                 <Typography variant="h6" sx={{ mb: 1 }}>
                     Редактирование программы

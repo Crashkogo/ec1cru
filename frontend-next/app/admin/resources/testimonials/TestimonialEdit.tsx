@@ -21,6 +21,7 @@ import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import axios from 'axios';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 interface ContentInputProps {
     source: string;
@@ -110,7 +111,7 @@ const ContentInput = ({ source, label }: ContentInputProps) => {
 };
 
 const TestimonialEditActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -167,7 +168,7 @@ const TestimonialEditToolbar = () => {
 
 export const TestimonialEdit = () => (
     <Edit title="Редактирование отзыва" actions={<TestimonialEditActions />}>
-        <Card className="p-6">
+        <Card sx={formCard}>
             <SimpleForm toolbar={<TestimonialEditToolbar />}>
                 <TextInput
                     source="companyName"

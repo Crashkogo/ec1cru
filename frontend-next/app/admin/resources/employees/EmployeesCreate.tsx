@@ -18,7 +18,7 @@ const departmentChoices = [
   { id: 'TECH', name: 'Сотрудник технического отдела' },
 ];
 import { Card, Typography, Box } from '@mui/material';
-import { formCard, toolbarClass } from '@/admin/adminStyles';
+import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/admin/adminStyles';
 
 const CreateActions = () => (
   <TopToolbar className={toolbarClass}>

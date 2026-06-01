@@ -18,6 +18,7 @@ import {
 } from 'react-admin';
 import { Card, Typography, Box, Button, Avatar, CircularProgress } from '@mui/material';
 import { CameraIcon } from '@heroicons/react/24/outline';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const sectionChoices = [
   { id: 'MANAGERS',       name: 'Менеджеры' },
@@ -95,7 +96,7 @@ const TeamMemberPhotoUpload = () => {
   );
 };
 
-const EditActions = () => <TopToolbar><ListButton /></TopToolbar>;
+const EditActions = () => <TopToolbar className={toolbarClass}><ListButton /></TopToolbar>;
 const EditToolbar = () => <Toolbar><SaveButton /></Toolbar>;
 
 const EditTitle = () => {
@@ -105,7 +106,7 @@ const EditTitle = () => {
 
 export const TeamMembersEdit: React.FC = () => (
   <Edit title={<EditTitle />} actions={<EditActions />}>
-    <Card className="p-6">
+    <Card sx={formCard}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>Редактирование сотрудника</Typography>
       </Box>

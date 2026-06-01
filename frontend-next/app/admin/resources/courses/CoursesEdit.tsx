@@ -17,6 +17,7 @@ import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 interface ContentInputProps {
     source: string;
@@ -150,7 +151,7 @@ const SlugInput = ({ source, label, ...props }: SlugInputProps) => {
 };
 
 const CoursesEditActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -163,7 +164,7 @@ const CoursesEditToolbar = () => (
 
 export const CoursesEdit = () => (
     <Edit title="Редактирование курса" actions={<CoursesEditActions />}>
-        <Card className="p-6">
+        <Card sx={formCard}>
             <SimpleForm toolbar={<CoursesEditToolbar />}>
                 <TextInput
                     source="title"
