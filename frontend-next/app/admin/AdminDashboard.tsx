@@ -10,8 +10,9 @@ import {
 import { Route } from 'react-router-dom';
 import { dataProvider } from '@/admin/dataProvider';
 import { authProvider } from '@/admin/authProvider';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { CssBaseline, Card, CardContent } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
+import { adminTheme } from './adminTheme';
+import { CssBaseline } from '@mui/material';
 import {
   NewspaperIcon,
   CalendarDaysIcon,
@@ -100,85 +101,12 @@ const EventRegistrationsList = () => <div>Event Registrations List</div>;
 
 import LoginPage from './LoginPage';
 
-// Современная тема в стиле основного сайта
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#3b82f6',
-      light: '#60a5fa',
-      dark: '#1d4ed8',
-    },
-    secondary: {
-      main: '#f59e0b',
-      light: '#fbbf24',
-      dark: '#d97706',
-    },
-    background: {
-      default: '#f8fafc',
-      paper: '#ffffff',
-    },
-    text: {
-      primary: '#1f2937',
-      secondary: '#6b7280',
-    },
-  },
-  typography: {
-    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    h1: {
-      fontSize: '2.25rem',
-      fontWeight: 700,
-    },
-    h2: {
-      fontSize: '1.875rem',
-      fontWeight: 600,
-    },
-    h3: {
-      fontSize: '1.5rem',
-      fontWeight: 600,
-    },
-  },
-  shape: {
-    borderRadius: 12,
-  },
-  components: {
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#ffffff',
-          color: '#1f2937',
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-          borderBottom: '1px solid #e5e7eb',
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-          border: '1px solid #e5e7eb',
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          fontWeight: 500,
-          borderRadius: '0.75rem',
-        },
-      },
-    },
-  },
-});
-
 // Главный Dashboard компонент
 const DashboardContent: React.FC = () => {
   const redirect = useRedirect();
   const [subscribersCount, setSubscribersCount] = React.useState<number>(0);
 
   React.useEffect(() => {
-    // Получаем количество активных подписчиков
     const fetchSubscribersCount = async () => {
       try {
         const result = await dataProvider.getList('subscribers', {
@@ -191,113 +119,89 @@ const DashboardContent: React.FC = () => {
         console.error('Ошибка при загрузке количества подписчиков:', error);
       }
     };
-
     fetchSubscribersCount();
   }, []);
-
-  const handleCreateNews = () => {
-    redirect('/news/create');
-  };
-
-  const handleCreateEvent = () => {
-    redirect('/events/create');
-  };
-
-  const handleCreatePromotion = () => {
-    redirect('/promotions/create');
-  };
-
-  const handleCreateCompanyLife = () => {
-    redirect('/company-life/create');
-  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-modern-gray-900 mb-2">Dashboard</h1>
-        <p className="text-modern-gray-600">Добро пожаловать в панель администратора ООО «Инженер-центр»</p>
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+        <p className="text-slate-500 text-sm mt-1">Добро пожаловать в панель администратора ООО «Инженер-центр»</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Quick Actions */}
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-modern-gray-900 mb-4">Быстрые действия: Создать</h3>
-            <div className="space-y-3">
-              <button
-                onClick={handleCreateNews}
-                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
-              >
-                <NewspaperIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Новость</span>
-              </button>
-              <button
-                onClick={handleCreateEvent}
-                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
-              >
-                <CalendarDaysIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Мероприятие</span>
-              </button>
-              <button
-                onClick={handleCreateCompanyLife}
-                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
-              >
-                <BuildingOffice2Icon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Наша жизнь</span>
-              </button>
-              <button
-                onClick={handleCreatePromotion}
-                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
-              >
-                <GiftIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Акция</span>
-              </button>
+      {/* Stat strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Подписчики', value: subscribersCount, icon: UserGroupIcon, color: 'text-blue-600 bg-blue-50' },
+          { label: 'Новости', value: '—', icon: NewspaperIcon, color: 'text-emerald-600 bg-emerald-50' },
+          { label: 'Мероприятия', value: '—', icon: CalendarDaysIcon, color: 'text-violet-600 bg-violet-50' },
+          { label: 'Рассылки', value: '—', icon: EnvelopeIcon, color: 'text-amber-600 bg-amber-50' },
+        ].map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="bg-white/80 backdrop-blur-sm border border-white/60 rounded-2xl p-4 shadow-sm">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${color}`}>
+              <Icon className="h-5 w-5" />
             </div>
-          </CardContent>
-        </Card>
+            <p className="text-2xl font-bold text-slate-900">{value}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+          </div>
+        ))}
+      </div>
 
-        {/* Newsletter Management */}
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-modern-gray-900 mb-4">Управление рассылками</h3>
-            <div className="mb-4 p-3 bg-modern-primary-50 rounded-lg">
-              <p className="text-sm text-modern-gray-700">
-                Количество подписчиков: <span className="font-bold text-modern-primary-700">{subscribersCount}</span>
-              </p>
-            </div>
-            <div className="space-y-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Quick Actions */}
+        <div className="bg-white/80 backdrop-blur-sm border border-white/60 rounded-2xl p-5 shadow-sm">
+          <h3 className="text-base font-semibold text-slate-900 mb-4">Быстрые действия</h3>
+          <div className="space-y-1">
+            {[
+              { label: 'Новость', icon: NewspaperIcon, action: () => redirect('/news/create') },
+              { label: 'Мероприятие', icon: CalendarDaysIcon, action: () => redirect('/events/create') },
+              { label: 'Жизнь компании', icon: BuildingOffice2Icon, action: () => redirect('/company-life/create') },
+              { label: 'Акция', icon: GiftIcon, action: () => redirect('/promotions/create') },
+            ].map(({ label, icon: Icon, action }) => (
               <button
-                onClick={() => redirect('/newsletters')}
-                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
+                key={label}
+                onClick={action}
+                className="w-full flex items-center px-3 py-2.5 text-sm text-left rounded-xl hover:bg-slate-50 transition-colors group"
               >
-                <EnvelopeIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Рассылки</span>
+                <span className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mr-3 group-hover:bg-blue-100 transition-colors">
+                  <Icon className="h-4 w-4 text-blue-600" />
+                </span>
+                <span className="font-medium text-slate-700 group-hover:text-slate-900">Создать: {label}</span>
               </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Newsletter */}
+        <div className="bg-white/80 backdrop-blur-sm border border-white/60 rounded-2xl p-5 shadow-sm">
+          <h3 className="text-base font-semibold text-slate-900 mb-3">Управление рассылками</h3>
+          <div className="mb-4 flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+            <UserGroupIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
+            <p className="text-sm text-slate-700">
+              Активных подписчиков: <span className="font-bold text-blue-700">{subscribersCount}</span>
+            </p>
+          </div>
+          <div className="space-y-1">
+            {[
+              { label: 'Рассылки', icon: EnvelopeIcon, path: '/newsletters' },
+              { label: 'Создать рассылку', icon: EnvelopeIcon, path: '/newsletters/create' },
+              { label: 'Отправка', icon: PaperAirplaneIcon, path: '/newsletters-send' },
+              { label: 'Подписчики', icon: UserGroupIcon, path: '/subscribers' },
+            ].map(({ label, icon: Icon, path }) => (
               <button
-                onClick={() => redirect('/newsletters/create')}
-                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
+                key={label}
+                onClick={() => redirect(path)}
+                className="w-full flex items-center px-3 py-2.5 text-sm text-left rounded-xl hover:bg-slate-50 transition-colors group"
               >
-                <EnvelopeIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Создать рассылку</span>
+                <span className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center mr-3 group-hover:bg-slate-200 transition-colors">
+                  <Icon className="h-4 w-4 text-slate-600" />
+                </span>
+                <span className="font-medium text-slate-700 group-hover:text-slate-900">{label}</span>
               </button>
-              <button
-                onClick={() => redirect('/newsletters-send')}
-                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
-              >
-                <PaperAirplaneIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Отправка</span>
-              </button>
-              <button
-                onClick={() => redirect('/subscribers')}
-                className="w-full flex items-center p-3 text-left rounded-lg hover:bg-modern-gray-50 transition-colors duration-200"
-              >
-                <UserGroupIcon className="h-5 w-5 text-modern-primary-600 mr-3" />
-                <span className="font-medium text-modern-gray-900">Подписчики</span>
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -310,17 +214,20 @@ const CustomLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedRole = localStorage.getItem('role');
-      if (storedRole) {
-        setRole(storedRole);
-      }
+      if (storedRole) setRole(storedRole);
     }
   }, []);
 
   return (
-    <div className="min-h-screen bg-modern-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+      {/* Decorative blobs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl" />
+      </div>
       <AdminMenu role={role} />
-      <div className="lg:ml-64">
-        <main className="flex-1 p-6 md:p-8 lg:p-10">
+      <div className="lg:ml-64 relative">
+        <main className="p-6 md:p-8 lg:p-10 min-h-screen bg-slate-100/95 lg:rounded-tl-2xl">
           <div className="max-w-[1600px] mx-auto">
             {children}
           </div>
@@ -332,7 +239,7 @@ const CustomLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 // Главный Dashboard компонент
 const AdminDashboard: React.FC = () => (
-  <ThemeProvider theme={theme}>
+  <ThemeProvider theme={adminTheme}>
     <CssBaseline />
     <Admin
       layout={CustomLayout}
