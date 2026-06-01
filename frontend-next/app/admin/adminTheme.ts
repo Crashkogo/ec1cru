@@ -1,5 +1,15 @@
 import { createTheme } from '@mui/material/styles';
 
+// Design tokens — referenced in styleOverrides to avoid string duplication
+const colors = {
+  textPrimary: '#1f2937',
+  textSecondary: '#6b7280',
+  textMuted: '#374151',
+  bgSubtle: '#f8fafc',
+  borderLight: '#e5e7eb',
+  borderLighter: '#f3f4f6',
+} as const;
+
 export const adminTheme = createTheme({
   palette: {
     mode: 'light',
@@ -35,7 +45,7 @@ export const adminTheme = createTheme({
         root: {
           background: 'rgba(255,255,255,0.8)',
           backdropFilter: 'blur(20px)',
-          color: '#1f2937',
+          color: colors.textPrimary,
           boxShadow: '0 1px 0 0 rgba(0,0,0,0.06)',
           borderBottom: '1px solid rgba(255,255,255,0.6)',
         },
@@ -68,25 +78,25 @@ export const adminTheme = createTheme({
     MuiTableCell: {
       styleOverrides: {
         head: {
-          backgroundColor: '#f8fafc',
-          borderBottom: '1px solid #e5e7eb',
+          backgroundColor: colors.bgSubtle,
+          borderBottom: `1px solid ${colors.borderLight}`,
           fontWeight: 600,
           fontSize: '13px',
-          color: '#374151',
+          color: colors.textMuted,
           padding: '14px 16px',
         },
         body: {
-          borderBottom: '1px solid #f3f4f6',
+          borderBottom: `1px solid ${colors.borderLighter}`,
           padding: '14px 16px',
           fontSize: '14px',
-          color: '#1f2937',
+          color: colors.textPrimary,
         },
       },
     },
     MuiTableRow: {
       styleOverrides: {
         root: {
-          '&:hover': { backgroundColor: '#f8fafc' },
+          '&:hover': { backgroundColor: colors.bgSubtle },
         },
       },
     },
@@ -98,7 +108,10 @@ export const adminTheme = createTheme({
     MuiInputBase: {
       styleOverrides: {
         root: {
-          borderRadius: '10px !important',
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderRadius: '10px',
+          },
+          borderRadius: '10px',
         },
       },
     },
