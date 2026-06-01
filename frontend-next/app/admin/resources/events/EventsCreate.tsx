@@ -22,6 +22,7 @@ import { Card, Box, Typography } from '@mui/material';
 import axios from 'axios';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const ContentInput = ({ source, label, ...props }: any) => {
     const { setValue, watch } = useFormContext();
@@ -154,7 +155,7 @@ const EventLinkInput = () => {
 };
 
 const EventsCreateActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -213,7 +214,7 @@ const EventsCreateToolbar = () => {
 
 export const EventsCreate = () => (
     <Create title="Создание мероприятия" actions={<EventsCreateActions />}>
-        <Card className="p-6">
+        <Card sx={formCard}>
             <SimpleForm toolbar={<EventsCreateToolbar />}>
                 <TextInput
                     source="title"

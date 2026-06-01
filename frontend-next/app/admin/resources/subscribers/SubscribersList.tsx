@@ -58,12 +58,12 @@ const ActionButtons = () => {
             <EditButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-modern-primary-600 hover:!bg-modern-primary-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-blue-600 hover:!bg-blue-50"
             />
             <DeleteButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-red-600 hover:!bg-red-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-red-600 hover:!bg-red-50"
             />
         </div>
     );
@@ -106,7 +106,7 @@ const SubscriberListActions = () => (
 const SubscriberPagination = () => (
     <Pagination
         rowsPerPageOptions={[5, 10, 25, 50]}
-        className="!border-t !border-modern-gray-200 !pt-4 !mt-4"
+        className="!border-t !border-slate-200 !pt-4 !mt-4"
     />
 );
 
@@ -156,7 +156,7 @@ export const SubscribersList = () => (
                         label="Дата подписки"
                         showTime
                         locales="ru-RU"
-                        className="!text-sm !text-modern-gray-600"
+                        className="!text-sm !text-slate-500"
                     />
                     <FunctionField
                         label="Действия"

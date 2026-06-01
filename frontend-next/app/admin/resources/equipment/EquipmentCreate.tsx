@@ -21,6 +21,7 @@ import { Card, Box, Typography } from '@mui/material';
 import axios from 'axios';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const ContentInput = ({ source, label }: { source: string; label: string }) => {
     const { setValue, watch } = useFormContext();
@@ -141,8 +142,8 @@ const EquipmentCreateToolbar = () => {
 };
 
 export const EquipmentCreate = () => (
-    <Create title="Создание товара" actions={<TopToolbar><ListButton /></TopToolbar>}>
-        <Card className="p-6">
+    <Create title="Создание товара" actions={<TopToolbar className={toolbarClass}><ListButton /></TopToolbar>}>
+        <Card sx={formCard}>
             <SimpleForm toolbar={<EquipmentCreateToolbar />}>
                 <Box sx={{ mb: 2, p: 1.5, bgcolor: '#f0f9ff', borderRadius: 2, border: '1px solid #bae6fd' }}>
                     <Typography variant="body2" color="text.secondary">

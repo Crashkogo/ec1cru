@@ -40,8 +40,8 @@ const MemberNameField = () => {
         {!photoSrc && `${record.firstName?.charAt(0) || ''}${record.lastName?.charAt(0) || ''}`}
       </Avatar>
       <div>
-        <p className="font-medium text-modern-gray-900">{record.firstName} {record.lastName}</p>
-        <p className="text-sm text-modern-gray-500">{record.position}</p>
+        <p className="font-medium text-slate-900">{record.firstName} {record.lastName}</p>
+        <p className="text-sm text-slate-500">{record.position}</p>
       </div>
     </div>
   );

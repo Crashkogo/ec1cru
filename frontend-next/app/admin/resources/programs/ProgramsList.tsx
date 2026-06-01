@@ -30,12 +30,12 @@ const ProgramNameField = () => {
 
     return (
         <div className="flex items-center">
-            <Box className="w-8 h-8 bg-modern-primary-100 rounded-lg flex items-center justify-center mr-3">
-                <CogIcon className="h-4 w-4 text-modern-primary-600" />
+            <Box className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                <CogIcon className="h-4 w-4 text-blue-600" />
             </Box>
             <div>
-                <p className="font-medium text-modern-gray-900">{record.fullName}</p>
-                <p className="text-sm text-modern-gray-500">{record.shortName}</p>
+                <p className="font-medium text-slate-900">{record.fullName}</p>
+                <p className="text-sm text-slate-500">{record.shortName}</p>
             </div>
         </div>
     );
@@ -51,17 +51,17 @@ const ActionButtons = () => {
             <ShowButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-modern-primary-600 hover:!bg-modern-primary-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-blue-600 hover:!bg-blue-50"
             />
             <EditButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-modern-primary-600 hover:!bg-modern-primary-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-blue-600 hover:!bg-blue-50"
             />
             <DeleteButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-red-600 hover:!bg-red-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-red-600 hover:!bg-red-50"
             />
         </div>
     );
@@ -99,7 +99,7 @@ const ProgramsListActions = () => (
 const ProgramsPagination = () => (
     <Pagination
         rowsPerPageOptions={[10, 25, 50, 100]}
-        className="!border-t !border-modern-gray-200 !pt-4 !mt-4"
+        className="!border-t !border-slate-200 !pt-4 !mt-4"
     />
 );
 
@@ -131,7 +131,7 @@ export const ProgramsList = () => (
                     <TextField
                         source="id"
                         label="ID"
-                        className="!text-sm !text-modern-gray-500"
+                        className="!text-sm !text-slate-500"
                         sx={{
                             '& .MuiTypography-root': {
                                 fontSize: '12px',
@@ -148,7 +148,7 @@ export const ProgramsList = () => (
                         label="Дата создания"
                         locales="ru-RU"
                         showTime
-                        className="!text-sm !text-modern-gray-600"
+                        className="!text-sm !text-slate-500"
                     />
                     <FunctionField
                         label="Действия"

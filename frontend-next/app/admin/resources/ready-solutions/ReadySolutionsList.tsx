@@ -84,12 +84,12 @@ const SolutionNameField = () => {
 
     return (
         <div className="flex items-start">
-            <Box className="w-8 h-8 bg-modern-primary-100 rounded-lg flex items-center justify-center mr-3 mt-1 flex-shrink-0">
-                <BuildingOffice2Icon className="h-4 w-4 text-modern-primary-600" />
+            <Box className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3 mt-1 flex-shrink-0">
+                <BuildingOffice2Icon className="h-4 w-4 text-blue-600" />
             </Box>
             <div className="flex-1">
-                <p className="font-medium text-modern-gray-900 text-sm leading-tight">{record.title}</p>
-                <p className="text-xs text-modern-gray-500 mt-1 line-clamp-2">{record.shortDescription}</p>
+                <p className="font-medium text-slate-900 text-sm leading-tight">{record.title}</p>
+                <p className="text-xs text-slate-500 mt-1 line-clamp-2">{record.shortDescription}</p>
             </div>
         </div>
     );
@@ -115,17 +115,17 @@ const ProgramsField = () => {
                         icon={<CogIcon className="h-3 w-3" />}
                         label={program.program.shortName}
                         size="small"
-                        className="bg-modern-primary-50 text-modern-primary-700 border-modern-primary-200 text-xs"
+                        className="bg-blue-50 text-blue-700 border-blue-200 text-xs"
                     />
                 ))
             ) : (
-                <span className="text-xs text-modern-gray-400 italic">Нет программ</span>
+                <span className="text-xs text-slate-400 italic">Нет программ</span>
             )}
             {record.programs && record.programs.length > 3 && (
                 <Chip
                     label={`+${record.programs.length - 3}`}
                     size="small"
-                    className="bg-modern-gray-100 text-modern-gray-600 text-xs"
+                    className="bg-slate-100 text-slate-500 text-xs"
                 />
             )}
         </Box>
@@ -148,8 +148,8 @@ const PriceField = () => {
 
     return (
         <div className="flex items-center">
-            <CurrencyDollarIcon className="h-4 w-4 text-modern-gray-400 mr-1" />
-            <span className="font-medium text-modern-gray-900">{formatPrice(record.price)}</span>
+            <CurrencyDollarIcon className="h-4 w-4 text-slate-400 mr-1" />
+            <span className="font-medium text-slate-900">{formatPrice(record.price)}</span>
         </div>
     );
 };
@@ -164,7 +164,7 @@ const ActionButtons = () => {
             <Tooltip title="Просмотреть">
                 <IconButton
                     size="small"
-                    className="text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50"
+                    className="text-slate-500 hover:text-blue-600 hover:bg-blue-50"
                     onClick={() => window.open(`/ready-solutions/${record.slug}`, '_blank')}
                 >
                     <EyeIcon className="h-4 w-4" />
@@ -173,12 +173,12 @@ const ActionButtons = () => {
             <EditButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-modern-primary-600 hover:!bg-modern-primary-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-blue-600 hover:!bg-blue-50"
             />
             <DeleteButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-red-600 hover:!bg-red-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-red-600 hover:!bg-red-50"
             />
         </div>
     );
@@ -236,7 +236,7 @@ const ReadySolutionsListActions = () => (
 const ReadySolutionsPagination = () => (
     <Pagination
         rowsPerPageOptions={[5, 10, 25, 50]}
-        className="!border-t !border-modern-gray-200 !pt-4 !mt-4"
+        className="!border-t !border-slate-200 !pt-4 !mt-4"
     />
 );
 
@@ -289,7 +289,7 @@ export const ReadySolutionsList = () => (
                         source="createdAt"
                         label="Дата создания"
                         showTime
-                        className="!text-sm !text-modern-gray-600"
+                        className="!text-sm !text-slate-500"
                     />
                     <FunctionField
                         label="Действия"

@@ -95,13 +95,13 @@ const OurEventField = () => {
                 <Chip
                     label="Наше"
                     size="small"
-                    className="bg-modern-primary-100 text-modern-primary-800 border-modern-primary-200"
+                    className="bg-blue-100 text-blue-800 border-blue-200"
                 />
             ) : (
                 <Chip
                     label="Партнерское"
                     size="small"
-                    className="bg-modern-accent-100 text-modern-accent-800 border-modern-accent-200"
+                    className="bg-amber-100 text-amber-800 border-amber-200"
                 />
             )}
         </div>
@@ -125,7 +125,7 @@ const ActionButtons = () => {
             <Tooltip title="Просмотреть">
                 <IconButton
                     size="small"
-                    className="text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50"
+                    className="text-slate-500 hover:text-blue-600 hover:bg-blue-50"
                     onClick={() => window.open(`/events/${record.slug}`, '_blank')}
                 >
                     <EyeIcon className="h-4 w-4" />
@@ -145,12 +145,12 @@ const ActionButtons = () => {
             <EditButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-modern-primary-600 hover:!bg-modern-primary-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-blue-600 hover:!bg-blue-50"
             />
             <DeleteButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-red-600 hover:!bg-red-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-red-600 hover:!bg-red-50"
             />
         </div>
     );
@@ -208,7 +208,7 @@ const EventListActions = () => (
 const EventPagination = () => (
     <Pagination
         rowsPerPageOptions={[5, 10, 25, 50]}
-        className="!border-t !border-modern-gray-200 !pt-4 !mt-4"
+        className="!border-t !border-slate-200 !pt-4 !mt-4"
     />
 );
 
@@ -253,7 +253,7 @@ export const EventsList = () => (
                         label="Описание"
                         render={(record: { shortDescription?: string }) => (
                             <div className="max-w-md">
-                                <p className="text-sm text-modern-gray-600 line-clamp-2">
+                                <p className="text-sm text-slate-500 line-clamp-2">
                                     {record.shortDescription}
                                 </p>
                             </div>
@@ -263,7 +263,7 @@ export const EventsList = () => (
                         source="startDate"
                         label="Дата проведения"
                         showTime
-                        className="!text-sm !text-modern-gray-600"
+                        className="!text-sm !text-slate-500"
                     />
                     <FunctionField
                         label="Тип"

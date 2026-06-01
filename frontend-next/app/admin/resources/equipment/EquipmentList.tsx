@@ -74,7 +74,7 @@ const EquipmentListActions = () => (
 );
 
 const EquipmentPagination = () => (
-    <Pagination rowsPerPageOptions={[5, 10, 25, 50]} className="!border-t !border-modern-gray-200 !pt-4 !mt-4" />
+    <Pagination rowsPerPageOptions={[5, 10, 25, 50]} className="!border-t !border-slate-200 !pt-4 !mt-4" />
 );
 
 export const EquipmentList = () => (
@@ -100,19 +100,19 @@ export const EquipmentList = () => (
                     <FunctionField
                         label="Описание"
                         render={(record: { shortDescription?: string }) => (
-                            <p className="text-sm text-modern-gray-600 line-clamp-2 max-w-xs">{record.shortDescription}</p>
+                            <p className="text-sm text-slate-500 line-clamp-2 max-w-xs">{record.shortDescription}</p>
                         )}
                     />
                     <FunctionField
                         label="Цена"
                         render={(record: { price?: number }) => (
-                            <span className="text-sm font-medium text-modern-gray-700">
+                            <span className="text-sm font-medium text-slate-700">
                                 {record.price ? `${Number(record.price).toLocaleString('ru-RU')} ₽` : '—'}
                             </span>
                         )}
                     />
                     <FunctionField label="Статус" render={() => <PublishedStatus />} />
-                    <DateField source="createdAt" label="Дата" showTime className="!text-sm !text-modern-gray-600" />
+                    <DateField source="createdAt" label="Дата" showTime className="!text-sm !text-slate-500" />
                     <FunctionField label="Действия" render={() => <ActionButtons />} />
                 </Datagrid>
             </List>

@@ -27,12 +27,12 @@ const EmployeeNameField = () => {
 
   return (
     <div className="flex items-center">
-      <Box className="w-10 h-10 bg-modern-primary-100 rounded-full flex items-center justify-center mr-3">
-        <UserIcon className="h-5 w-5 text-modern-primary-600" />
+      <Box className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+        <UserIcon className="h-5 w-5 text-blue-600" />
       </Box>
       <div>
-        <p className="font-medium text-modern-gray-900">{record.firstName} {record.lastName}</p>
-        <p className="text-sm text-modern-gray-500">ID: {record.id}</p>
+        <p className="font-medium text-slate-900">{record.firstName} {record.lastName}</p>
+        <p className="text-sm text-slate-500">ID: {record.id}</p>
       </div>
     </div>
   );
@@ -48,12 +48,12 @@ const ActionButtons = () => {
       <EditButton
         record={record}
         label=""
-        className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-modern-primary-600 hover:!bg-modern-primary-50"
+        className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-blue-600 hover:!bg-blue-50"
       />
       <DeleteButton
         record={record}
         label=""
-        className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-red-600 hover:!bg-red-50"
+        className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-red-600 hover:!bg-red-50"
       />
     </div>
   );
@@ -91,7 +91,7 @@ const EmployeesListActions = () => (
 const EmployeesPagination = () => (
   <Pagination
     rowsPerPageOptions={[10, 25, 50, 100]}
-    className="!border-t !border-modern-gray-200 !pt-4 !mt-4"
+    className="!border-t !border-slate-200 !pt-4 !mt-4"
   />
 );
 
@@ -129,7 +129,7 @@ export const EmployeesList: React.FC = () => (
             label="Дата создания"
             showTime
             locales="ru-RU"
-            className="!text-sm !text-modern-gray-600"
+            className="!text-sm !text-slate-500"
           />
           <FunctionField
             label="Действия"

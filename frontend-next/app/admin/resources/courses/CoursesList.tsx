@@ -61,7 +61,7 @@ const ActionButtons = () => {
             <Tooltip title="Просмотреть">
                 <IconButton
                     size="small"
-                    className="text-modern-gray-600 hover:text-modern-primary-600 hover:bg-modern-primary-50"
+                    className="text-slate-500 hover:text-blue-600 hover:bg-blue-50"
                     onClick={() => window.open(`/1c-courses/${record.slug}`, '_blank')}
                 >
                     <EyeIcon className="h-4 w-4" />
@@ -70,12 +70,12 @@ const ActionButtons = () => {
             <EditButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-modern-primary-600 hover:!bg-modern-primary-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-blue-600 hover:!bg-blue-50"
             />
             <DeleteButton
                 record={record}
                 label=""
-                className="!p-1 !min-w-0 !min-h-0 !text-modern-gray-600 hover:!text-red-600 hover:!bg-red-50"
+                className="!p-1 !min-w-0 !min-h-0 !text-slate-500 hover:!text-red-600 hover:!bg-red-50"
             />
         </div>
     );
@@ -123,7 +123,7 @@ const CourseListActions = () => (
 const CoursePagination = () => (
     <Pagination
         rowsPerPageOptions={[5, 10, 25, 50]}
-        className="!border-t !border-modern-gray-200 !pt-4 !mt-4"
+        className="!border-t !border-slate-200 !pt-4 !mt-4"
     />
 );
 
@@ -168,7 +168,7 @@ export const CoursesList = () => (
                         label="Описание"
                         render={(record: { shortDescription?: string }) => (
                             <div className="max-w-md">
-                                <p className="text-sm text-modern-gray-600 line-clamp-2">
+                                <p className="text-sm text-slate-500 line-clamp-2">
                                     {record.shortDescription}
                                 </p>
                             </div>
@@ -182,7 +182,7 @@ export const CoursesList = () => (
                         source="createdAt"
                         label="Дата создания"
                         showTime
-                        className="!text-sm !text-modern-gray-600"
+                        className="!text-sm !text-slate-500"
                     />
                     <FunctionField
                         label="Действия"
