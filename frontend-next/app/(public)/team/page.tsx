@@ -56,30 +56,28 @@ function MemberCard({ member }: { member: TeamMember }) {
     (member.firstName.charAt(0) + member.lastName.charAt(0)).toUpperCase();
 
   return (
-    <div className="bg-white rounded-xl shadow-modern overflow-hidden hover:-translate-y-1 transition-transform duration-300 border border-modern-gray-100">
-      {/* Фото */}
-      <div className="relative w-full aspect-square bg-modern-gray-100">
+    <div className="w-48 bg-white rounded-xl shadow-modern border border-modern-gray-100 flex flex-col items-center text-center p-4 hover:shadow-modern-lg hover:-translate-y-1 transition-all duration-300">
+      {/* Квадратное фото 96×96px */}
+      <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 mb-3">
         {photoSrc ? (
           <Image
             src={photoSrc}
             alt={`${member.firstName} ${member.lastName}`}
             fill
             className="object-cover object-top"
-            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes="96px"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-modern-primary-400 to-modern-primary-700">
-            <span className="text-white text-4xl font-bold select-none">{initials}</span>
+            <span className="text-white text-2xl font-bold select-none">{initials}</span>
           </div>
         )}
       </div>
       {/* Текст */}
-      <div className="p-4 text-center">
-        <p className="font-semibold text-modern-gray-900 text-base leading-tight">
-          {member.firstName} {member.lastName}
-        </p>
-        <p className="text-sm text-modern-gray-500 mt-1">{member.position}</p>
-      </div>
+      <p className="font-semibold text-modern-gray-900 text-base leading-snug">
+        {member.firstName} {member.lastName}
+      </p>
+      <p className="text-sm text-modern-gray-500 mt-1 leading-snug">{member.position}</p>
     </div>
   );
 }
@@ -98,40 +96,41 @@ export default async function TeamPage() {
 
   return (
     <div className="min-h-screen bg-modern-gray-50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Заголовок */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-modern-primary-700 mb-4">
-            Наша команда
-          </h1>
-          <p className="text-lg text-modern-gray-600 max-w-2xl mx-auto">
-            Профессионалы, которые помогают бизнесу работать эффективнее
-          </p>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-4/5 mx-auto">
+          <article className="bg-modern-white rounded-xl shadow-modern overflow-hidden">
+            <div className="p-8 lg:p-12">
+              {/* Заголовок */}
+              <h1 className="text-4xl md:text-5xl font-bold text-center mb-12 text-modern-primary-700">
+                Наша команда
+              </h1>
+
+              {!hasAnyMembers && (
+                <p className="text-center text-modern-gray-500 py-20">
+                  Информация о команде скоро появится.
+                </p>
+              )}
+
+              {/* Разделы */}
+              {SECTION_ORDER.map((sectionKey) => {
+                const sectionMembers = grouped[sectionKey];
+                if (!sectionMembers || sectionMembers.length === 0) return null;
+                return (
+                  <section key={sectionKey} className="mb-14">
+                    <h2 className="text-2xl font-semibold text-modern-gray-800 mb-6 pb-3 border-b border-modern-gray-200 text-center">
+                      {SECTION_LABELS[sectionKey]}
+                    </h2>
+                    <div className="flex flex-wrap justify-center gap-4">
+                      {sectionMembers.map((member) => (
+                        <MemberCard key={member.id} member={member} />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          </article>
         </div>
-
-        {!hasAnyMembers && (
-          <p className="text-center text-modern-gray-500 py-20">
-            Информация о команде скоро появится.
-          </p>
-        )}
-
-        {/* Разделы */}
-        {SECTION_ORDER.map((sectionKey) => {
-          const sectionMembers = grouped[sectionKey];
-          if (!sectionMembers || sectionMembers.length === 0) return null;
-          return (
-            <section key={sectionKey} className="mb-14">
-              <h2 className="text-2xl font-semibold text-modern-gray-800 mb-6 pb-3 border-b border-modern-gray-200">
-                {SECTION_LABELS[sectionKey]}
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-                {sectionMembers.map((member) => (
-                  <MemberCard key={member.id} member={member} />
-                ))}
-              </div>
-            </section>
-          );
-        })}
       </div>
     </div>
   );

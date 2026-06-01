@@ -18,7 +18,8 @@ import {
   EnvelopeIcon,
   UserGroupIcon,
   PaperAirplaneIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  ComputerDesktopIcon
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
@@ -83,6 +84,11 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
       title: 'Отзывы клиентов',
       path: '/admin#/testimonials',
       icon: ChatBubbleLeftRightIcon
+    },
+    {
+      title: 'Оборудование',
+      path: '/admin#/equipment',
+      icon: ComputerDesktopIcon
     }
   ];
 

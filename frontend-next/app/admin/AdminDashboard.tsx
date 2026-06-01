@@ -90,6 +90,10 @@ import { ClientsList } from './resources/clients/ClientsList';
 import { ClientsCreate } from './resources/clients/ClientsCreate';
 import { ClientsEdit } from './resources/clients/ClientsEdit';
 
+import { EquipmentList }   from './resources/equipment/EquipmentList';
+import { EquipmentCreate } from './resources/equipment/EquipmentCreate';
+import { EquipmentEdit }   from './resources/equipment/EquipmentEdit';
+
 // Временные заглушки для остальных компонентов (будут заменены позже)
 
 const EventRegistrationsList = () => <div>Event Registrations List</div>;
@@ -363,6 +367,7 @@ const AdminDashboard: React.FC = () => (
       <Resource name="employees" list={EmployeesList} create={EmployeesCreate} edit={EmployeesEdit} />
       <Resource name="team-members" list={TeamMembersList} create={TeamMembersCreate} edit={TeamMembersEdit} />
       <Resource name="clients" list={ClientsList} create={ClientsCreate} edit={ClientsEdit} />
+      <Resource name="equipment" list={EquipmentList} create={EquipmentCreate} edit={EquipmentEdit} />
       <CustomRoutes>
         <Route path="/events/:id/registrations" element={<EventRegistrationsList />} />
       </CustomRoutes>

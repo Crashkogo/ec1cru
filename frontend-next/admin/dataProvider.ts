@@ -97,6 +97,22 @@ export const dataProvider: DataProvider = {
       };
     }
 
+    if (resource === 'equipment') {
+      const query = {
+        _start: ((page - 1) * perPage).toString(),
+        _end: (page * perPage).toString(),
+        _sort: params.sort?.field || 'createdAt',
+        _order: params.sort?.order || 'DESC',
+        ...params.filter,
+      };
+      const url = `${apiUrl}/api/admin/equipment?${stringify(query)}`;
+      const { json, headers: responseHeaders } = await httpClient(url);
+      return {
+        data: Array.isArray(json) ? json.map((item) => ({ ...item, id: item.id })) : [json],
+        total: parseInt(responseHeaders.get('X-Total-Count') || '0'),
+      };
+    }
+
     if (resource === 'events') {
       const query = {
         _start: ((page - 1) * perPage).toString(),
@@ -465,6 +481,19 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'equipment') {
+      const url = `${apiUrl}/api/admin/equipment/${params.id}`;
+      try {
+        const { json } = await httpClient(url);
+        return { data: { ...json, id: json.id } };
+      } catch (error) {
+        console.error('GetOne equipment error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to fetch equipment'
+        );
+      }
+    }
+
     if (resource === 'events') {
       const url = `${apiUrl}/api/posts/admin/events/${params.id}`;
       try {
@@ -671,6 +700,14 @@ export const dataProvider: DataProvider = {
       return { data };
     }
 
+    if (resource === 'equipment') {
+      const promises = params.ids.map((id) =>
+        httpClient(`${apiUrl}/api/admin/equipment/${id}`)
+      );
+      const results = await Promise.all(promises);
+      return { data: results.map(({ json }) => ({ ...json, id: json.id })) };
+    }
+
     if (resource === 'events') {
       // Для мероприятий получаем каждое по отдельности через админский маршрут
       const promises = params.ids.map((id) =>
@@ -799,6 +836,15 @@ export const dataProvider: DataProvider = {
 
     if (resource === 'courses') {
       const url = `${apiUrl}/api/courses`;
+      const { json } = await httpClient(url, {
+        method: 'POST',
+        body: JSON.stringify(params.data),
+      });
+      return { data: { ...json, id: json.id } };
+    }
+
+    if (resource === 'equipment') {
+      const url = `${apiUrl}/api/equipment`;
       const { json } = await httpClient(url, {
         method: 'POST',
         body: JSON.stringify(params.data),
@@ -969,6 +1015,22 @@ export const dataProvider: DataProvider = {
         console.error('Update course error:', error);
         throw new Error(
           (error as HttpError).body?.message || 'Failed to update course'
+        );
+      }
+    }
+
+    if (resource === 'equipment') {
+      const url = `${apiUrl}/api/admin/equipment/${params.id}`;
+      try {
+        const { json } = await httpClient(url, {
+          method: 'PATCH',
+          body: JSON.stringify(params.data),
+        });
+        return { data: { ...json, id: json.id } };
+      } catch (error) {
+        console.error('Update equipment error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to update equipment'
         );
       }
     }
@@ -1333,6 +1395,19 @@ export const dataProvider: DataProvider = {
       }
     }
 
+    if (resource === 'equipment') {
+      const url = `${apiUrl}/api/admin/equipment/${params.id}`;
+      try {
+        await httpClient(url, { method: 'DELETE' });
+        return { data: { id: params.id } as unknown as RecordType };
+      } catch (error) {
+        console.error('Delete equipment error:', error);
+        throw new Error(
+          (error as HttpError).body?.message || 'Failed to delete equipment'
+        );
+      }
+    }
+
     if (resource === 'events') {
       // Используем админский маршрут с ID
       const url = `${apiUrl}/api/posts/admin/events/${params.id}`;
@@ -1637,6 +1712,15 @@ export const dataProvider: DataProvider = {
           httpClient(`${apiUrl}/api/clients/${id}`, {
             method: 'DELETE',
           })
+        )
+      );
+      return { data: params.ids };
+    }
+
+    if (resource === 'equipment') {
+      await Promise.all(
+        params.ids.map((id) =>
+          httpClient(`${apiUrl}/api/admin/equipment/${id}`, { method: 'DELETE' })
         )
       );
       return { data: params.ids };

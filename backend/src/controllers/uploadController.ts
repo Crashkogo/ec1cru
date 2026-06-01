@@ -21,7 +21,8 @@ const ALLOWED_ENTITIES = [
   'ready-solutions',
   'courses',
   'testimonials',
-  'newsletters'
+  'newsletters',
+  'equipment'
 ];
 
 // Валидация slug - только буквы, цифры, дефисы и 'temp'

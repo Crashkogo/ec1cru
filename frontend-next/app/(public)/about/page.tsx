@@ -6,9 +6,9 @@ import {
 } from '@heroicons/react/24/outline';
 
 export const metadata: Metadata = {
-  title: 'О компании - ООО «Инженер-центр»',
+  title: 'О компании — ООО «Инженер-центр», Волжский',
   description:
-    'Инженер-Центр — более 30 лет опыта на рынке автоматизации бизнеса. Внедрение, поддержка и разработка решений 1С для 1500+ компаний по всей России.',
+    'ООО «Инженер-центр» — более 30 лет автоматизации бизнеса в Волжском и Волгоградской области. Внедрение и сопровождение 1С, IT-аутсорсинг. 600+ клиентов, победитель «Партнёр года 1С:ИТС 2024».',
 };
 
 export default function AboutPage() {
@@ -28,14 +28,22 @@ export default function AboutPage() {
                 {/* Текст истории */}
                 <div className="lg:w-1/2 text-lg text-modern-gray-700 leading-relaxed space-y-4">
                   <p>
-                    Инженер-Центр успешно развивается на IT-рынке с 1993 года. Более 30 лет выполняет работы по внедрению,
-                    разработке, установке и сопровождению программ.
+                    «Инженер-центр» — это более 30 лет автоматизации бизнеса. За плечами — более 50 успешных проектов
+                    внедрения и 600+ довольных клиентов. От маленьких компаний до крупных корпораций.
+                  </p>
+                  <h2 className="text-2xl font-bold text-modern-primary-600 pt-2">Что мы делаем?</h2>
+                  <p>Внедряем и сопровождаем 1С.</p>
+                  <p>
+                    Предоставляем IT-аутсорсинг — полностью берём на себя вашу IT-инфраструктуру. Серверы, сети,
+                    компьютеры, защита, обновления, поддержка пользователей. Вы не отвлекаетесь на технику — мы решаем
+                    все вопросы за вас.
                   </p>
                   <p>
-                    С 2015 года является Центром сопровождения, выдерживая высокий стандарт качества по обслуживанию клиентов.
+                    Наша команда — это сертифицированные специалисты. Они постоянно повышают квалификацию, следят за
+                    новейшими тенденциями и применяют лучшее на практике.
                   </p>
-                  <p>
-                    Нашими услугами воспользовались более 1500 компаний. В настоящий момент на сопровождении находится 660 организаций.
+                  <p className="font-semibold text-modern-primary-700">
+                    Наша цель: сделать IT незаметным. Чтобы вы занимались бизнесом, а всё остальное мы взяли на себя.
                   </p>
                 </div>
 
@@ -63,7 +71,7 @@ export default function AboutPage() {
                     <UsersIcon className="h-12 w-12 text-modern-primary-600" />
                   </div>
                   <p className="text-lg font-semibold text-modern-gray-800 leading-relaxed">
-                    1500 компаний по всей России
+                    600+ довольных клиентов
                   </p>
                 </div>
 
@@ -100,16 +108,45 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Секция 3: Миссия и Видео */}
+              {/* Секция 3: Наша команда */}
               <div className="flex flex-col lg:flex-row-reverse items-center lg:items-start gap-8 mb-16">
-                {/* Текст Миссии */}
-                <div className="lg:w-1/2 text-lg text-modern-gray-700 leading-relaxed">
-                  <h2 className="text-3xl font-bold mb-6 text-modern-primary-600">
-                    Миссия
+                {/* Текст */}
+                <div className="lg:w-1/2 text-lg text-modern-gray-700 leading-relaxed space-y-4">
+                  <h2 className="text-3xl font-bold text-modern-primary-600">
+                    Наша команда
                   </h2>
+                  <p className="text-xl font-semibold text-modern-gray-800">
+                    Команда, на которую можно положиться
+                  </p>
+                  <p>За нашей работой стоят люди. Живые, увлечённые, надёжные.</p>
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-modern-primary-500"></span>
+                      <span>Разработчики, которые пишут код так, чтобы его не стыдно было показать коллегам.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-modern-primary-500"></span>
+                      <span>Консультанты, которые говорят с бизнесом на одном языке.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-modern-primary-500"></span>
+                      <span>Системные администраторы, которые держат всю IT-инфраструктуру в порядке — тихо, без паники, но с полным контролем.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-modern-primary-500"></span>
+                      <span>Специалисты техподдержки, которые не бросают трубку, пока проблема не решена.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-modern-primary-500"></span>
+                      <span>И преподаватели учебного центра, которые учат других так, как хотели бы, чтобы учили их.</span>
+                    </li>
+                  </ul>
                   <p>
-                    Помогать клиентам в повышении эффективности бизнеса, показывая своим примером возможность честного
-                    взаимовыгодного сотрудничества, основанного на доверии, приносящего радость и удовлетворение его участникам!
+                    У каждого из нас — официальные сертификаты 1С. Мы регулярно учимся, сдаём экзамены, перенимаем
+                    лучшее у коллег. Потому что спокойствие клиента стоит того.
+                  </p>
+                  <p className="font-semibold text-modern-primary-700">
+                    Мы — команда «Инженер-центра». И мы любим своё дело.
                   </p>
                 </div>
 
@@ -129,67 +166,64 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              {/* Секция 4: С чем помогаем клиентам */}
-              <div>
+              {/* Горизонтальная отсечка */}
+              <div className="relative mb-16">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t-2 border-modern-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center">
+                  <span className="bg-modern-white px-6 text-modern-gray-400 text-sm font-medium">
+                    •••
+                  </span>
+                </div>
+              </div>
+
+              {/* Секция 4: Карьера */}
+              <div className="max-w-3xl mx-auto">
                 <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-modern-primary-600">
-                  С чем помогаем клиентам?
+                  Карьера в нашей компании
                 </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Блок 1: Внедрение 1С */}
-                  <div className="p-6 bg-modern-gray-50 rounded-xl shadow-sm hover:shadow-modern transition-all duration-200 border-l-4 border-modern-primary-500">
-                    <h3 className="text-xl font-semibold mb-3 text-modern-primary-700">
-                      Внедрение 1С
-                    </h3>
-                    <p className="text-modern-gray-700 leading-relaxed">
-                      Понимаем бизнес-процессы в разных отраслях. Думаем об эффективности цифровизации и не забываем о безопасности.
-                      Настроим 1С, сделаем нужные интеграции и обучим сотрудников.
-                    </p>
-                  </div>
-
-                  {/* Блок 2: Поддержка 1С */}
-                  <div className="p-6 bg-modern-gray-50 rounded-xl shadow-sm hover:shadow-modern transition-all duration-200 border-l-4 border-modern-accent-500">
-                    <h3 className="text-xl font-semibold mb-3 text-modern-accent-700">
-                      Поддержка 1С
-                    </h3>
-                    <p className="text-modern-gray-700 leading-relaxed">
-                      В вашем распоряжении — команда экспертов с опытом в самых разных задачах: от ускорения 1С до расчёта себестоимости.
-                      Всё, чтобы вы использовали возможности программы на максимум.
-                    </p>
-                  </div>
-
-                  {/* Блок 3: Индивидуальная разработка в 1С */}
-                  <div className="p-6 bg-modern-gray-50 rounded-xl shadow-sm hover:shadow-modern transition-all duration-200 border-l-4 border-modern-primary-500">
-                    <h3 className="text-xl font-semibold mb-3 text-modern-primary-700">
-                      Индивидуальная разработка в 1С
-                    </h3>
-                    <p className="text-modern-gray-700 leading-relaxed">
-                      Если функционала вашей 1С уже не хватает — доработаем её бережно и системно: с учётом дальнейшей поддержки
-                      и без вреда для основного функционала.
-                    </p>
-                  </div>
-
-                  {/* Блок 4: Интеграция 1С с другими программами */}
-                  <div className="p-6 bg-modern-gray-50 rounded-xl shadow-sm hover:shadow-modern transition-all duration-200 border-l-4 border-modern-accent-500">
-                    <h3 className="text-xl font-semibold mb-3 text-modern-accent-700">
-                      Интеграция 1С с другими программами
-                    </h3>
-                    <p className="text-modern-gray-700 leading-relaxed">
-                      Настроим обмен вашей 1С с сайтом компании, маркетплейсами и другими конфигурациями 1С.
-                    </p>
-                  </div>
-
-                  {/* Блок 5: Индивидуальное и групповое обучение */}
-                  <div className="md:col-span-2 max-w-xl mx-auto p-6 bg-modern-gray-50 rounded-xl shadow-sm hover:shadow-modern transition-all duration-200 border-l-4 border-modern-primary-500">
-                    <h3 className="text-xl font-semibold mb-3 text-modern-primary-700">
-                      Индивидуальное и групповое обучение
-                    </h3>
-                    <p className="text-modern-gray-700 leading-relaxed">
-                      Проведем качественное и быстрое обучение пользователей для работы в новой для них программе.
-                    </p>
+                <div className="text-lg text-modern-gray-700 leading-relaxed space-y-4">
+                  <p>
+                    Мы всегда рады видеть в команде талантливых и амбициозных специалистов. Тех, кто хочет расти в IT
+                    и не боится сложных задач.
+                  </p>
+                  <h3 className="text-xl font-semibold text-modern-gray-800 pt-2">Что мы предлагаем?</h3>
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-modern-accent-500"></span>
+                      <span>Стабильную работу.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-modern-accent-500"></span>
+                      <span>Дружный коллектив, в котором не страшно спросить и не стыдно ошибиться.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-modern-accent-500"></span>
+                      <span>Возможности для профессионального роста — реальные, а не на словах.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-modern-accent-500"></span>
+                      <span>Обучение за счёт компании, потому что мы верим: инвестиции в людей — лучшие инвестиции.</span>
+                    </li>
+                  </ul>
+                  <p>
+                    И ещё — менторскую поддержку. Мы не бросаем новичков в открытое море. Рядом есть тот, кто
+                    направит, подскажет, поможет раскрыть потенциал.
+                  </p>
+                  <div className="mt-6 text-center">
+                    <a
+                      href="https://career-ec.ru/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-modern-primary-600 text-white font-semibold rounded-lg hover:bg-modern-primary-700 transition-colors duration-200 shadow-modern"
+                    >
+                      Смотреть вакансии
+                    </a>
                   </div>
                 </div>
               </div>
+
             </div>
           </article>
         </div>

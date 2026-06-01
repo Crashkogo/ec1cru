@@ -95,11 +95,11 @@ export default function HeroSection({ unifiedPosts }: HeroSectionProps) {
             {/* УТП */}
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-modern-gray-900 mb-6 leading-tight">
-                <span className="text-modern-primary-600 block">Индивидуальный подход</span>
-                от лидеров в регионе
+                <span className="text-modern-primary-600 block">1С и IT для бизнеса</span>
+                в Волгоградской области
               </h1>
               <h2 className="text-2xl md:text-3xl font-semibold text-modern-gray-700 mb-8">
-                Полный цикл услуг
+                Внедрение · Сопровождение · Обучение · IT-аутсорсинг
               </h2>
             </div>
 

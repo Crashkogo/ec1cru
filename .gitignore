@@ -18,3 +18,4 @@ plan/
 # Exclude specific docs, but keep CLAUDE.md
 bugs.txt
 GEMINI.md
+*.md

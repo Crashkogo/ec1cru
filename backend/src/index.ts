@@ -10,6 +10,7 @@ import courseRoutes from './routes/courseRoutes.js';
 import employeeRoutes from './routes/employeeRoutes.js';
 import teamMemberRoutes from './routes/teamMemberRoutes.js';
 import clientRoutes from './routes/clientRoutes.js';
+import equipmentRoutes from './routes/equipmentRoutes.js';
 import fileUpload from 'express-fileupload';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -80,6 +81,7 @@ app.use('/api', courseRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/team-members', teamMemberRoutes);
 app.use('/api/clients', clientRoutes);
+app.use('/api', equipmentRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

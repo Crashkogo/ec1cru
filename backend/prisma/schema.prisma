@@ -305,3 +305,21 @@ model TeamMember {
 
   @@map("team_members")
 }
+
+// Модель для каталога оборудования
+model Equipment {
+  id               Int      @id @default(autoincrement())
+  title            String
+  shortDescription String
+  content          String   @db.Text
+  price            Decimal? @db.Decimal(10, 2)
+  imageUrl         String?
+  slug             String   @unique
+  isPublished      Boolean  @default(false)
+  metaTitle        String?
+  metaDescription  String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("equipment")
+}
