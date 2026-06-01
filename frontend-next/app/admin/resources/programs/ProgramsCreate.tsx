@@ -12,6 +12,7 @@ import {
     TopToolbar,
 } from 'react-admin';
 import { Card, Typography, Box } from '@mui/material';
+import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/admin/adminStyles';
 
 const ProgramCreateToolbar = () => (
     <Toolbar>
@@ -20,7 +21,7 @@ const ProgramCreateToolbar = () => (
 );
 
 const ProgramCreateActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -30,7 +31,7 @@ export const ProgramsCreate = () => (
         title="Создание программы"
         actions={<ProgramCreateActions />}
     >
-        <Card className="p-6">
+        <Card sx={formCard}>
             <Box sx={{ mb: 3 }}>
                 <Typography variant="h6" sx={{ mb: 1 }}>
                     Добавление новой программы

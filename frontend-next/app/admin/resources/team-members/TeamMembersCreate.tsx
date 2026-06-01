@@ -14,6 +14,7 @@ import {
   Toolbar,
 } from 'react-admin';
 import { Card, Typography, Box } from '@mui/material';
+import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/admin/adminStyles';
 
 const sectionChoices = [
   { id: 'MANAGERS',       name: 'Менеджеры' },
@@ -24,7 +25,7 @@ const sectionChoices = [
 ];
 
 const CreateActions = () => (
-  <TopToolbar><ListButton /></TopToolbar>
+  <TopToolbar className={toolbarClass}><ListButton /></TopToolbar>
 );
 
 const CreateToolbar = () => (
@@ -33,7 +34,7 @@ const CreateToolbar = () => (
 
 export const TeamMembersCreate: React.FC = () => (
   <Create title="Добавление сотрудника" actions={<CreateActions />}>
-    <Card className="p-6">
+    <Card sx={formCard}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>Новый сотрудник</Typography>
         <Typography variant="body2" color="text.secondary">

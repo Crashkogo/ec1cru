@@ -17,9 +17,10 @@ import {
   useRecordContext
 } from 'react-admin';
 import { Card, Typography, Box } from '@mui/material';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const EditActions = () => (
-  <TopToolbar>
+  <TopToolbar className={toolbarClass}>
     <ListButton />
   </TopToolbar>
 );
@@ -37,7 +38,7 @@ const ClientTitle = () => {
 
 export const ClientsEdit: React.FC = () => (
   <Edit title={<ClientTitle />} actions={<EditActions />}>
-    <Card className="p-6">
+    <Card sx={formCard}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>
           Редактирование клиента

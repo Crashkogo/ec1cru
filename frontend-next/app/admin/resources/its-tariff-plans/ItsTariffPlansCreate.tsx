@@ -14,16 +14,17 @@ import {
   TopToolbar
 } from 'react-admin';
 import { Card } from '@mui/material';
+import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/admin/adminStyles';
 
 const CreateActions = () => (
-  <TopToolbar>
+  <TopToolbar className={toolbarClass}>
     <ListButton />
   </TopToolbar>
 );
 
 export const ItsTariffPlansCreate: React.FC = () => (
   <Create title="Создание тарифа ИТС" actions={<CreateActions />}>
-    <Card className="p-6">
+    <Card sx={formCard}>
       <SimpleForm>
         <TextInput source="title" label="Название тарифа" validate={required()} fullWidth />
 

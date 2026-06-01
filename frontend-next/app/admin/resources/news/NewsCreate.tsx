@@ -22,6 +22,7 @@ import { Card, Box, Typography } from '@mui/material';
 import axios from 'axios';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/admin/adminStyles';
 
 interface ContentInputProps {
     source: string;
@@ -147,7 +148,7 @@ const SlugInput = ({ source, label, ...rest }: SlugInputProps) => {
 };
 
 const NewsCreateActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -204,7 +205,7 @@ const NewsCreateToolbar = () => {
 
 export const NewsCreate = () => (
     <Create title="Создание новости" actions={<NewsCreateActions />}>
-        <Card className="p-6">
+        <Card sx={formCard}>
             <SimpleForm toolbar={<NewsCreateToolbar />}>
                 <TextInput
                     source="title"

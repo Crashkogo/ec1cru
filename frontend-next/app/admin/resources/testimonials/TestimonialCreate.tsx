@@ -21,6 +21,7 @@ import { Card, Box, Typography } from '@mui/material';
 import axios from 'axios';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/admin/adminStyles';
 
 interface ContentInputProps {
     source: string;
@@ -145,7 +146,7 @@ const SlugInput = ({ source, label, ...rest }: SlugInputProps) => {
 };
 
 const TestimonialCreateActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -201,7 +202,7 @@ const TestimonialCreateToolbar = () => {
 
 export const TestimonialCreate = () => (
     <Create title="Создание отзыва" actions={<TestimonialCreateActions />}>
-        <Card className="p-6">
+        <Card sx={formCard}>
             <SimpleForm toolbar={<TestimonialCreateToolbar />}>
                 <TextInput
                     source="companyName"

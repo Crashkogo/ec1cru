@@ -15,6 +15,7 @@ import { Editor } from '@tinymce/tinymce-react';
 import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const RichTextInput = ({ source, label, ...props }: any) => {
     const { setValue, watch } = useFormContext();
@@ -80,7 +81,7 @@ const RichTextInput = ({ source, label, ...props }: any) => {
 };
 
 const NewslettersEditActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -93,7 +94,7 @@ const NewslettersEditToolbar = () => (
 
 export const NewslettersEdit = () => (
     <Edit title="Редактирование шаблона рассылки" actions={<NewslettersEditActions />}>
-        <Card className="p-6">
+        <Card sx={formCard}>
             <SimpleForm toolbar={<NewslettersEditToolbar />}>
                 <TextInput
                     source="title"

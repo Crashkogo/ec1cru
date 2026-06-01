@@ -20,6 +20,7 @@ import { Card, Box, Typography, Checkbox, FormGroup, FormControlLabel } from '@m
 import axios from 'axios';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const SERVER_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -332,7 +333,7 @@ const ProgramCheckboxes = ({ source, label, ...props }: any) => {
 };
 
 const ReadySolutionsEditActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -345,7 +346,7 @@ const ReadySolutionsEditToolbar = () => (
 
 export const ReadySolutionsEdit = () => (
     <Edit title="Редактирование готового решения" actions={<ReadySolutionsEditActions />}>
-        <Card className="p-6">
+        <Card sx={formCard}>
             <SimpleForm toolbar={<ReadySolutionsEditToolbar />}>
                 <SelectInput
                     source="type"

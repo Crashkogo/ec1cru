@@ -13,16 +13,17 @@ import {
 } from 'react-admin';
 import { Card } from '@mui/material';
 import { TariffTableEditor } from '@/components/admin/TariffTableEditor';
+import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/admin/adminStyles';
 
 const CreateActions = () => (
-  <TopToolbar>
+  <TopToolbar className={toolbarClass}>
     <ListButton />
   </TopToolbar>
 );
 
 export const TariffPlansCreate: React.FC = () => (
   <Create title="Создание тарифного плана" actions={<CreateActions />}>
-    <Card className="p-6">
+    <Card sx={formCard}>
       <SimpleForm>
         <TextInput source="name" label="Название тарифа" validate={required()} fullWidth />
         <TextInput source="subtitle" label="Подзаголовок" fullWidth />

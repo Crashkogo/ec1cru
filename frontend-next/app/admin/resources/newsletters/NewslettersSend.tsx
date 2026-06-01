@@ -38,6 +38,7 @@ import {
     ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
+import { pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/admin/adminStyles';
 
 interface Newsletter {
     id: number;
@@ -281,10 +282,10 @@ const NewslettersSend: React.FC = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className={pageHeaderClass}>
                 <div>
-                    <h1 className="text-2xl font-bold text-modern-gray-900">Управление рассылками</h1>
-                    <p className="text-modern-gray-600 mt-1">Отправка и планирование email-рассылок</p>
+                    <h1 className={pageTitleClass}>Управление рассылками</h1>
+                    <p className={pageSubtitleClass}>Отправка и планирование email-рассылок</p>
                 </div>
             </div>
 
@@ -300,8 +301,8 @@ const NewslettersSend: React.FC = () => {
 
             <Grid container spacing={3}>
                 <Grid size={{ xs: 12, md: 8 }}>
-                    <Card className="!shadow-sm !border !border-modern-gray-200 !rounded-xl p-6">
-                        <Typography variant="h6" className="!font-semibold !text-modern-gray-900 mb-4">
+                    <Card className="!shadow-sm !border !border-slate-200 !rounded-xl p-6">
+                        <Typography variant="h6" className="!font-semibold !text-slate-900 mb-4">
                             Новая рассылка
                         </Typography>
 
@@ -332,7 +333,7 @@ const NewslettersSend: React.FC = () => {
 
                             {/* Выбор аудитории */}
                             <FormControl component="fieldset" fullWidth>
-                                <Typography variant="subtitle1" className="!font-medium !text-modern-gray-700 mb-2">
+                                <Typography variant="subtitle1" className="!font-medium !text-slate-700 mb-2">
                                     Аудитория рассылки
                                 </Typography>
                                 <RadioGroup
@@ -352,7 +353,7 @@ const NewslettersSend: React.FC = () => {
                                         value={selectedEventId}
                                         onChange={handleEventChange}
                                         label="Выберите мероприятие"
-                                        startAdornment={<MegaphoneIcon className="h-5 w-5 text-modern-gray-400 mr-2" />}
+                                        startAdornment={<MegaphoneIcon className="h-5 w-5 text-slate-400 mr-2" />}
                                     >
                                         {eventsList.map((event) => (
                                             <MenuItem key={event.id} value={event.id}>
@@ -384,7 +385,7 @@ const NewslettersSend: React.FC = () => {
                                     onClick={() => setConfirmDialog(true)}
                                     disabled={!selectedTemplate || (audienceType === 'EVENT_GUESTS' && !selectedEventId) || loading}
                                     startIcon={scheduledDate ? <CalendarDaysIcon className="h-4 w-4" /> : <PaperAirplaneIcon className="h-4 w-4" />}
-                                    className="!bg-modern-primary-600 hover:!bg-modern-primary-700"
+                                    className="!bg-blue-600 hover:!bg-blue-700"
                                 >
                                     {scheduledDate ? 'Запланировать' : 'Отправить сейчас'}
                                 </Button>
@@ -408,15 +409,15 @@ const NewslettersSend: React.FC = () => {
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 4 }}>
-                    <Card className="!shadow-sm !border !border-modern-gray-200 !rounded-xl p-6">
-                        <Typography variant="h6" className="!font-semibold !text-modern-gray-900 mb-4">
+                    <Card className="!shadow-sm !border !border-slate-200 !rounded-xl p-6">
+                        <Typography variant="h6" className="!font-semibold !text-slate-900 mb-4">
                             Статус очереди
                         </Typography>
 
                         {queueStatus && (
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-modern-gray-600">В очереди:</span>
+                                    <span className="text-sm text-slate-500">В очереди:</span>
                                     <Chip
                                         label={queueStatus.queueLength}
                                         size="small"
@@ -425,7 +426,7 @@ const NewslettersSend: React.FC = () => {
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-modern-gray-600">Статус:</span>
+                                    <span className="text-sm text-slate-500">Статус:</span>
                                     <Chip
                                         label={queueStatus.isProcessing ? 'Отправляется' : 'Ожидание'}
                                         size="small"
@@ -434,14 +435,14 @@ const NewslettersSend: React.FC = () => {
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-modern-gray-600">За минуту:</span>
+                                    <span className="text-sm text-slate-500">За минуту:</span>
                                     <span className="text-sm font-medium">
                                         {queueStatus.sentThisMinute}/30
                                     </span>
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-modern-gray-600">За час:</span>
+                                    <span className="text-sm text-slate-500">За час:</span>
                                     <span className="text-sm font-medium">
                                         {queueStatus.sentThisHour}/1000
                                     </span>
@@ -464,8 +465,8 @@ const NewslettersSend: React.FC = () => {
                 </Grid>
 
                 <Grid size={12}>
-                    <Card className="!shadow-sm !border !border-modern-gray-200 !rounded-xl p-6">
-                        <Typography variant="h6" className="!font-semibold !text-modern-gray-900 mb-4">
+                    <Card className="!shadow-sm !border !border-slate-200 !rounded-xl p-6">
+                        <Typography variant="h6" className="!font-semibold !text-slate-900 mb-4">
                             История рассылок
                         </Typography>
 
@@ -474,7 +475,7 @@ const NewslettersSend: React.FC = () => {
                                 <React.Fragment key={campaign.id}>
                                     <ListItem className="!px-0">
                                         <ListItemIcon>
-                                            <EnvelopeIcon className="h-5 w-5 text-modern-gray-500" />
+                                            <EnvelopeIcon className="h-5 w-5 text-slate-500" />
                                         </ListItemIcon>
                                         <ListItemText
                                             primary={
@@ -489,20 +490,20 @@ const NewslettersSend: React.FC = () => {
                                             }
                                             secondary={
                                                 <div className="flex items-center space-x-4 mt-1">
-                                                    <span className="text-sm text-modern-gray-500">
+                                                    <span className="text-sm text-slate-500">
                                                         Шаблон: {campaign.template.title}
                                                     </span>
-                                                    <span className="text-sm text-modern-gray-500">
+                                                    <span className="text-sm text-slate-500">
                                                         Аудитория: {
                                                             campaign.audienceType === 'SUBSCRIBERS'
                                                                 ? 'Все подписчики'
                                                                 : `Участники мероприятия ${eventsList.find(e => e.id === campaign.audienceEventId)?.title || campaign.audienceEventId}`
                                                         }
                                                     </span>
-                                                    <span className="text-sm text-modern-gray-500">
+                                                    <span className="text-sm text-slate-500">
                                                         Отправлено: {campaign.sentCount} / Ошибки: {campaign.failedCount || 0}
                                                     </span>
-                                                    <span className="text-sm text-modern-gray-500">
+                                                    <span className="text-sm text-slate-500">
                                                         {new Date(campaign.scheduledAt).toLocaleString('ru-RU')}
                                                     </span>
                                                 </div>
@@ -586,7 +587,7 @@ const NewslettersSend: React.FC = () => {
                         variant="contained"
                         disabled={loading}
                         startIcon={<PaperAirplaneIcon className="h-4 w-4" />}
-                        className="!bg-modern-primary-600 hover:!bg-modern-primary-700"
+                        className="!bg-blue-600 hover:!bg-blue-700"
                     >
                         {loading ? 'Отправка...' : (scheduledDate ? 'Запланировать' : 'Отправить')}
                     </Button>

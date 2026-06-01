@@ -17,6 +17,7 @@ import {
 } from 'react-admin';
 import { Card, Typography, Box, Button, Avatar, CircularProgress } from '@mui/material';
 import { CameraIcon } from '@heroicons/react/24/outline';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const departmentChoices = [
   { id: '1C',   name: 'Сотрудник 1С' },
@@ -109,7 +110,7 @@ const EmployeePhotoUpload = () => {
 };
 
 const EditActions = () => (
-  <TopToolbar>
+  <TopToolbar className={toolbarClass}>
     <ListButton />
   </TopToolbar>
 );
@@ -127,7 +128,7 @@ const EmployeeTitle = () => {
 
 export const EmployeesEdit: React.FC = () => (
   <Edit title={<EmployeeTitle />} actions={<EditActions />}>
-    <Card className="p-6">
+    <Card sx={formCard}>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>
           Редактирование сотрудника

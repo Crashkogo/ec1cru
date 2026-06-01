@@ -22,6 +22,7 @@ import { Card, Box, Typography } from '@mui/material';
 import axios from 'axios';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/admin/adminStyles';
 
 const ContentInput = ({ source, label, ...props }: any) => {
     const { setValue, watch } = useFormContext();
@@ -137,7 +138,7 @@ const SlugInput = ({ source, label, ...props }: any) => {
 };
 
 const PromotionsCreateActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -196,7 +197,7 @@ const PromotionsCreateToolbar = () => {
 
 export const PromotionsCreate = () => (
     <Create title="Создание акции" actions={<PromotionsCreateActions />}>
-        <Card className="p-6">
+        <Card sx={formCard}>
             <SimpleForm toolbar={<PromotionsCreateToolbar />}>
                 <TextInput
                     source="title"

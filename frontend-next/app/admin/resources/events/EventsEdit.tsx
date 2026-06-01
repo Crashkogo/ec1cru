@@ -18,6 +18,7 @@ import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
+import { formCard, toolbarClass } from '@/admin/adminStyles';
 
 const ContentInput = ({ source, label, ...props }: any) => {
     const { setValue, watch } = useFormContext();
@@ -156,7 +157,7 @@ const EventLinkInput = () => {
 };
 
 const EventsEditActions = () => (
-    <TopToolbar>
+    <TopToolbar className={toolbarClass}>
         <ListButton />
     </TopToolbar>
 );
@@ -169,7 +170,7 @@ const EventsEditToolbar = () => (
 
 export const EventsEdit = () => (
     <Edit title="Редактирование мероприятия" actions={<EventsEditActions />}>
-        <Card className="p-6">
+        <Card sx={formCard}>
             <SimpleForm toolbar={<EventsEditToolbar />}>
                 <TextInput
                     source="title"
