@@ -23,6 +23,7 @@ import {
     CheckCircleIcon,
     XCircleIcon,
 } from '@heroicons/react/24/outline';
+import { glassCard, filterInputSx, toolbarClass, createBtnClass, filterBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/admin/adminStyles';
 
 const PublishedStatus = () => {
     const record = useRecordContext();
@@ -52,18 +53,18 @@ const ActionButtons = () => {
 
 const EquipmentFilter = [
     <SearchInput source="q" placeholder="Поиск по названию..." alwaysOn key="search" className="w-full max-w-lg"
-        sx={{ marginLeft: '12px', '& .MuiInputBase-root': { backgroundColor: 'background.paper', borderRadius: '12px', border: '1px solid #e5e7eb' } }}
+        sx={filterInputSx}
     />,
     <BooleanInput source="isPublished" label="Статус публикации" key="published" />,
 ];
 
 const EquipmentListActions = () => (
-    <TopToolbar className="!bg-transparent !shadow-none !p-0">
+    <TopToolbar className={toolbarClass}>
         <div className="flex items-center justify-end w-full px-6">
             <div className="flex items-center space-x-3">
-                <FilterButton className="!bg-white !text-modern-gray-700 !border !border-modern-gray-300 hover:!bg-modern-gray-50 !rounded-lg !px-4 !py-2 !shadow-sm !min-h-[40px]" />
+                <FilterButton className={filterBtnClass} />
                 <CreateButton
-                    className="!bg-modern-primary-600 hover:!bg-modern-primary-700 !text-white !rounded-lg !px-4 !py-2 !shadow-sm !border-none !min-h-[40px]"
+                    className={createBtnClass}
                     startIcon={<PlusIcon className="h-4 w-4" />}
                     label="Добавить товар"
                 />
@@ -78,20 +79,13 @@ const EquipmentPagination = () => (
 
 export const EquipmentList = () => (
     <div className="space-y-6">
-        <div>
-            <h1 className="text-2xl font-bold text-modern-gray-900">Оборудование</h1>
-            <p className="text-modern-gray-600 mt-1">Управление каталогом оборудования</p>
+        <div className={pageHeaderClass}>
+            <div>
+                <h1 className={pageTitleClass}>Оборудование</h1>
+                <p className={pageSubtitleClass}>Управление каталогом оборудования</p>
+            </div>
         </div>
-        <Card
-            className="!shadow-sm !border !border-modern-gray-200 !rounded-xl overflow-hidden"
-            sx={{
-                '& .MuiTableCell-head': { backgroundColor: '#f8fafc', borderBottom: '1px solid #e5e7eb', fontWeight: 600, fontSize: '14px', color: '#374151', padding: '16px' },
-                '& .MuiTableCell-body': { borderBottom: '1px solid #f3f4f6', padding: '16px', fontSize: '14px', color: '#1f2937' },
-                '& .MuiTableRow-root:hover': { backgroundColor: '#f8fafc' },
-                '& .RaList-content': { padding: '24px' },
-                '& .RaList-actions': { paddingBottom: '20px', paddingTop: '8px' },
-            }}
-        >
+        <Card sx={glassCard}>
             <List
                 filters={EquipmentFilter}
                 actions={<EquipmentListActions />}

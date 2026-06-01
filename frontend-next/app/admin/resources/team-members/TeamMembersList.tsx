@@ -18,6 +18,7 @@ import {
 } from 'react-admin';
 import { Card, Avatar } from '@mui/material';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import { glassCard, filterInputSx, toolbarClass, createBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/admin/adminStyles';
 
 const sectionLabels: Record<string, string> = {
   MANAGERS:       'Менеджеры',
@@ -67,16 +68,16 @@ const sectionChoices = Object.entries(sectionLabels).map(([id, name]) => ({ id, 
 
 const TeamFilters = [
   <SearchInput source="q" placeholder="Поиск по имени..." alwaysOn key="search"
-    sx={{ marginLeft: '12px', '& .MuiInputBase-root': { borderRadius: '12px', border: '1px solid #e5e7eb' } }}
+    sx={filterInputSx}
   />,
   <SelectInput source="section" label="Раздел" choices={sectionChoices} key="section" />,
 ];
 
 const ListActions = () => (
-  <TopToolbar className="!bg-transparent !shadow-none !border-none !p-0">
+  <TopToolbar className={toolbarClass}>
     <div className="flex items-center justify-end w-full px-6">
       <CreateButton
-        className="!bg-modern-primary-600 hover:!bg-modern-primary-700 !text-white !rounded-lg !px-4 !py-2 !shadow-sm !border-none !min-h-[40px]"
+        className={createBtnClass}
         startIcon={<PlusIcon className="h-4 w-4" />}
         label="Добавить сотрудника"
       />
@@ -86,18 +87,13 @@ const ListActions = () => (
 
 export const TeamMembersList: React.FC = () => (
   <div className="space-y-6">
-    <div>
-      <h1 className="text-2xl font-bold text-modern-gray-900">Команда сайта</h1>
-      <p className="text-modern-gray-600 mt-1">Управление карточками сотрудников на странице /team</p>
+    <div className={pageHeaderClass}>
+      <div>
+        <h1 className={pageTitleClass}>Команда сайта</h1>
+        <p className={pageSubtitleClass}>Управление карточками сотрудников на странице /team</p>
+      </div>
     </div>
-    <Card className="!shadow-sm !border !border-modern-gray-200 !rounded-xl overflow-hidden"
-      sx={{
-        '& .RaList-content': { padding: '24px' },
-        '& .RaList-actions': { paddingBottom: '20px', paddingTop: '8px' },
-        '& .MuiTableCell-head': { backgroundColor: '#f8fafc', borderBottom: '1px solid #e5e7eb', fontWeight: 600, fontSize: '14px', padding: '16px' },
-        '& .MuiTableCell-body': { borderBottom: '1px solid #f3f4f6', padding: '16px', fontSize: '14px' },
-      }}
-    >
+    <Card sx={glassCard}>
       <List
         filters={TeamFilters}
         actions={<ListActions />}
