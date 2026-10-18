@@ -25,7 +25,7 @@ import {
     BuildingOffice2Icon,
     CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
-import { glassCard, filterInputSx, toolbarClass, createBtnClass, filterBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/admin/adminStyles';
+import { glassCard, filterInputSx, toolbarClass, createBtnClass, filterBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/app/admin/adminStyles';
 
 // Кастомный компонент для статуса публикации
 const PublishedStatus = () => {

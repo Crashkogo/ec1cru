@@ -14,7 +14,7 @@ import {
 } from 'react-admin';
 import { Card } from '@mui/material';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { glassCard, toolbarClass, createBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/admin/adminStyles';
+import { glassCard, toolbarClass, createBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/app/admin/adminStyles';
 
 const ListActions = () => (
   <TopToolbar className={toolbarClass}>

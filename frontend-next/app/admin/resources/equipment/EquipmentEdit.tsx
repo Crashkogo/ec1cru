@@ -21,7 +21,7 @@ import { Card, Box, Typography, Button, CircularProgress } from '@mui/material';
 import { CameraIcon } from '@heroicons/react/24/outline';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
-import { formCard, toolbarClass } from '@/admin/adminStyles';
+import { formCard, toolbarClass } from '@/app/admin/adminStyles';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
 

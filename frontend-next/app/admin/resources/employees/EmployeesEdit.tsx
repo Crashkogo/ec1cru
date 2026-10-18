@@ -17,7 +17,7 @@ import {
 } from 'react-admin';
 import { Card, Typography, Box, Button, Avatar, CircularProgress } from '@mui/material';
 import { CameraIcon } from '@heroicons/react/24/outline';
-import { formCard, toolbarClass } from '@/admin/adminStyles';
+import { formCard, toolbarClass } from '@/app/admin/adminStyles';
 
 const departmentChoices = [
   { id: '1C',   name: 'Сотрудник 1С' },

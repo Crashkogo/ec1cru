@@ -12,7 +12,7 @@ import {
     TopToolbar,
 } from 'react-admin';
 import { Card, Typography, Box } from '@mui/material';
-import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/admin/adminStyles';
+import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/app/admin/adminStyles';
 
 const ProgramCreateToolbar = () => (
     <Toolbar>

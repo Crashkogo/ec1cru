@@ -38,7 +38,7 @@ import {
     ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
-import { pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/admin/adminStyles';
+import { pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/app/admin/adminStyles';
 
 interface Newsletter {
     id: number;

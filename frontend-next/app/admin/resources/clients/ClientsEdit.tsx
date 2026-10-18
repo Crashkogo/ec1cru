@@ -17,7 +17,7 @@ import {
   useRecordContext
 } from 'react-admin';
 import { Card, Typography, Box } from '@mui/material';
-import { formCard, toolbarClass } from '@/admin/adminStyles';
+import { formCard, toolbarClass } from '@/app/admin/adminStyles';
 
 const EditActions = () => (
   <TopToolbar className={toolbarClass}>

@@ -20,7 +20,7 @@ import {
     CheckCircleIcon,
     XCircleIcon
 } from '@heroicons/react/24/outline';
-import { glassCard, filterInputSx, toolbarClass, filterBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/admin/adminStyles';
+import { glassCard, filterInputSx, toolbarClass, filterBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/app/admin/adminStyles';
 
 // Кастомный компонент для статуса активности
 const ActiveStatus = () => {

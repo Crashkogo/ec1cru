@@ -15,7 +15,7 @@ import { Editor } from '@tinymce/tinymce-react';
 import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
-import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/admin/adminStyles';
+import { formCard, pageHeaderClass, pageTitleClass, pageSubtitleClass, toolbarClass } from '@/app/admin/adminStyles';
 
 const RichTextInput = ({ source, label, ...props }: any) => {
     const { setValue, watch } = useFormContext();

@@ -17,7 +17,7 @@ import {
     useRecordContext,
 } from 'react-admin';
 import { Card, Chip, IconButton, Tooltip } from '@mui/material';
-import { glassCard, filterInputSx, toolbarClass, createBtnClass, filterBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/admin/adminStyles';
+import { glassCard, filterInputSx, toolbarClass, createBtnClass, filterBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/app/admin/adminStyles';
 import {
     PlusIcon,
     EyeIcon,

@@ -20,7 +20,7 @@ import { Card, Box, Typography, Checkbox, FormGroup, FormControlLabel } from '@m
 import axios from 'axios';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
-import { formCard, toolbarClass } from '@/admin/adminStyles';
+import { formCard, toolbarClass } from '@/app/admin/adminStyles';
 
 const SERVER_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 

@@ -17,7 +17,7 @@ import { useFormContext } from 'react-hook-form';
 import { Card, Box, Typography } from '@mui/material';
 import { transliterate } from '@/utils/transliterate';
 import { createTinyMCEUploadHandler } from '@/utils/tinymceUploadHandler';
-import { formCard, toolbarClass } from '@/admin/adminStyles';
+import { formCard, toolbarClass } from '@/app/admin/adminStyles';
 
 interface ContentInputProps {
     source: string;

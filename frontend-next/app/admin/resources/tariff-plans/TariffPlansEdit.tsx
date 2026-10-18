@@ -13,7 +13,7 @@ import {
 } from 'react-admin';
 import { Card } from '@mui/material';
 import { TariffTableEditor } from '@/components/admin/TariffTableEditor';
-import { formCard, toolbarClass } from '@/admin/adminStyles';
+import { formCard, toolbarClass } from '@/app/admin/adminStyles';
 
 const EditActions = () => (
   <TopToolbar className={toolbarClass}>

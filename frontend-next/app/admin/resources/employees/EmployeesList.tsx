@@ -18,7 +18,7 @@ import {
 } from 'react-admin';
 import { Card, Box } from '@mui/material';
 import { PlusIcon, UserIcon } from '@heroicons/react/24/outline';
-import { glassCard, filterInputSx, toolbarClass, createBtnClass, filterBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/admin/adminStyles';
+import { glassCard, filterInputSx, toolbarClass, createBtnClass, filterBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/app/admin/adminStyles';
 
 // Кастомный компонент для отображения ФИО сотрудника
 const EmployeeNameField = () => {

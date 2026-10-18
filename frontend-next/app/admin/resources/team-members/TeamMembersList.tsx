@@ -18,7 +18,7 @@ import {
 } from 'react-admin';
 import { Card, Avatar } from '@mui/material';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { glassCard, filterInputSx, toolbarClass, createBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/admin/adminStyles';
+import { glassCard, filterInputSx, toolbarClass, createBtnClass, pageHeaderClass, pageTitleClass, pageSubtitleClass } from '@/app/admin/adminStyles';
 
 const sectionLabels: Record<string, string> = {
   MANAGERS:       'Менеджеры',
