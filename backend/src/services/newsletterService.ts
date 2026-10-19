@@ -131,8 +131,8 @@ class NewsletterService {
     unsubscribeUrl: string,
     title: string
   ): string {
-    // Встраиваем картинки как Data URI (Base64) - работает везде, включая localhost
-    const contentWithEmbeddedImages = this.convertImagesToDataUri(htmlContent);
+    // Используем абсолютные URL - работает в production, картинки раздаются с сервера
+    const contentWithEmbeddedImages = this.convertImagesToAbsoluteUrls(htmlContent);
 
     const unsubscribeSection = `
       <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center;">

@@ -8,7 +8,7 @@ const router = express.Router();
 
 // БЕЗОПАСНОСТЬ: Регистрация доступна только администраторам
 // Это предотвращает создание несанкционированных учётных записей
-router.post('/register', authMiddleware, registerUser);
+router.post('/register', authMiddleware, requireAdmin, registerUser);
 router.post('/login', loginUser);
 router.post('/logout', logoutUser); // БЕЗОПАСНОСТЬ: Очистка HttpOnly cookies
 router.get('/me', authMiddleware, getCurrentUser);

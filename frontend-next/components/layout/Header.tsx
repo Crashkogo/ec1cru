@@ -289,13 +289,14 @@ export default function Header({ setShowLogin }: HeaderProps) {
                 </a>
               </div>
 
-              <button
+              {/* TODO: ЛК скрыт до завершения разработки backend */}
+              {/* <button
                 onClick={handleLoginClick}
                 className="group flex items-center justify-center w-10 h-10 bg-modern-gray-100 hover:bg-modern-gray-200 text-modern-gray-600 hover:text-modern-gray-800 rounded-xl transition-all duration-200"
                 aria-label="Открыть форму входа"
               >
                 <UserCircleIcon className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
-              </button>
+              </button> */}
             </div>
 
             {/* Mobile Menu Button */}
@@ -443,7 +444,8 @@ export default function Header({ setShowLogin }: HeaderProps) {
                   </a>
                 </div>
 
-                <button
+                {/* TODO: ЛК скрыт до завершения разработки backend */}
+                {/* <button
                   onClick={() => {
                     handleLoginClick();
                     setIsMenuOpen(false);
@@ -453,7 +455,7 @@ export default function Header({ setShowLogin }: HeaderProps) {
                 >
                   <UserCircleIcon className="h-5 w-5 mr-2" aria-hidden="true" />
                   <span>Личный кабинет</span>
-                </button>
+                </button> */}
               </div>
             </nav>
           </div>
