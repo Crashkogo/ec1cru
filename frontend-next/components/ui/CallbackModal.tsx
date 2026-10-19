@@ -173,10 +173,7 @@ const CallbackModal: React.FC<CallbackModalProps> = ({ isOpen, onClose }) => {
               >
                 <option value="">Выберите направление</option>
                 <option value="1С">1С</option>
-                <option value="Технический отдел">Технический отдел</option>
                 <option value="IT-аутсорсинг">IT-аутсорсинг</option>
-                <option value="Внедрение">Внедрение</option>
-                <option value="Другое">Другое</option>
               </select>
             </div>
             {errors.topic && <p className="text-red-600 text-sm mt-1">{errors.topic.message}</p>}
