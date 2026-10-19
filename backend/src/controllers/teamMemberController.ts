@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { UploadedFile } from 'express-fileupload';
 import { z } from 'zod';
 import { path, fs, __dirname } from '../utils/index.js';
+import { saveOptimizedImage } from '../utils/imageProcessor.js';
 
 const prisma = new PrismaClient();
 
@@ -160,8 +161,8 @@ export const uploadTeamMemberPhoto: RequestHandler = async (req, res) => {
       if (fs.existsSync(oldFile)) { try { fs.unlinkSync(oldFile); } catch { /* ignore */ } }
     }
 
-    const fileName = 'photo' + ext;
-    await photo.mv(path.join(uploadDir, fileName));
+    const fileName = 'photo.webp';
+    await saveOptimizedImage(photo.data, path.join(uploadDir, 'photo'), { maxWidth: 800 });
 
     const photoUrl = `/uploads/team-members/${id}/${fileName}`;
     const updated = await prisma.teamMember.update({ where: { id }, data: { photoUrl } });

@@ -3,6 +3,7 @@ import { prisma } from "../utils/index.js";
 import { sanitizeHTMLContent } from "../utils/sanitize.js";
 import { UploadedFile } from "express-fileupload";
 import { path, fs, __dirname } from "../utils/index.js";
+import { saveOptimizedImage } from "../utils/imageProcessor.js";
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -260,8 +261,8 @@ export const uploadEquipmentImage: RequestHandler = async (req, res) => {
       }
     }
 
-    const fileName = "image" + ext;
-    await image.mv(path.join(uploadDir, fileName));
+    const fileName = "image.webp";
+    await saveOptimizedImage(image.data, path.join(uploadDir, "image"), { maxWidth: 1200 });
 
     const imageUrl = `/uploads/equipment/${id}/${fileName}`;
     const updated = await prisma.equipment.update({

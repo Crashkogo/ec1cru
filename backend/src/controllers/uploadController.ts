@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { UploadedFile } from "express-fileupload";
 import { path, fs, __dirname } from "../utils/index.js";
+import { saveOptimizedImage } from "../utils/imageProcessor.js";
 
 // ========== БЕЗОПАСНОСТЬ: Валидация загружаемых файлов ==========
 
@@ -160,12 +161,12 @@ export const uploadImage: RequestHandler = async (req, res) => {
 
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-  const fileName = createSafeFileName(file.name);
-  const filePath = path.join(uploadDir, fileName);
+  const baseName = createSafeFileName(file.name).replace(/\.[^.]+$/, '');
+  const filePathWithoutExt = path.join(uploadDir, baseName);
 
   try {
-    await file.mv(filePath);
-    const imageUrl = `/uploads/${entity}/${slug}/${fileName}`;
+    await saveOptimizedImage(file.data, filePathWithoutExt, { maxWidth: 1920 });
+    const imageUrl = `/uploads/${entity}/${slug}/${baseName}.webp`;
     res.json({ location: imageUrl });
   } catch (error) {
     console.error("Error uploading image:", error);
@@ -233,12 +234,12 @@ export const uploadGalleryImage: RequestHandler = async (req, res) => {
 
   if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-  const fileName = createSafeFileName(image.name);
-  const filePath = path.join(uploadDir, fileName);
+  const baseName = createSafeFileName(image.name).replace(/\.[^.]+$/, '');
+  const filePathWithoutExt = path.join(uploadDir, baseName);
 
   try {
-    await image.mv(filePath);
-    const imageUrl = `/uploads/${entity}/${slug}/${fileName}`;
+    await saveOptimizedImage(image.data, filePathWithoutExt, { maxWidth: 1920 });
+    const imageUrl = `/uploads/${entity}/${slug}/${baseName}.webp`;
     res.json({ url: imageUrl });
   } catch (error) {
     console.error("Error uploading gallery image:", error);
