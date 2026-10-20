@@ -1,6 +1,7 @@
 import { prisma, fs, path, __dirname } from "../utils/index.js";
 import jwt from "jsonwebtoken";
 import { UNSUBSCRIBE_SECRET, FRONTEND_URL } from "../config.js";
+import { injectTracking } from "./trackingService.js";
 
 // Типизация для аудитории
 export type Audience =
@@ -181,16 +182,24 @@ class NewsletterService {
       for (const recipient of validRecipients) {
         const unsubToken = this.generateUnsubscribeToken(recipient.id);
         const unsubUrl = `${FRONTEND_URL}/unsubscribe?token=${unsubToken}`;
-        const html = this.createEmailTemplate(template.htmlContent, unsubUrl, template.title);
+        const baseHtml = this.createEmailTemplate(template.htmlContent, unsubUrl, template.title);
 
-        await prisma.emailJob.create({
+        // Create job first to get auto-generated trackingId
+        const job = await prisma.emailJob.create({
           data: {
             to: recipient.email,
             subject: subject || template.title,
-            html,
+            html: baseHtml,
             campaignId: campaign.id,
             scheduledAt: scheduledAt || new Date(),
           },
+        });
+
+        // Inject tracking pixel and link wrapping using the job's trackingId
+        const trackedHtml = injectTracking(baseHtml, job.trackingId, FRONTEND_URL);
+        await prisma.emailJob.update({
+          where: { id: job.id },
+          data: { html: trackedHtml },
         });
       }
 
@@ -272,15 +281,24 @@ class NewsletterService {
       for (const recipient of validRecipients) {
         const unsubscribeToken = this.generateUnsubscribeToken(recipient.id);
         const unsubscribeUrl = `${FRONTEND_URL}/unsubscribe?token=${unsubscribeToken}`;
+        const baseHtml = this.createEmailTemplate(campaign.template.htmlContent, unsubscribeUrl, campaign.template.title);
 
-        await prisma.emailJob.create({
+        // Create job first to get auto-generated trackingId
+        const job = await prisma.emailJob.create({
           data: {
             to: recipient.email,
             subject: campaign.subject,
-            html: this.createEmailTemplate(campaign.template.htmlContent, unsubscribeUrl, campaign.template.title),
+            html: baseHtml,
             campaignId: campaign.id,
             scheduledAt: new Date(),
           },
+        });
+
+        // Inject tracking pixel and link wrapping using the job's trackingId
+        const trackedHtml = injectTracking(baseHtml, job.trackingId, FRONTEND_URL);
+        await prisma.emailJob.update({
+          where: { id: job.id },
+          data: { html: trackedHtml },
         });
       }
 
