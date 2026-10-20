@@ -140,7 +140,7 @@ model SolutionProgram {
 model NewsletterTemplate {
   id          Int                  @id @default(autoincrement())
   title       String // Название шаблона рассылки
-  htmlContent String // HTML-код письма, вводится в редакторе TinyMCE
+  htmlContent String   @db.Text // HTML-код письма, вводится в редакторе TinyMCE
   createdAt   DateTime             @default(now())
   campaigns   NewsletterCampaign[] // Связь с кампаниями
 }
@@ -185,7 +185,7 @@ model EmailJob {
   html        String              @db.Text
   campaignId  Int?
   campaign    NewsletterCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  status      String              @default("PENDING")
+  status      String              @default("PENDING") // PENDING, SENDING, SENT, FAILED
   retries     Int                 @default(0)
   lastError   String?
   scheduledAt DateTime            @default(now())
@@ -195,6 +195,7 @@ model EmailJob {
   createdAt   DateTime            @default(now())
   events      EmailEvent[]
 
+  @@index([status, scheduledAt, retries])
   @@map("email_jobs")
 }
 
