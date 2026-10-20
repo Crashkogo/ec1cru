@@ -13,6 +13,7 @@ import clientRoutes from './routes/clientRoutes.js';
 import equipmentRoutes from './routes/equipmentRoutes.js';
 import siteSettingRoutes from './routes/siteSettingRoutes.js';
 import trackingRoutes from './routes/trackingRoutes.js';
+import newsletterRoutes from './routes/newsletterRoutes.js';
 import fileUpload from 'express-fileupload';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -87,6 +88,7 @@ app.use('/api/clients', clientRoutes);
 app.use('/api', equipmentRoutes);
 app.use('/api', siteSettingRoutes);
 app.use('/api', trackingRoutes);
+app.use('/api/newsletter', newsletterRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

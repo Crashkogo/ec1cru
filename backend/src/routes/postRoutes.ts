@@ -561,18 +561,6 @@ router.get(
   newsletterController.unsubscribeByToken as RequestHandler
 );
 
-// Публичная подписка с double opt-in
-router.post(
-  "/newsletter/subscribe",
-  newsletterController.subscribeNewsletter as RequestHandler
-);
-
-// Подтверждение подписки по токену
-router.get(
-  "/newsletter/confirm",
-  newsletterController.confirmSubscription as RequestHandler
-);
-
 // =============================================================================
 // ОТЗЫВЫ
 // =============================================================================
