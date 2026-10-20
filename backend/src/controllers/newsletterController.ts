@@ -314,6 +314,13 @@ export const unsubscribeByToken: RequestHandler = async (req, res) => {
       data: { isActive: false },
     });
 
+    // Add to suppression list to prevent future sends
+    await prisma.suppressionList.upsert({
+      where: { email: subscriber.email },
+      update: {},
+      create: { email: subscriber.email, reason: 'UNSUBSCRIBED' },
+    });
+
     res.status(200).json({ message: "Successfully unsubscribed" });
   } catch (error) {
     console.error("Error unsubscribing:", error);
@@ -391,6 +398,118 @@ export const processScheduledNewsletters: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Error processing scheduled newsletters:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const subscribeNewsletter: RequestHandler = async (req, res) => {
+  const { email, name, source } = req.body;
+
+  if (!email || typeof email !== 'string' || !email.includes('@')) {
+    res.status(400).json({ message: 'Invalid email' });
+    return;
+  }
+
+  try {
+    // Check suppression list
+    const suppressed = await prisma.suppressionList.findUnique({ where: { email } });
+    if (suppressed) {
+      // Return 200 to not reveal suppression status to potential spammers
+      res.status(200).json({ message: 'Confirmation email sent' });
+      return;
+    }
+
+    // Check if already confirmed
+    const existing = await prisma.newsletterSubscriber.findUnique({ where: { email } });
+    if (existing?.confirmedAt) {
+      res.status(200).json({ message: 'Already subscribed' });
+      return;
+    }
+
+    // Generate confirmation token
+    const token = jwt.sign({ email }, UNSUBSCRIBE_SECRET, { expiresIn: '7d' });
+
+    // Upsert subscriber (unconfirmed state)
+    await prisma.newsletterSubscriber.upsert({
+      where: { email },
+      update: { token, doubleOptInSentAt: new Date(), name: name || undefined },
+      create: {
+        email,
+        name: name || null,
+        source: source || null,
+        token,
+        isActive: false,
+        doubleOptInSentAt: new Date(),
+      },
+    });
+
+    // Send confirmation email
+    const confirmUrl = `${FRONTEND_URL}/confirm?token=${token}`;
+    const html = `
+      <!DOCTYPE html>
+      <html lang="ru">
+      <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+      <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+        <h2 style="color: #1e40af;">Подтверждение подписки</h2>
+        <p>Здравствуйте${name ? `, ${name}` : ''}!</p>
+        <p>Вы оставили заявку на подписку на рассылку <strong>Инженер-центр</strong>.</p>
+        <p>Для подтверждения нажмите кнопку:</p>
+        <p>
+          <a href="${confirmUrl}"
+             style="background:#3b82f6;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+            Подтвердить подписку
+          </a>
+        </p>
+        <p style="color:#6b7280;font-size:13px;">Ссылка действительна 7 дней. Если вы не подписывались - просто проигнорируйте это письмо.</p>
+      </body>
+      </html>
+    `;
+
+    await newsletterService.sendTransactional(email, 'Подтвердите подписку на рассылку', html);
+
+    res.status(200).json({ message: 'Confirmation email sent' });
+  } catch (error) {
+    console.error('Error in subscribeNewsletter:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const confirmSubscription: RequestHandler = async (req, res) => {
+  const { token } = req.query;
+
+  if (!token || typeof token !== 'string') {
+    res.status(400).json({ message: 'Token required' });
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(token, UNSUBSCRIBE_SECRET) as { email: string };
+    const subscriber = await prisma.newsletterSubscriber.findUnique({
+      where: { email: decoded.email },
+    });
+
+    if (!subscriber) {
+      res.status(404).json({ message: 'Subscriber not found' });
+      return;
+    }
+
+    if (subscriber.confirmedAt) {
+      res.status(200).json({ message: 'Already confirmed' });
+      return;
+    }
+
+    await prisma.newsletterSubscriber.update({
+      where: { email: decoded.email },
+      data: { isActive: true, confirmedAt: new Date() },
+    });
+
+    res.status(200).json({ message: 'Subscription confirmed successfully' });
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError || error instanceof jwt.TokenExpiredError) {
+      res.status(400).json({ message: 'Invalid or expired token' });
+      return;
+    }
+    console.error('Error in confirmSubscription:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };
 
