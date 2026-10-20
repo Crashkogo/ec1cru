@@ -397,7 +397,9 @@ export const processScheduledNewsletters: RequestHandler = async (req, res) => {
 };
 
 export const subscribeNewsletter: RequestHandler = async (req, res) => {
-  const { email, name, source } = req.body;
+  const { email, name, source, consentText } = req.body;
+  const consentIp = req.ip || req.headers['x-forwarded-for'] as string || null;
+  const consentAt = new Date();
 
   if (!email || typeof email !== 'string' || !email.includes('@')) {
     res.status(400).json({ message: 'Invalid email' });
@@ -426,7 +428,14 @@ export const subscribeNewsletter: RequestHandler = async (req, res) => {
     // Upsert subscriber (unconfirmed state)
     await prisma.newsletterSubscriber.upsert({
       where: { email },
-      update: { token, doubleOptInSentAt: new Date(), name: name || undefined },
+      update: {
+        token,
+        doubleOptInSentAt: new Date(),
+        name: name || undefined,
+        consentAt,
+        consentIp,
+        consentText: consentText || null,
+      },
       create: {
         email,
         name: name || null,
@@ -434,6 +443,9 @@ export const subscribeNewsletter: RequestHandler = async (req, res) => {
         token,
         isActive: false,
         doubleOptInSentAt: new Date(),
+        consentAt,
+        consentIp,
+        consentText: consentText || null,
       },
     });
 
