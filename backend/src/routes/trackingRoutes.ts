@@ -26,6 +26,12 @@ export const trackOpen: RequestHandler = async (req, res) => {
       const job = await prisma.emailJob.findUnique({ where: { trackingId } });
       if (!job) return;
 
+      // Check if this job was already opened (for uniqueOpenCount)
+      const alreadyOpened = await prisma.emailEvent.findFirst({
+        where: { jobId: job.id, type: 'OPENED' },
+        select: { id: true },
+      });
+
       await prisma.emailEvent.create({
         data: {
           jobId: job.id,
@@ -38,7 +44,10 @@ export const trackOpen: RequestHandler = async (req, res) => {
       if (job.campaignId) {
         await prisma.newsletterCampaign.update({
           where: { id: job.campaignId },
-          data: { openCount: { increment: 1 } },
+          data: {
+            openCount: { increment: 1 },
+            ...(alreadyOpened ? {} : { uniqueOpenCount: { increment: 1 } }),
+          },
         });
       }
     } catch {

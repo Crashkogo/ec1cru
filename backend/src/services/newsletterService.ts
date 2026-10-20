@@ -310,6 +310,69 @@ class NewsletterService {
   }
 
   /**
+   * Активирует уже существующую SCHEDULED кампанию: создаёт EmailJob записи и
+   * переводит кампанию в статус SENDING. Вызывается из processScheduledNewsletters.
+   */
+  async activateScheduledCampaign(campaignId: number): Promise<{ success: boolean; message: string }> {
+    try {
+      const campaign = await prisma.newsletterCampaign.findUnique({
+        where: { id: campaignId },
+        include: { template: true },
+      });
+      if (!campaign) return { success: false, message: 'Campaign not found' };
+      if (campaign.status !== 'SCHEDULED') return { success: false, message: 'Campaign is not SCHEDULED' };
+
+      let recipients: { id: number; email: string }[] = [];
+      if (campaign.audienceType === 'SUBSCRIBERS') {
+        recipients = await prisma.newsletterSubscriber.findMany({ where: { isActive: true } });
+      } else if (campaign.audienceType === 'EVENT_GUESTS' && campaign.audienceEventId) {
+        const registrations = await prisma.eventsRegistration.findMany({
+          where: { eventId: campaign.audienceEventId },
+          select: { email: true },
+          distinct: ['email'],
+        });
+        recipients = registrations.map((reg, index) => ({ id: index, email: reg.email }));
+      }
+
+      const suppressed = await prisma.suppressionList.findMany({
+        where: { email: { in: recipients.map((r) => r.email) } },
+        select: { email: true },
+      });
+      const suppressedEmails = new Set(suppressed.map((s) => s.email));
+      const validRecipients = recipients.filter((r) => !suppressedEmails.has(r.email));
+
+      await prisma.newsletterCampaign.update({
+        where: { id: campaignId },
+        data: { status: 'SENDING', totalRecipients: validRecipients.length },
+      });
+
+      for (const recipient of validRecipients) {
+        const unsubToken = this.generateUnsubscribeToken(recipient.id);
+        const unsubUrl = `${FRONTEND_URL}/unsubscribe?token=${unsubToken}`;
+        const baseHtml = this.createEmailTemplate(campaign.template.htmlContent, unsubUrl, campaign.template.title);
+
+        const job = await prisma.emailJob.create({
+          data: {
+            to: recipient.email,
+            subject: campaign.subject,
+            html: baseHtml,
+            campaignId: campaign.id,
+            scheduledAt: new Date(),
+          },
+        });
+
+        const trackedHtml = injectTracking(baseHtml, job.trackingId, FRONTEND_URL);
+        await prisma.emailJob.update({ where: { id: job.id }, data: { html: trackedHtml } });
+      }
+
+      return { success: true, message: `Campaign activated for ${validRecipients.length} recipients` };
+    } catch (error) {
+      console.error('Error activating scheduled campaign:', error);
+      return { success: false, message: 'Failed to activate campaign' };
+    }
+  }
+
+  /**
    * Отправка транзакционного письма (без рассылочного контекста, напрямую через провайдер)
    */
   async sendTransactional(to: string, subject: string, html: string): Promise<void> {

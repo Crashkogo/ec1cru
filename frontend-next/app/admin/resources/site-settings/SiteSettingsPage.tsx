@@ -56,8 +56,12 @@ export const SiteSettingsPage = () => {
   const [settings, setSettings] = useState<Settings>(DEFAULT);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
     axios
-      .get(`${API_URL}/api/admin/site-settings`, { withCredentials: true })
+      .get(`${API_URL}/api/admin/site-settings`, {
+        withCredentials: true,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
       .then((r) => setSettings({ ...DEFAULT, ...r.data }))
       .catch(() => notify('Не удалось загрузить настройки', { type: 'error' }))
       .finally(() => setLoading(false));
@@ -89,7 +93,11 @@ export const SiteSettingsPage = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await axios.put(`${API_URL}/api/admin/site-settings`, settings, { withCredentials: true });
+      const token = localStorage.getItem('token');
+      await axios.put(`${API_URL}/api/admin/site-settings`, settings, {
+        withCredentials: true,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       notify('Настройки сохранены', { type: 'success' });
     } catch {
       notify('Ошибка при сохранении', { type: 'error' });

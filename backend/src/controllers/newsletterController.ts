@@ -232,8 +232,14 @@ export const sendNewsletter: RequestHandler = async (req, res) => {
 
 export const getQueueStatus: RequestHandler = async (req, res) => {
   try {
-    const status = newsletterService.getQueueStatus();
-    res.status(200).json(status);
+    const { pendingJobs, sendingJobs } = await newsletterService.getQueueStatus();
+    res.status(200).json({
+      queueLength: pendingJobs + sendingJobs,
+      isProcessing: sendingJobs > 0,
+      sentThisMinute: 0,
+      sentThisHour: 0,
+      limitsReached: false,
+    });
   } catch (error) {
     console.error("Error getting queue status:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -249,9 +255,6 @@ export const getCampaigns: RequestHandler = async (req, res) => {
 
     const sortField = (req.query._sort as string) || "createdAt";
     const sortOrder = (req.query._order as string)?.toLowerCase() === "asc" ? "asc" : "desc";
-
-    console.log("getCampaigns - Query Params:", req.query);
-    console.log("getCampaigns - Parsed:", { page, limit, skip, take, sortField, sortOrder });
 
     const orderBy: any = {};
     orderBy[sortField] = sortOrder;
@@ -383,15 +386,7 @@ export const processScheduledNewsletters: RequestHandler = async (req, res) => {
     });
 
     for (const campaign of scheduledCampaigns) {
-        const audience: any = campaign.audienceType === 'EVENT_GUESTS' && campaign.audienceEventId
-            ? { type: 'EVENT_GUESTS', eventId: campaign.audienceEventId }
-            : { type: 'SUBSCRIBERS' };
-
-        await newsletterService.sendNewsletter(
-            campaign.templateId,
-            audience,
-            campaign.subject
-        );
+      await newsletterService.activateScheduledCampaign(campaign.id);
     }
 
     res.status(200).json({ message: `Processed ${scheduledCampaigns.length} scheduled campaigns` });
