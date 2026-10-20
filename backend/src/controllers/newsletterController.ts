@@ -513,6 +513,43 @@ export const confirmSubscription: RequestHandler = async (req, res) => {
   }
 };
 
+export const getCampaignStats: RequestHandler = async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) {
+    res.status(400).json({ message: 'Invalid campaign id' });
+    return;
+  }
+
+  try {
+    const campaign = await prisma.newsletterCampaign.findUnique({ where: { id } });
+    if (!campaign) {
+      res.status(404).json({ message: 'Campaign not found' });
+      return;
+    }
+
+    const totalSent = campaign.sentCount;
+    const openRate = totalSent > 0
+      ? ((campaign.openCount / totalSent) * 100).toFixed(1)
+      : '0.0';
+    const clickRate = totalSent > 0
+      ? ((campaign.clickCount / totalSent) * 100).toFixed(1)
+      : '0.0';
+    const unsubRate = totalSent > 0
+      ? ((campaign.unsubscribeCount / totalSent) * 100).toFixed(1)
+      : '0.0';
+
+    res.status(200).json({
+      ...campaign,
+      openRate: `${openRate}%`,
+      clickRate: `${clickRate}%`,
+      unsubRate: `${unsubRate}%`,
+    });
+  } catch (error) {
+    console.error('Error fetching campaign stats:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export const retryCampaign: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;

@@ -64,6 +64,10 @@ interface Campaign {
     audienceEventId?: number;
     sentCount: number;
     failedCount?: number;
+    openCount: number;
+    clickCount: number;
+    unsubscribeCount: number;
+    totalRecipients?: number;
     createdAt: string;
     template: {
         title: string;
@@ -489,7 +493,7 @@ const NewslettersSend: React.FC = () => {
                                                 </div>
                                             }
                                             secondary={
-                                                <div className="flex items-center space-x-4 mt-1">
+                                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
                                                     <span className="text-sm text-slate-500">
                                                         Шаблон: {campaign.template.title}
                                                     </span>
@@ -501,7 +505,16 @@ const NewslettersSend: React.FC = () => {
                                                         }
                                                     </span>
                                                     <span className="text-sm text-slate-500">
-                                                        Отправлено: {campaign.sentCount} / Ошибки: {campaign.failedCount || 0}
+                                                        Получателей: {campaign.totalRecipients || '—'}
+                                                    </span>
+                                                    <span className="text-sm text-slate-500">
+                                                        Доставлено: {campaign.sentCount > 0 ? campaign.sentCount : '—'} / Ошибки: {campaign.failedCount || 0}
+                                                    </span>
+                                                    <span className="text-sm text-slate-500">
+                                                        Откр.: {campaign.sentCount > 0 ? `${((campaign.openCount / campaign.sentCount) * 100).toFixed(1)}%` : '—'}
+                                                    </span>
+                                                    <span className="text-sm text-slate-500">
+                                                        Клики: {campaign.sentCount > 0 ? `${((campaign.clickCount / campaign.sentCount) * 100).toFixed(1)}%` : '—'}
                                                     </span>
                                                     <span className="text-sm text-slate-500">
                                                         {new Date(campaign.scheduledAt).toLocaleString('ru-RU')}

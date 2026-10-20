@@ -454,6 +454,12 @@ router.post(
   requireAdmin,
   newsletterController.processScheduledNewsletters as RequestHandler
 );
+router.get(
+  "/newsletters/campaigns/:id/stats",
+  authMiddleware,
+  requireAdmin,
+  newsletterController.getCampaignStats as RequestHandler
+);
 router.post(
   "/newsletters/campaigns/:id/retry",
   authMiddleware,
