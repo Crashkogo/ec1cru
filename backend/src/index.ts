@@ -11,9 +11,11 @@ import employeeRoutes from './routes/employeeRoutes.js';
 import teamMemberRoutes from './routes/teamMemberRoutes.js';
 import clientRoutes from './routes/clientRoutes.js';
 import equipmentRoutes from './routes/equipmentRoutes.js';
+import siteSettingRoutes from './routes/siteSettingRoutes.js';
 import fileUpload from 'express-fileupload';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { startEmailQueueWorker } from './services/emailQueueWorker.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,6 +84,7 @@ app.use('/api/employees', employeeRoutes);
 app.use('/api/team-members', teamMemberRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api', equipmentRoutes);
+app.use('/api', siteSettingRoutes);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -91,3 +94,5 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on http://0.0.0.0:${PORT}`);
   console.log(`Access from network: http://<your-server-ip>:${PORT}`);
 });
+
+startEmailQueueWorker();

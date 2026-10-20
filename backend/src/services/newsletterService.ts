@@ -1,55 +1,13 @@
-import { prisma, transporter, fs, path, __dirname } from "../utils/index.js";
+import { prisma, fs, path, __dirname } from "../utils/index.js";
 import jwt from "jsonwebtoken";
-import { UNSUBSCRIBE_SECRET, FRONTEND_URL, EMAIL_USER } from "../config.js";
+import { UNSUBSCRIBE_SECRET, FRONTEND_URL } from "../config.js";
 
 // Типизация для аудитории
 export type Audience =
   | { type: 'SUBSCRIBERS' }
   | { type: 'EVENT_GUESTS'; eventId: number };
 
-// Очередь отправки для контроля скорости
-interface EmailQueueItem {
-  to: string;
-  subject: string;
-  html: string;
-  unsubscribeToken: string;
-  campaignId: number;
-  retries: number;
-}
-
 class NewsletterService {
-  private emailQueue: EmailQueueItem[] = [];
-  private isProcessing = false;
-  private readonly EMAILS_PER_MINUTE = 30;
-  private readonly EMAILS_PER_HOUR = 1000;
-  private readonly BATCH_SIZE = 5;
-
-  private sentThisMinute = 0;
-  private sentThisHour = 0;
-  private lastMinuteReset = Date.now();
-  private lastHourReset = Date.now();
-
-  constructor() {
-    setInterval(() => {
-      const now = Date.now();
-      if (now - this.lastMinuteReset >= 60000) {
-        this.sentThisMinute = 0;
-        this.lastMinuteReset = now;
-      }
-      if (now - this.lastHourReset >= 3600000) {
-        this.sentThisHour = 0;
-        this.lastHourReset = now;
-      }
-    }, 60000);
-  }
-
-  private canSendEmails(): boolean {
-    return (
-      this.sentThisMinute < this.EMAILS_PER_MINUTE &&
-      this.sentThisHour < this.EMAILS_PER_HOUR
-    );
-  }
-
   private generateUnsubscribeToken(subscriberId: number): string {
     return jwt.sign({ id: subscriberId }, UNSUBSCRIBE_SECRET, { expiresIn: '30d' });
   }
@@ -110,8 +68,8 @@ class NewsletterService {
   private convertImagesToAbsoluteUrls(htmlContent: string): string {
     const imgRegex = /(<img[^>]+src=)(["'])\/uploads\/([^"']+)\2/gi;
 
-    const updatedHtml = htmlContent.replace(imgRegex, (match, prefix, quote, path) => {
-      const absoluteUrl = `${FRONTEND_URL}/uploads/${path}`;
+    const updatedHtml = htmlContent.replace(imgRegex, (match, prefix, quote, imgPath) => {
+      const absoluteUrl = `${FRONTEND_URL}/uploads/${imgPath}`;
       // БЕЗОПАСНОСТЬ: Удалено логирование путей
       return `${prefix}${quote}${absoluteUrl}${quote}`;
     });
@@ -166,134 +124,6 @@ class NewsletterService {
     `;
   }
 
-  async addToQueue(emails: EmailQueueItem[]): Promise<void> {
-    this.emailQueue.push(...emails);
-    if (!this.isProcessing) {
-      this.processQueue();
-    }
-  }
-
-  private async processQueue(): Promise<void> {
-    this.isProcessing = true;
-
-    while (this.emailQueue.length > 0 && this.canSendEmails()) {
-      const batch = this.emailQueue.splice(
-        0,
-        Math.min(this.BATCH_SIZE, this.emailQueue.length)
-      );
-
-      const results = await Promise.allSettled(
-        batch.map(async (email) => {
-          try {
-            await transporter.sendMail({
-              from: `"1С Поддержка" <${EMAIL_USER}>`,
-              to: email.to,
-              subject: email.subject,
-              html: email.html,
-              headers: {
-                "List-Unsubscribe": `<${FRONTEND_URL}/unsubscribe?token=${email.unsubscribeToken}>`,
-                "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
-                "X-Mailer": "1C Support Newsletter System",
-              },
-            });
-
-            this.sentThisMinute++;
-            this.sentThisHour++;
-
-            // Обновляем счетчик успешных отправок в кампании
-            await prisma.newsletterCampaign.update({
-              where: { id: email.campaignId },
-              data: {
-                sentCount: { increment: 1 }
-              }
-            });
-
-            console.log(`Email sent to ${email.to}`);
-            return { success: true, email };
-          } catch (error) {
-            console.error(`Error sending email to ${email.to}:`, error);
-
-            // Обновляем счетчик неудачных отправок
-            await prisma.newsletterCampaign.update({
-              where: { id: email.campaignId },
-              data: {
-                failedCount: { increment: 1 }
-              }
-            });
-
-            return { success: false, email, error };
-          }
-        })
-      );
-
-      // Обрабатываем неудачные отправки
-      const failedEmails = results
-        .filter((result, index) =>
-          result.status === 'rejected' ||
-          (result.status === 'fulfilled' && !result.value.success)
-        )
-        .map((_, index) => batch[index])
-        .filter(email => email.retries < 3); // Максимум 3 попытки
-
-      // Возвращаем неудачные письма в очередь с увеличенным счетчиком попыток
-      failedEmails.forEach(email => {
-        this.emailQueue.push({ ...email, retries: email.retries + 1 });
-      });
-
-      if (this.emailQueue.length > 0) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      }
-    }
-
-    // Обновляем статусы кампаний
-    await this.updateCampaignStatuses();
-
-    if (this.emailQueue.length > 0) {
-      setTimeout(() => this.processQueue(), 60000);
-    } else {
-      this.isProcessing = false;
-    }
-  }
-
-  private async updateCampaignStatuses(): Promise<void> {
-    try {
-      const sendingCampaigns = await prisma.newsletterCampaign.findMany({
-        where: { status: 'SENDING' }
-      });
-
-      for (const campaign of sendingCampaigns) {
-        const hasQueuedEmails = this.emailQueue.some(email => email.campaignId === campaign.id);
-
-        if (!hasQueuedEmails) {
-          // Все письма обработаны
-          const totalEmails = campaign.sentCount + campaign.failedCount;
-
-          if (campaign.sentCount > 0 && campaign.failedCount === 0) {
-            // Все успешно
-            await prisma.newsletterCampaign.update({
-              where: { id: campaign.id },
-              data: { status: 'COMPLETED' }
-            });
-          } else if (campaign.sentCount === 0) {
-            // Все провалились
-            await prisma.newsletterCampaign.update({
-              where: { id: campaign.id },
-              data: { status: 'FAILED' }
-            });
-          } else {
-            // Частично успешно - считаем завершенной
-            await prisma.newsletterCampaign.update({
-              where: { id: campaign.id },
-              data: { status: 'COMPLETED' }
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error updating campaign statuses:', error);
-    }
-  }
-
   async sendNewsletter(
     templateId: number,
     audience: Audience,
@@ -322,57 +152,65 @@ class NewsletterService {
         return { success: false, message: "No active recipients found for the selected audience", queuedEmails: 0 };
       }
 
+      // Check suppression list
+      const suppressed = await prisma.suppressionList.findMany({
+        where: { email: { in: recipients.map((r) => r.email) } },
+        select: { email: true },
+      });
+      const suppressedEmails = new Set(suppressed.map((s) => s.email));
+      const validRecipients = recipients.filter((r) => !suppressedEmails.has(r.email));
+
+      if (validRecipients.length === 0) {
+        return { success: false, message: "All recipients are suppressed", queuedEmails: 0 };
+      }
+
+      // Create campaign
       const campaign = await prisma.newsletterCampaign.create({
         data: {
           templateId,
           subject: subject || template.title,
           scheduledAt: scheduledAt || new Date(),
-          status: scheduledAt ? "SCHEDULED" : "SENDING",
+          status: scheduledAt && scheduledAt > new Date() ? 'SCHEDULED' : 'SENDING',
           audienceType: audience.type,
-          audienceEventId: audience.type === 'EVENT_GUESTS' ? audience.eventId : null,
+          audienceEventId: audience.type === 'EVENT_GUESTS' ? (audience as { type: 'EVENT_GUESTS'; eventId: number }).eventId : null,
+          totalRecipients: validRecipients.length,
         },
       });
 
-      if (scheduledAt && scheduledAt > new Date()) {
-        return { success: true, message: `Newsletter scheduled for ${scheduledAt.toLocaleString("ru-RU")}`, queuedEmails: 0 };
+      // Create EmailJob records (one per recipient)
+      for (const recipient of validRecipients) {
+        const unsubToken = this.generateUnsubscribeToken(recipient.id);
+        const unsubUrl = `${FRONTEND_URL}/unsubscribe?token=${unsubToken}`;
+        const html = this.createEmailTemplate(template.htmlContent, unsubUrl, template.title);
+
+        await prisma.emailJob.create({
+          data: {
+            to: recipient.email,
+            subject: subject || template.title,
+            html,
+            campaignId: campaign.id,
+            scheduledAt: scheduledAt || new Date(),
+          },
+        });
       }
 
-      const emails: EmailQueueItem[] = recipients.map((recipient) => {
-        const unsubscribeToken = this.generateUnsubscribeToken(recipient.id);
-        const unsubscribeUrl = `${FRONTEND_URL}/unsubscribe?token=${unsubscribeToken}`;
-
-        return {
-          to: recipient.email,
-          subject: subject || template.title,
-          html: this.createEmailTemplate(template.htmlContent, unsubscribeUrl, template.title),
-          unsubscribeToken,
-          campaignId: campaign.id,
-          retries: 0,
-        };
-      });
-
-      await this.addToQueue(emails);
-
-      await prisma.newsletterCampaign.update({
-        where: { id: campaign.id },
-        data: { status: "SENDING" },
-      });
-
-      return { success: true, message: `Newsletter queued for ${recipients.length} recipients`, queuedEmails: recipients.length };
+      return {
+        success: true,
+        message: scheduledAt && scheduledAt > new Date()
+          ? `Newsletter scheduled for ${scheduledAt.toLocaleString('ru-RU')}`
+          : `Newsletter queued for ${validRecipients.length} recipients`,
+        queuedEmails: validRecipients.length,
+      };
     } catch (error) {
       console.error("Error sending newsletter:", error);
       return { success: false, message: "Failed to send newsletter", queuedEmails: 0 };
     }
   }
 
-  getQueueStatus() {
-    return {
-      queueLength: this.emailQueue.length,
-      isProcessing: this.isProcessing,
-      sentThisMinute: this.sentThisMinute,
-      sentThisHour: this.sentThisHour,
-      limitsReached: !this.canSendEmails(),
-    };
+  async getQueueStatus() {
+    const pending = await prisma.emailJob.count({ where: { status: 'PENDING' } });
+    const sending = await prisma.emailJob.count({ where: { status: 'SENDING' } });
+    return { pendingJobs: pending, sendingJobs: sending };
   }
 
   async retryCampaign(campaignId: number): Promise<{ success: boolean; message: string }> {
@@ -407,38 +245,59 @@ class NewsletterService {
         return { success: false, message: "No recipients found" };
       }
 
-      // Сбрасываем счетчики
+      // Check suppression list
+      const suppressed = await prisma.suppressionList.findMany({
+        where: { email: { in: recipients.map((r) => r.email) } },
+        select: { email: true },
+      });
+      const suppressedEmails = new Set(suppressed.map((s) => s.email));
+      const validRecipients = recipients.filter((r) => !suppressedEmails.has(r.email));
+
+      // Сбрасываем счетчики и удаляем старые незавершенные задания
+      await prisma.emailJob.deleteMany({
+        where: { campaignId, status: { in: ['PENDING', 'FAILED'] } },
+      });
+
       await prisma.newsletterCampaign.update({
         where: { id: campaignId },
         data: {
           status: 'SENDING',
           sentCount: 0,
-          failedCount: 0
+          failedCount: 0,
+          totalRecipients: validRecipients.length,
         }
       });
 
-      // Создаем новую очередь писем
-      const emails: EmailQueueItem[] = recipients.map((recipient) => {
+      // Создаем новые EmailJob записи
+      for (const recipient of validRecipients) {
         const unsubscribeToken = this.generateUnsubscribeToken(recipient.id);
         const unsubscribeUrl = `${FRONTEND_URL}/unsubscribe?token=${unsubscribeToken}`;
 
-        return {
-          to: recipient.email,
-          subject: campaign.subject,
-          html: this.createEmailTemplate(campaign.template.htmlContent, unsubscribeUrl, campaign.template.title),
-          unsubscribeToken,
-          campaignId: campaign.id,
-          retries: 0,
-        };
-      });
+        await prisma.emailJob.create({
+          data: {
+            to: recipient.email,
+            subject: campaign.subject,
+            html: this.createEmailTemplate(campaign.template.htmlContent, unsubscribeUrl, campaign.template.title),
+            campaignId: campaign.id,
+            scheduledAt: new Date(),
+          },
+        });
+      }
 
-      await this.addToQueue(emails);
-
-      return { success: true, message: `Campaign retry queued for ${recipients.length} recipients` };
+      return { success: true, message: `Campaign retry queued for ${validRecipients.length} recipients` };
     } catch (error) {
       console.error("Error retrying campaign:", error);
       return { success: false, message: "Failed to retry campaign" };
     }
+  }
+
+  /**
+   * Отправка транзакционного письма (без рассылочного контекста, напрямую через провайдер)
+   */
+  async sendTransactional(to: string, subject: string, html: string): Promise<void> {
+    const { getEmailProvider } = await import('../email/EmailProviderFactory.js');
+    const provider = await getEmailProvider();
+    await provider.send({ to, subject, html });
   }
 }
 
