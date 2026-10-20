@@ -146,25 +146,96 @@ model NewsletterTemplate {
 }
 
 model NewsletterSubscriber {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  createdAt DateTime @default(now())
-  isActive  Boolean  @default(true)
-  token     String?  @unique
+  id                 Int             @id @default(autoincrement())
+  email              String          @unique
+  name               String?
+  source             String?
+  createdAt          DateTime        @default(now())
+  confirmedAt        DateTime?
+  doubleOptInSentAt  DateTime?
+  isActive           Boolean         @default(false)
+  token              String?         @unique
+  tags               SubscriberTag[]
 }
 
 model NewsletterCampaign {
-  id              Int          @id @default(autoincrement())
-  createdAt       DateTime     @default(now())
-  subject         String
-  templateId      Int
-  template        NewsletterTemplate @relation(fields: [templateId], references: [id])
-  status          String       // e.g., PENDING, SENT, FAILED
-  sentCount       Int          @default(0)
-  failedCount     Int          @default(0)
-  scheduledAt     DateTime?    // Time for scheduled sending
-  audienceType    AudienceType @default(SUBSCRIBERS) // Тип аудитории
-  audienceEventId Int?         // ID мероприятия, если рассылка по участникам
+  id               Int                @id @default(autoincrement())
+  createdAt        DateTime           @default(now())
+  subject          String
+  templateId       Int
+  template         NewsletterTemplate @relation(fields: [templateId], references: [id])
+  status           String             // e.g., PENDING, SENT, FAILED
+  sentCount        Int                @default(0)
+  failedCount      Int                @default(0)
+  openCount        Int                @default(0)
+  uniqueOpenCount  Int                @default(0)
+  clickCount       Int                @default(0)
+  unsubscribeCount Int                @default(0)
+  totalRecipients  Int                @default(0)
+  scheduledAt      DateTime?          // Time for scheduled sending
+  audienceType     AudienceType       @default(SUBSCRIBERS) // Тип аудитории
+  audienceEventId  Int?               // ID мероприятия, если рассылка по участникам
+  emailJobs        EmailJob[]
+}
+
+model EmailJob {
+  id          Int                 @id @default(autoincrement())
+  to          String
+  subject     String
+  html        String              @db.Text
+  campaignId  Int?
+  campaign    NewsletterCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  status      String              @default("PENDING")
+  retries     Int                 @default(0)
+  lastError   String?
+  scheduledAt DateTime            @default(now())
+  sentAt      DateTime?
+  provider    String              @default("smtp")
+  trackingId  String              @unique @default(cuid())
+  createdAt   DateTime            @default(now())
+  events      EmailEvent[]
+
+  @@map("email_jobs")
+}
+
+model EmailEvent {
+  id        Int      @id @default(autoincrement())
+  jobId     Int
+  job       EmailJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  type      String
+  url       String?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@map("email_events")
+}
+
+model SuppressionList {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@map("suppression_list")
+}
+
+model NewsletterTag {
+  id          Int             @id @default(autoincrement())
+  name        String          @unique
+  subscribers SubscriberTag[]
+
+  @@map("newsletter_tags")
+}
+
+model SubscriberTag {
+  subscriberId Int
+  tagId        Int
+  subscriber   NewsletterSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  tag          NewsletterTag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([subscriberId, tagId])
+  @@map("subscriber_tags")
 }
 
 enum AudienceType {
@@ -304,6 +375,15 @@ model TeamMember {
   updatedAt DateTime @updatedAt
 
   @@map("team_members")
+}
+
+// Настройки сайта (ключ-значение)
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
 }
 
 // Модель для каталога оборудования
