@@ -19,7 +19,8 @@ import {
   UserGroupIcon,
   PaperAirplaneIcon,
   ChatBubbleLeftRightIcon,
-  ComputerDesktopIcon
+  ComputerDesktopIcon,
+  WrenchScrewdriverIcon
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
@@ -106,6 +107,11 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
     {
       title: 'Подписчики',
       path: '/admin#/subscribers',
+      icon: UserGroupIcon
+    },
+    {
+      title: 'Список подавлений',
+      path: '/admin#/suppression-list',
       icon: UserGroupIcon
     }
   ];
@@ -268,6 +274,20 @@ const AdminMenu: React.FC<AdminMenuProps> = ({ role }) => {
             </div>
           )}
         </div>
+
+        {/* Настройки сайта */}
+        {['ADMIN'].includes(role) && (
+          <div className="pt-1">
+            <a
+              href="/admin#/site-settings"
+              className="group flex items-center px-3 py-2 text-sm font-medium text-slate-300 rounded-lg hover:bg-white/[0.08] hover:text-white transition-all duration-150"
+              onClick={() => setIsMobileOpen(false)}
+            >
+              <WrenchScrewdriverIcon className="h-4 w-4 flex-shrink-0 mr-3 text-slate-400 group-hover:text-slate-200" />
+              <span className="flex-1">Настройки сайта</span>
+            </a>
+          </div>
+        )}
 
         {/* Настройки Section */}
         <div className="pt-4 border-t border-white/[0.06] mt-4">

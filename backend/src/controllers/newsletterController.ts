@@ -550,6 +550,41 @@ export const getCampaignStats: RequestHandler = async (req, res) => {
   }
 };
 
+export const getSuppressionList: RequestHandler = async (req, res) => {
+  try {
+    const page = parseInt(req.query._start as string) || 0;
+    const limit = parseInt(req.query._end as string) || 50;
+    const skip = page;
+    const take = limit - page;
+
+    const [list, total] = await Promise.all([
+      prisma.suppressionList.findMany({
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+      }),
+      prisma.suppressionList.count(),
+    ]);
+
+    res.set('X-Total-Count', total.toString());
+    res.set('Access-Control-Expose-Headers', 'X-Total-Count');
+    res.status(200).json(list);
+  } catch (error) {
+    console.error('Error fetching suppression list:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const removeFromSuppression: RequestHandler = async (req, res) => {
+  const { email } = req.params;
+  try {
+    await prisma.suppressionList.delete({ where: { email: decodeURIComponent(email) } });
+    res.status(200).json({ message: 'Removed from suppression list' });
+  } catch (error) {
+    res.status(404).json({ message: 'Email not found in suppression list' });
+  }
+};
+
 export const retryCampaign: RequestHandler = async (req, res) => {
   try {
     const { id } = req.params;

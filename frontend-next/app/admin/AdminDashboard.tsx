@@ -95,6 +95,9 @@ import { EquipmentList }   from './resources/equipment/EquipmentList';
 import { EquipmentCreate } from './resources/equipment/EquipmentCreate';
 import { EquipmentEdit }   from './resources/equipment/EquipmentEdit';
 
+import SiteSettingsPage from './resources/site-settings/SiteSettingsPage';
+import SuppressionListPage from './resources/newsletters/SuppressionList';
+
 // Временные заглушки для остальных компонентов (будут заменены позже)
 
 const EventRegistrationsList = () => <div>Event Registrations List</div>;
@@ -277,6 +280,8 @@ const AdminDashboard: React.FC = () => (
       <Resource name="equipment" list={EquipmentList} create={EquipmentCreate} edit={EquipmentEdit} />
       <CustomRoutes>
         <Route path="/events/:id/registrations" element={<EventRegistrationsList />} />
+        <Route path="/site-settings" element={<SiteSettingsPage />} />
+        <Route path="/suppression-list" element={<SuppressionListPage />} />
       </CustomRoutes>
     </Admin>
   </ThemeProvider>

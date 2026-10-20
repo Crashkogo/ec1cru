@@ -568,6 +568,22 @@ router.get(
 );
 
 // =============================================================================
+// СПИСОК ПОДАВЛЕНИЙ
+// =============================================================================
+router.get(
+  "/admin/suppression-list",
+  authMiddleware,
+  requireAdmin,
+  newsletterController.getSuppressionList as RequestHandler
+);
+router.delete(
+  "/admin/suppression-list/:email",
+  authMiddleware,
+  requireAdmin,
+  newsletterController.removeFromSuppression as RequestHandler
+);
+
+// =============================================================================
 // ОТЗЫВЫ
 // =============================================================================
 // Публичные маршруты

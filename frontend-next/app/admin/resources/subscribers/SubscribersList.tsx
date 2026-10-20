@@ -4,6 +4,7 @@ import {
     List,
     Datagrid,
     EmailField,
+    TextField,
     DateField,
     EditButton,
     DeleteButton,
@@ -127,7 +128,7 @@ export const SubscribersList = () => (
                 actions={<SubscriberListActions />}
                 pagination={<SubscriberPagination />}
                 perPage={10}
-                sort={{ field: 'subscribedAt', order: 'DESC' }}
+                sort={{ field: 'createdAt', order: 'DESC' }}
                 title=""
                 component="div"
             >
@@ -147,12 +148,32 @@ export const SubscribersList = () => (
                             },
                         }}
                     />
+                    <TextField
+                        source="name"
+                        label="Имя"
+                        emptyText="-"
+                        className="!text-sm !text-slate-700"
+                    />
+                    <TextField
+                        source="source"
+                        label="Источник"
+                        emptyText="-"
+                        className="!text-sm !text-slate-500"
+                    />
                     <FunctionField
                         label="Статус"
                         render={() => <ActiveStatus />}
                     />
                     <DateField
-                        source="subscribedAt"
+                        source="confirmedAt"
+                        label="Подтверждён"
+                        showTime
+                        locales="ru-RU"
+                        emptyText="-"
+                        className="!text-sm !text-slate-500"
+                    />
+                    <DateField
+                        source="createdAt"
                         label="Дата подписки"
                         showTime
                         locales="ru-RU"
