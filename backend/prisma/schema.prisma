@@ -153,6 +153,9 @@ model NewsletterSubscriber {
   createdAt          DateTime        @default(now())
   confirmedAt        DateTime?
   doubleOptInSentAt  DateTime?
+  consentAt          DateTime?  // момент отправки формы (до подтверждения email)
+  consentIp          String?    // IP адрес при отправке формы
+  consentText        String?    // текст чекбокса согласия на момент подписки
   isActive           Boolean         @default(false)
   token              String?         @unique
   tags               SubscriberTag[]
