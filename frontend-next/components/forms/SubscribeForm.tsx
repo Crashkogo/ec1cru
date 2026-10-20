@@ -48,6 +48,7 @@ const SubscribeForm: React.FC<SubscribeFormProps> = ({
         formState: { errors }
     } = useForm<SubscribeFormInputs>({
         resolver: zodResolver(subscribeSchema),
+        defaultValues: { consent: false },
     });
 
     const onSubmit: SubmitHandler<SubscribeFormInputs> = async (data) => {
@@ -149,29 +150,6 @@ const SubscribeForm: React.FC<SubscribeFormProps> = ({
                     )}
                 </div>
 
-                <button
-                    type="submit"
-                    disabled={isSubmitting || submitStatus === 'success'}
-                    className="w-full flex items-center justify-center px-6 py-3 bg-modern-primary-600 text-white rounded-lg hover:bg-modern-primary-700 transition-colors duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {isSubmitting ? (
-                        <>
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                            Подписываем...
-                        </>
-                    ) : submitStatus === 'success' ? (
-                        <>
-                            <CheckCircleIcon className="h-5 w-5 mr-2" />
-                            Подписка оформлена
-                        </>
-                    ) : (
-                        <>
-                            <EnvelopeIcon className="h-5 w-5 mr-2" />
-                            Подписаться
-                        </>
-                    )}
-                </button>
-
                 <div>
                     <label className="flex items-start gap-3 cursor-pointer">
                         <input
@@ -197,6 +175,29 @@ const SubscribeForm: React.FC<SubscribeFormProps> = ({
                         <p className="text-red-600 text-xs mt-1 ml-7">{errors.consent.message}</p>
                     )}
                 </div>
+
+                <button
+                    type="submit"
+                    disabled={isSubmitting || submitStatus === 'success'}
+                    className="w-full flex items-center justify-center px-6 py-3 bg-modern-primary-600 text-white rounded-lg hover:bg-modern-primary-700 transition-colors duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {isSubmitting ? (
+                        <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            Подписываем...
+                        </>
+                    ) : submitStatus === 'success' ? (
+                        <>
+                            <CheckCircleIcon className="h-5 w-5 mr-2" />
+                            Подписка оформлена
+                        </>
+                    ) : (
+                        <>
+                            <EnvelopeIcon className="h-5 w-5 mr-2" />
+                            Подписаться
+                        </>
+                    )}
+                </button>
             </form>
         </div>
     );
