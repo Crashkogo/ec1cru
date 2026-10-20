@@ -12,11 +12,16 @@ import {
     EnvelopeIcon
 } from '@heroicons/react/24/outline';
 
+const CONSENT_TEXT = 'Согласен получать рекламные рассылки от ООО «Инженер-центр» и на обработку персональных данных согласно политике конфиденциальности';
+
 // Схема валидации
 const subscribeSchema = z.object({
     email: z.string()
         .min(1, 'Email обязателен')
         .email('Неверный формат email'),
+    consent: z.boolean().refine(val => val === true, {
+        message: 'Необходимо согласие на получение рассылки',
+    }),
 });
 
 type SubscribeFormInputs = z.infer<typeof subscribeSchema>;
@@ -52,8 +57,12 @@ const SubscribeForm: React.FC<SubscribeFormProps> = ({
 
         try {
             const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/posts/subscribers`,
-                data
+                `${process.env.NEXT_PUBLIC_API_URL}/api/newsletter/subscribe`,
+                {
+                    email: data.email,
+                    source: 'website',
+                    consentText: CONSENT_TEXT,
+                }
             );
 
             setSubmitStatus('success');
@@ -103,7 +112,7 @@ const SubscribeForm: React.FC<SubscribeFormProps> = ({
                     <div className="flex items-center">
                         <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
                         <span className="text-green-800 font-medium">
-                            Спасибо! Вы успешно подписались на рассылку
+                            Вы подписались! Проверьте email для подтверждения
                         </span>
                     </div>
                 </div>
@@ -163,18 +172,31 @@ const SubscribeForm: React.FC<SubscribeFormProps> = ({
                     )}
                 </button>
 
-                <p className="text-xs text-modern-gray-500 text-center leading-relaxed">
-                    Подписываясь, вы соглашаетесь с{' '}
-                    <Link
-                        href="/privacy-policy"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-modern-primary-600 hover:text-modern-primary-700 underline"
-                    >
-                        политикой конфиденциальности
-                    </Link>
-                    {' '}и можете отписаться в любое время.
-                </p>
+                <div>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                            {...register('consent')}
+                            type="checkbox"
+                            className="mt-1 h-4 w-4 rounded border-modern-gray-300 text-modern-primary-600 focus:ring-modern-primary-500 flex-shrink-0"
+                            disabled={isSubmitting}
+                        />
+                        <span className="text-xs text-modern-gray-600 leading-relaxed">
+                            Согласен получать рекламные рассылки от ООО «Инженер-центр» и на обработку персональных данных согласно{' '}
+                            <Link
+                                href="/privacy-policy"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-modern-primary-600 hover:text-modern-primary-700 underline"
+                            >
+                                политике конфиденциальности
+                            </Link>
+                            . Вы можете отписаться в любое время.
+                        </span>
+                    </label>
+                    {errors.consent && (
+                        <p className="text-red-600 text-xs mt-1 ml-7">{errors.consent.message}</p>
+                    )}
+                </div>
             </form>
         </div>
     );
